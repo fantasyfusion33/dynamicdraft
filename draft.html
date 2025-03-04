@@ -693,6 +693,9 @@
 </head>
 <body>
 <div class="main-content">
+    <div class="team-list" id="teamList">
+      <!-- Teams will be dynamically inserted here -->
+    </div>
   <!-- My Team Box -->
 <div id="myTeamBox" class="collapsed">
   <button id="toggleMyTeam" onclick="toggleMyTeam()">
@@ -805,9 +808,6 @@
   </select>
     </div>
 </div>
-    <div class="team-list" id="teamList">
-      <!-- Teams will be dynamically inserted here -->
-    </div>
   </div>
 </div>
 <!-- Sidebar -->
@@ -1322,9 +1322,20 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const team = DraftableTeams.find(t => t.team_id === teamId);
+  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
 
-  // Existing draft logic with league size awareness
+  if (teamIndex === -1) {
+    alert('Team not found. Please try again.');
+    return;
+  }
+
+  const team = DraftableTeams[teamIndex];
+
+  if (!team || !currentPlayer[team.sport]) {
+    alert('Invalid team or sport. Please try again.');
+    return;
+  }
+
   const isWildcardRound = draftState.currentPick >= (12 * LEAGUE_SIZE);
   const sportLimit = isWildcardRound ? Infinity : 2;
 
@@ -1340,9 +1351,13 @@ function draftTeam(teamId) {
     currentPlayer[team.sport].push(team);
   }
 
+  // Remove the team from the draftable list
+  DraftableTeams.splice(teamIndex, 1);
+
   // Update UI
   updateRosterDisplay(currentPlayerNumber);
-  updateMyTeamBox(team); // Update My Team Box
+  updateMyTeamBox(team);
+  renderTeams(); // Re-render the team list
   advanceDraft();
 }
 
