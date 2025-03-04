@@ -693,81 +693,69 @@
 </head>
 <body>
 <div class="main-content">
-    <div class="team-list" id="teamList">
-      <!-- Teams will be dynamically inserted here -->
-    </div>
-  <!-- My Team Box -->
 <div id="myTeamBox" class="collapsed">
   <button id="toggleMyTeam" onclick="toggleMyTeam()">
     <span class="arrow">◀</span>
   </button>
   <div id="myTeamContent">
-    <h3>My Team</h3>
     <div class="sport-grid">
-      <!-- NFL -->
-      <div class="sport-slot" data-sport="NFL">
-        <h4>NFL</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- NBA -->
-      <div class="sport-slot" data-sport="NBA">
-        <h4>NBA</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- MLB -->
-      <div class="sport-slot" data-sport="MLB">
-        <h4>MLB</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- NHL -->
-      <div class="sport-slot" data-sport="NHL">
-        <h4>NHL</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- NCAA Football -->
-      <div class="sport-slot" data-sport="NCAAF>
-        <h4>NCAA Football</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- NCAA Basketball -->
-      <div class="sport-slot" data-sport="NCAAB">
-        <h4>NCAA Basketball</h4>
-        <div class="slots">
-          <div class="slot"></div>
-          <div class="slot"></div>
-        </div>
-      </div>
-      <!-- Wildcard -->
-      <div class="sport-slot" data-sport="Wildcard">
-        <h4>Wildcard</h4>
-        <div class="slots">
-          <div class="slot"></div>
-        </div>
-      </div>
+    <h3>Player 1's Team</h3>
+<div class="sport-slot" data-sport="NFL">
+  <h4>NFL</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="NBA">
+  <h4>NBA</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="MLB">
+  <h4>MLB</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="NHL">
+  <h4>NHL</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="NCAAF">
+  <h4>NCAA Football</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="NCAAB">
+  <h4>NCAA Basketball</h4>
+  <div class="slots">
+    <div class="slot"></div>
+    <div class="slot"></div>
+  </div>
+</div>
+<div class="sport-slot" data-sport="Wildcard">
+  <h4>Wildcard</h4>
+  <div class="slots">
+    <div class="slot"></div>
+  </div>
+</div>
     </div>
   </div>
-</div>
-<div class="draft-header">
-  <h1>Fantasy Fusion Draft</h1>
-  <div class="current-player" id="currentPlayerBox">
-    <span>On The Clock:</span> <strong>Team 1 - Round 1.1</strong>
+</div>  <div class="draft-header">
+    <h1>Fantasy Fusion Draft</h1>
+    <div class="current-player" id="currentPlayerBox">
+      <span>On The Clock:</span> <strong>Player 1 - Round 1.1</strong>
+    </div>
   </div>
-</div>
   <div class="draft-status-bar">
     <div class="draft-progress" style="width: 0%"></div>
   </div>
@@ -808,6 +796,9 @@
   </select>
     </div>
 </div>
+    <div class="team-list" id="teamList">
+      <!-- Teams will be dynamically inserted here -->
+    </div>
   </div>
 </div>
 <!-- Sidebar -->
