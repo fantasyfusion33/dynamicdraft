@@ -1330,26 +1330,34 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
+  const isWildcardRound = draftState.currentPick >= 12 * LEAGUE_SIZE;
 
+  // Find team in DraftableTeams
+  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
   if (teamIndex === -1) {
     alert('Team not found. Please try again.');
     return;
   }
-
   const team = DraftableTeams[teamIndex];
 
-  if (!team || !currentPlayer[team.sport]) {
-    alert('Invalid team or sport. Please try again.');
+  // Validate team existence
+  if (!team) {
+    alert('Invalid team selection. Please try again.');
     return;
   }
 
-  const isWildcardRound = draftState.currentPick >= 12 * LEAGUE_SIZE;
-  const sportLimit = isWildcardRound ? Infinity : 2;
+  if (!isWildcardRound) {
+    // Validate sport for regular rounds
+    if (!currentPlayer[team.sport]) {
+      alert(`Invalid sport configuration for ${team.sport}. Contact league manager.`);
+      return;
+    }
 
-  if (!isWildcardRound && currentPlayer[team.sport].length >= sportLimit) {
-    alert(`You've already drafted ${sportLimit} ${team.sport} teams!`);
-    return;
+    // Check sport limit
+    if (currentPlayer[team.sport].length >= 2) {
+      alert(`You've already drafted 2 ${team.sport} teams!`);
+      return;
+    }
   }
 
   // Update roster
@@ -1359,13 +1367,13 @@ function draftTeam(teamId) {
     currentPlayer[team.sport].push(team);
   }
 
-  // Remove the team from the draftable list
+  // Remove team from available pool
   DraftableTeams.splice(teamIndex, 1);
 
   // Update UI
   updateRosterDisplay(currentPlayerNumber);
   updateMyTeamBox(team);
-  renderTeams(); // Re-render the team list
+  renderTeams();
   advanceDraft();
 }
 
