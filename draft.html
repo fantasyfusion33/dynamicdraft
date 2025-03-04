@@ -857,9 +857,8 @@ function generateDraftOrder(size) {
 // Initialize draft state
 let draftState = {
   currentPick: 0,
-  totalPicks: 12 * LEAGUE_SIZE + (LEAGUE_SIZE * 1), // 12 rounds + wildcard
-  draftOrder: generateDraftOrder(LEAGUE_SIZE),
-  timerDuration: Math.max(60 - LEAGUE_SIZE, 30), // 30-60 second timer
+  totalPicks: (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0), // 12 rounds + wildcard  draftOrder: generateDraftOrder(LEAGUE_SIZE),
+  timerDuration: 120,
   playerRosters: {},
   settings: JSON.parse(localStorage.getItem('leagueData'))
 };
@@ -940,6 +939,11 @@ function advanceDraft() {
 
   // Reset the countdown timer
   resetCountdown();
+
+  // Check if we're transitioning to the wildcard round
+  if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
+    startWildcard();
+  }
   
   if (draftState.currentPick >= draftState.totalPicks) {
     endDraft();
@@ -1364,7 +1368,7 @@ const startWildcard = () => {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
 
   // Update the draft state for the wildcard round
-  currentRound = 13; // Wildcard round
+  currentRound = Wildcard; // Wildcard round
   currentPick = 1;
 
   // Switch to the next player
