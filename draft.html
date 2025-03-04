@@ -857,11 +857,14 @@ function generateDraftOrder(size) {
 // Initialize draft state
 let draftState = {
   currentPick: 0,
-  totalPicks: (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0), // 12 rounds + wildcard  draftOrder: generateDraftOrder(LEAGUE_SIZE),
-  timerDuration: 120,
+  draftOrder: generateDraftOrder(LEAGUE_SIZE),
+  timerDuration: 120, // 2 minutes per pick
   playerRosters: {},
   settings: JSON.parse(localStorage.getItem('leagueData'))
 };
+
+// Step 2: Calculate totalPicks after draftState is initialized
+draftState.totalPicks = (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0);
 
 // Initialize rosters
 for (let i = 1; i <= LEAGUE_SIZE; i++) {
