@@ -866,18 +866,26 @@ let draftState = {
 // Step 2: Calculate totalPicks after draftState is initialized
 draftState.totalPicks = (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0);
 
-// Initialize rosters
+// Initialize rosters with all possible sports
+const ALL_SPORTS = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+
 for (let i = 1; i <= LEAGUE_SIZE; i++) {
-  draftState.playerRosters[i] = {
-    NFL: [],
-    NBA: [],
-    MLB: [],
-    NHL: [],
-    NCAAF: [],
-    NCAAB: [],
-    wildcard: []
-  };
+  draftState.playerRosters[i] = ALL_SPORTS.reduce((acc, sport) => {
+    acc[sport] = [];
+    return acc;
+  }, { wildcard: [] });
 }
+
+// Add this validation when creating DraftableTeams
+const VALID_SPORTS = new Set(['NFL', 'NBA', 'MLB', 'NHL', 'NCAA-FB', 'NCAA-BB']);
+
+DraftableTeams = DraftableTeams.map(team => {
+  if (!VALID_SPORTS.has(team.sport)) {
+    console.error(`Invalid sport ${team.sport} for team ${team.name}`);
+    team.sport = 'NFL'; // Default to NFL if invalid
+  }
+  return team;
+});
 
 // ========================
 // Updated UI Components
@@ -1382,31 +1390,6 @@ function draftTeam(teamId) {
 
   // Render updated teams
   renderTeams(DraftableTeams);
-
-// Start the wildcard round
-const startWildcard = () => {
-  // Notify players about the wildcard round
-  alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
-
-  // Update the draft state for the wildcard round
-  currentRound = 13; // Wildcard round
-  currentPick = 1;
-
-  // Switch to the next player
-  if (currentRound % 2 === 1) {
-    // Odd rounds: Player 1 → Player 2
-    currentPlayer = currentPick === 1 ? 1 : 2;
-  } else {
-    // Even rounds: Player 2 → Player 1
-    currentPlayer = currentPick === 1 ? 2 : 1;
-  }
-
-  // Update the "On The Clock" display
-  currentPlayerBox.innerHTML = `<span>On The Clock:</span> <strong>Player ${currentPlayer} - Pick ${currentRound}.${currentPick}</strong>`;
-
-  // Render teams for the wildcard round
-  renderTeams(DraftableTeams);
-};
 
 // Update the sidebar to show the current drafting team
 const updateSidebar = (currentPlayer) => {
