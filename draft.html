@@ -1305,7 +1305,7 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const team = mockTeams.find(t => t.team_id === teamId);
+  const team = DraftableTeams.find(t => t.team_id === teamId);
 
   // Existing draft logic with league size awareness
   const isWildcardRound = draftState.currentPick >= (12 * LEAGUE_SIZE);
