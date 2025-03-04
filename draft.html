@@ -942,6 +942,13 @@ function advanceDraft() {
   draftState.currentPick++;
   updateDraftHeader();
   updateDraftProgress();
+
+  // Automatically switch to the current player's roster
+  const currentPlayer = draftState.draftOrder[draftState.currentPick];
+  switchRoster(`player${currentPlayer}`);
+
+  // Reset the countdown timer
+  resetCountdown();
   
   if (draftState.currentPick >= draftState.totalPicks) {
     endDraft();
@@ -953,7 +960,7 @@ function advanceDraft() {
 // ========================
 
 function startCountdown() {
-  let timeLeft = draftState.timerDuration;
+  let timeLeft = 120;
   const timerElement = document.getElementById('countdownClock');
   
   const timer = setInterval(() => {
@@ -965,6 +972,16 @@ function startCountdown() {
       autoDraftTeam();
     }
   }, 1000);
+  // Save the timer ID to clear it later
+  draftState.timer = timer;
+}
+
+// Reset the timer after each pick
+function resetCountdown() {
+  if (draftState.timer) {
+    clearInterval(draftState.timer);
+  }
+  startCountdown();
 }
 
 // Initialize dynamic draft
@@ -1389,7 +1406,11 @@ const toggleSidebar = () => {
 const switchRoster = (team) => {
   const rosters = document.querySelectorAll(".roster");
   rosters.forEach(roster => roster.style.display = "none");
-  document.getElementById(`${team}Roster`).style.display = "block";
+
+  const activeRoster = document.getElementById(`${team}Roster`);
+  if (activeRoster) {
+    activeRoster.style.display = "block";
+  }
 };
 
 // Render rosters
