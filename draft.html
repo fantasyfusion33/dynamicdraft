@@ -866,26 +866,18 @@ let draftState = {
 // Step 2: Calculate totalPicks after draftState is initialized
 draftState.totalPicks = (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0);
 
-// Initialize rosters with all possible sports
-const ALL_SPORTS = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
-
+// Initialize rosters
 for (let i = 1; i <= LEAGUE_SIZE; i++) {
-  draftState.playerRosters[i] = ALL_SPORTS.reduce((acc, sport) => {
-    acc[sport] = [];
-    return acc;
-  }, { wildcard: [] });
+  draftState.playerRosters[i] = {
+    NFL: [],
+    NBA: [],
+    MLB: [],
+    NHL: [],
+    NCAAF: [],
+    NCAAB: [],
+    wildcard: []
+  };
 }
-
-// Add this validation when creating DraftableTeams
-const VALID_SPORTS = new Set(['NFL', 'NBA', 'MLB', 'NHL', 'NCAA-FB', 'NCAA-BB']);
-
-DraftableTeams = DraftableTeams.map(team => {
-  if (!VALID_SPORTS.has(team.sport)) {
-    console.error(`Invalid sport ${team.sport} for team ${team.name}`);
-    team.sport = 'NFL'; // Default to NFL if invalid
-  }
-  return team;
-});
 
 // ========================
 // Updated UI Components
