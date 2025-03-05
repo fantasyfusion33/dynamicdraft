@@ -1321,6 +1321,7 @@ let currentPlayer = 1; // 1 or 2
 let currentRound = 1;
 let currentPick = 1;
 let totalPicks = 0; // Track total picks
+
 // Initialize playerRosters
 const playerRosters = {};
 for (let i = 1; i <= LEAGUE_SIZE; i++) {
@@ -1365,7 +1366,7 @@ function draftTeam(teamId) {
     currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
   } else {
     // Wildcard round: add to a special "wildcard" section
-    playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
+   currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
   }
 
   // Remove team from available pool
