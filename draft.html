@@ -1365,7 +1365,6 @@ function draftTeam(teamId) {
     currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
   } else {
     // Wildcard round: add to a special "wildcard" section
-    if (!playerRosters[currentPlayer].wildcard) playerRosters[currentPlayer].wildcard = [];
     playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
   }
 
