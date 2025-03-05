@@ -944,23 +944,30 @@ function advanceDraft() {
   resetCountdown();
 
   // Check if we're transitioning to the wildcard round
-  if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
-    startWildcardRound();
+  if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {    startWildcard(); // Start the wildcard round
   }
 
-  if (draftState.currentPick >= draftState.totalPicks) {
+  // End draft after all picks (including wildcard)
+  if (draftState.currentPick === 13 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
     endDraft();
   }
 }
 
-function startWildcardRound() {
+function startWildcard() {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
+
+  // Update the draft state for the wildcard round
+  currentRound = 13; // Wildcard round
+  currentPick = 1;
 
   // Update the draft header to indicate wildcard round
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>Wildcard Round:</span> 
     <strong>Team ${draftState.draftOrder[draftState.currentPick]} - Pick ${draftState.currentPick + 1}</strong>
   `;
+
+  // Render teams for the wildcard round
+  renderTeams();
 }
 
 // ========================
@@ -1330,7 +1337,6 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = draftState.currentPick >= 12 * LEAGUE_SIZE;
 
   // Find team in DraftableTeams
   const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
@@ -1340,31 +1346,29 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
+  // Add team to the current player's roster
+  if (currentRound <= 12) {
+    playerRosters[currentPlayer][team.sport].push({ ...team, round: currentRound, pick: currentPick });
+  } else {
+    // Wildcard round: add to a special "wildcard" section
+    if (!playerRosters[currentPlayer].wildcard) playerRosters[currentPlayer].wildcard = [];
+    playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
+  }
+
+  // Update the sidebar and My Team Box
+  renderRosters();
+
   // Validate team existence
   if (!team) {
     alert('Invalid team selection. Please try again.');
     return;
   }
 
-  if (!isWildcardRound) {
-    // Validate sport for regular rounds
-    if (!currentPlayer[team.sport]) {
-      alert(`Invalid sport configuration for ${team.sport}. Contact league manager.`);
-      return;
-    }
-
-    // Check sport limit
-    if (currentPlayer[team.sport].length >= 2) {
-      alert(`You've already drafted 2 ${team.sport} teams!`);
-      return;
-    }
+  // Prevent drafting if the player has already filled this sport (except in wildcard round)
+  if (currentRound <= 12 && playerRosters[currentPlayer][team.sport].length >= 2) {
+    alert(`You've already drafted 2 ${team.sport} teams!`);
+    return;
   }
-
-  // Update roster
-  if (isWildcardRound) {
-    currentPlayer.wildcard.push(team);
-  } else {
-    currentPlayer[team.sport].push(team);
   }
 
   // Remove team from available pool
