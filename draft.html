@@ -1369,9 +1369,6 @@ function draftTeam(teamId) {
     playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
   }
 
-  // Update the sidebar and My Team Box
-  renderRosters();
-
   // Remove team from available pool
   DraftableTeams.splice(teamIndex, 1);
 
