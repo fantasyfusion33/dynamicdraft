@@ -1321,10 +1321,19 @@ let currentPlayer = 1; // 1 or 2
 let currentRound = 1;
 let currentPick = 1;
 let totalPicks = 0; // Track total picks
-const playerRosters = {
-  1: { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [] },
-  2: { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [] }
-};
+// Initialize playerRosters
+const playerRosters = {};
+for (let i = 1; i <= LEAGUE_SIZE; i++) {
+  playerRosters[i] = {
+    NFL: [],
+    NBA: [],
+    MLB: [],
+    NHL: [],
+    NCAAF: [],
+    NCAAB: [],
+    wildcard: [] // Ensure wildcard exists for all players
+  };
+}
 
 // Auto-draft the team with the lowest odds
 const autoDraftTeam = () => {
@@ -1346,9 +1355,14 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
-  // Add team to the current player's roster
+   // Add team to the current player's roster
   if (currentRound <= 12) {
-    playerRosters[currentPlayer][team.sport].push({ ...team, round: currentRound, pick: currentPick });
+    // Regular round: Add to sport-specific slot
+    if (currentPlayer[team.sport].length >= 2) {
+      alert(`You've already drafted 2 ${team.sport} teams!`);
+      return;
+    }
+    currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
   } else {
     // Wildcard round: add to a special "wildcard" section
     if (!playerRosters[currentPlayer].wildcard) playerRosters[currentPlayer].wildcard = [];
@@ -1357,18 +1371,6 @@ function draftTeam(teamId) {
 
   // Update the sidebar and My Team Box
   renderRosters();
-
-  // Validate team existence
-  if (!team) {
-    alert('Invalid team selection. Please try again.');
-    return;
-  }
-
-  // Prevent drafting if the player has already filled this sport (except in wildcard round)
-  if (currentRound <= 12 && playerRosters[currentPlayer][team.sport].length >= 2) {
-    alert(`You've already drafted 2 ${team.sport} teams!`);
-    return;
-  }
 
   // Remove team from available pool
   DraftableTeams.splice(teamIndex, 1);
