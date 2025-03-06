@@ -1347,7 +1347,6 @@ for (let i = 1; i <= LEAGUE_SIZE; i++) {
     NHL: [],
     NCAAF: [],
     NCAAB: [],
-    wildcard: [] // Ensure wildcard exists for all players
   };
 }
 
@@ -1358,10 +1357,12 @@ const autoDraftTeam = () => {
   if (team) draftTeam(team.team_id);
 };
 
-// Draft a team
+// Draft a team 
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
+  const isWildcardRound = draftState.currentPick >= 12 * LEAGUE_SIZE;
+
   // Find team in DraftableTeams
   const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
   if (teamIndex === -1) {
@@ -1370,23 +1371,36 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
-  // Prevent drafting if the player has already filled this sport (except in wildcard round)
-  if (currentRound <= 12 && playerRosters[currentPlayer][team.sport].length >= 2) {
-    alert(`You've already drafted 2 ${team.sport} teams!`);
+ if (isWildcardRound) {
+    // Wildcard round handling
+  if (currentPlayer.wildcard.length >= 1) {
+    alert("Wildcard slot already filled!");
     return;
   }
-
-  // Add team to the current player's roster
-  if (currentRound <= 12) {
-    playerRosters[currentPlayer][team.sport].push({ ...team, round: currentRound, pick: currentPick });
+  currentPlayer.wildcard.push({ 
+      ...team, 
+      wildcard: true,
+      round: 13,
+      pick: draftState.currentPick - (12 * LEAGUE_SIZE) + 1
+    });
   } else {
-    // Wildcard round: add to a special "wildcard" section
-    if (!playerRosters[currentPlayer].wildcard) playerRosters[currentPlayer].wildcard = [];
-    playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
+    // Regular round handling
+    if (!currentPlayer[team.sport]) {
+      currentPlayer[team.sport] = []; // Initialize if undefined
+    }
+    if (currentPlayer[team.sport].length >= 2) {
+      alert(`You've already drafted 2 ${team.sport} teams!`);
+      return;
+    }
+    currentPlayer[team.sport].push({
+      ...team,
+      round: Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1,
+      pick: (draftState.currentPick % LEAGUE_SIZE) + 1
+    });
   }
 
-  // Remove team from the draft pool
-  DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
+  // Remove team from available pool
+  DraftableTeams.splice(teamIndex, 1);
 
   // Update UI
   updateRosterDisplay(currentPlayerNumber);
