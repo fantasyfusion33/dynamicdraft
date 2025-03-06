@@ -689,6 +689,16 @@
   font-size: 0.9rem;
 }
 
+.wildcard-badge {
+  display: inline-block;
+  background: #FFD700;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
+
   </style>
 </head>
 <body>
@@ -858,13 +868,14 @@ function generateDraftOrder(size) {
 let draftState = {
   currentPick: 0,
   draftOrder: generateDraftOrder(LEAGUE_SIZE),
-  timerDuration: 120, // 2 minutes per pick
+  timerDuration: 120,
   playerRosters: {},
-  settings: JSON.parse(localStorage.getItem('leagueData'))
+  settings: JSON.parse(localStorage.getItem('leagueData')),
+  // Calculate total picks based on wildcard setting
+  get totalPicks() {
+    return (12 * LEAGUE_SIZE) + (this.settings.wildcard === 'on' ? LEAGUE_SIZE : 0)
+  }
 };
-
-// Step 2: Calculate totalPicks after draftState is initialized
-draftState.totalPicks = (12 * LEAGUE_SIZE) + (draftState.settings.wildcard === 'on' ? LEAGUE_SIZE : 0);
 
 // Initialize rosters
 for (let i = 1; i <= LEAGUE_SIZE; i++) {
@@ -884,10 +895,21 @@ for (let i = 1; i <= LEAGUE_SIZE; i++) {
 // ========================
 
 function updateDraftHeader() {
-  const currentPlayer = draftState.draftOrder[draftState.currentPick];
+  const currentPick = draftState.currentPick;
+  const currentPlayer = draftState.draftOrder[currentPick];
+  
+  let round = Math.floor(currentPick / LEAGUE_SIZE) + 1;
+  let pickInRound = (currentPick % LEAGUE_SIZE) + 1;
+  
+  if (draftState.settings.wildcard === 'on' && round > 12) {
+    round = 13;
+    pickInRound = currentPick - (12 * LEAGUE_SIZE) + 1;
+  }
+
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span> 
-    <strong>Team ${currentPlayer} - Round ${Math.floor(draftState.currentPick/LEAGUE_SIZE)+1}.${(draftState.currentPick % LEAGUE_SIZE)+1}</strong>
+    <strong>Team ${currentPlayer} - Round ${round}.${pickInRound}</strong>
+    ${round === 13 ? '<div class="wildcard-badge">WILDCARD</div>' : ''}
   `;
 }
 
@@ -933,39 +955,26 @@ function updateDraftProgress() {
 
 function advanceDraft() {
   draftState.currentPick++;
+  
+  // End draft conditions
+  if (draftState.currentPick >= draftState.totalPicks) {
+    endDraft();
+    return;
+  }
+
+  // Wildcard round transition
+  if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
+    startWildcard();
+  }
+
   updateDraftHeader();
   updateDraftProgress();
-
-  // Automatically switch to the current player's roster
-  const currentPlayer = draftState.draftOrder[draftState.currentPick];
-  switchRoster(`player${currentPlayer}`);
-
-  // Reset the countdown timer
   resetCountdown();
-
-  // Check if we're transitioning to the wildcard round
-  if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {    startWildcard(); // Start the wildcard round
-  }
-
-  // End draft after all picks (including wildcard)
-  if (draftState.currentPick === 13 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
-    endDraft();
-  }
+  switchRosterToCurrentPlayer();
 }
 
 function startWildcard() {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
-
-  // Update the draft state for the wildcard round
-  currentRound = 13; // Wildcard round
-  currentPick = 1;
-
-  // Update the draft header to indicate wildcard round
-  document.getElementById('currentPlayerBox').innerHTML = `
-    <span>Wildcard Round:</span> 
-    <strong>Team ${draftState.draftOrder[draftState.currentPick]} - Pick ${draftState.currentPick + 1}</strong>
-  `;
-
   // Render teams for the wildcard round
   renderTeams();
 }
@@ -1347,31 +1356,30 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
+  const isWildcardRound = draftState.currentPick >= 12 * LEAGUE_SIZE;
 
   // Find team in DraftableTeams
   const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
-  if (teamIndex === -1) {
-    alert('Team not found. Please try again.');
-    return;
-  }
   const team = DraftableTeams[teamIndex];
 
-   // Add team to the current player's roster
-  if (currentRound <= 12) {
-    // Regular round: Add to sport-specific slot
+if (isWildcardRound) {
+    // Wildcard round handling
+    if (currentPlayer.wildcard.length >= 1) {
+      alert("You already used your wildcard pick!");
+      return;
+    }
+    currentPlayer.wildcard.push({ ...team, wildcard: true });
+  } else {
+    // Regular round handling
     if (currentPlayer[team.sport].length >= 2) {
       alert(`You've already drafted 2 ${team.sport} teams!`);
       return;
     }
-    currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
-  } else {
-    // Wildcard round: add to a special "wildcard" section
-   currentPlayer[team.sport].push({ ...team, round: currentRound, pick: currentPick });
+    currentPlayer[team.sport].push(team);
   }
 
   // Remove team from available pool
   DraftableTeams.splice(teamIndex, 1);
-
   // Update UI
   updateRosterDisplay(currentPlayerNumber);
   updateMyTeamBox(team);
@@ -1502,8 +1510,8 @@ function toggleMyTeam() {
 }
 
 // End the draft
-const endDraft = () => {
-  clearInterval(countdownInterval);
+function endDraft() {
+  clearInterval(draftState.timer);
   alert("Draft Complete! Click OK to view results.");
 
   // Remove UI elements related to the draft
