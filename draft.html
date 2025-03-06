@@ -1362,8 +1362,13 @@ const autoDraftTeam = () => {
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const team = DraftableTeams.find(t => t.team_id === teamId);
-  if (!team) return;
+  // Find team in DraftableTeams
+  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
+  if (teamIndex === -1) {
+    alert('Team not found. Please try again.');
+    return;
+  }
+  const team = DraftableTeams[teamIndex];
 
   // Prevent drafting if the player has already filled this sport (except in wildcard round)
   if (currentRound <= 12 && playerRosters[currentPlayer][team.sport].length >= 2) {
