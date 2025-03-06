@@ -878,16 +878,35 @@ let draftState = {
 };
 
 // Initialize rosters
-for (let i = 1; i <= LEAGUE_SIZE; i++) {
-  draftState.playerRosters[i] = {
-    NFL: [],
-    NBA: [],
-    MLB: [],
-    NHL: [],
-    NCAAF: [],
-    NCAAB: [],
-    wildcard: []
-  };
+function initializeRosters() {
+  for (let i = 1; i <= LEAGUE_SIZE; i++) {
+    draftState.playerRosters[i] = {
+      NFL: [],
+      NBA: [],
+      MLB: [],
+      NHL: [],
+      NCAAF: [],
+      NCAAB: [],
+      wildcard: [] // Ensure wildcard exists for all players
+    };
+  }
+}
+
+// Call this during initial setup
+initializeRosters();
+
+// ========================
+// Fixed Switch Roster Function
+// ========================
+function switchRosterToCurrentPlayer() {
+  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const teamSelector = document.getElementById('teamSelector');
+  
+  // Update the selector
+  teamSelector.value = `player${currentPlayerNumber}`;
+  
+  // Switch the displayed roster
+  switchRoster(`player${currentPlayerNumber}`);
 }
 
 // ========================
@@ -1360,22 +1379,41 @@ function draftTeam(teamId) {
 
   // Find team in DraftableTeams
   const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
+  if (teamIndex === -1) {
+    alert('Team not found. Please try again.');
+    return;
+  }
   const team = DraftableTeams[teamIndex];
 
-if (isWildcardRound) {
+ if (isWildcardRound) {
     // Wildcard round handling
+    if (!currentPlayer.wildcard) {
+      currentPlayer.wildcard = []; // Initialize if undefined
+    }
     if (currentPlayer.wildcard.length >= 1) {
       alert("You already used your wildcard pick!");
       return;
     }
-    currentPlayer.wildcard.push({ ...team, wildcard: true });
+    currentPlayer.wildcard.push({ 
+      ...team, 
+      wildcard: true,
+      round: 13,
+      pick: draftState.currentPick - (12 * LEAGUE_SIZE) + 1
+    });
   } else {
     // Regular round handling
+    if (!currentPlayer[team.sport]) {
+      currentPlayer[team.sport] = []; // Initialize if undefined
+    }
     if (currentPlayer[team.sport].length >= 2) {
       alert(`You've already drafted 2 ${team.sport} teams!`);
       return;
     }
-    currentPlayer[team.sport].push(team);
+    currentPlayer[team.sport].push({
+      ...team,
+      round: Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1,
+      pick: (draftState.currentPick % LEAGUE_SIZE) + 1
+    });
   }
 
   // Remove team from available pool
@@ -1431,10 +1469,9 @@ const switchRoster = (team) => {
 
 // Render rosters
 function updateRosterDisplay(playerNumber) {
-  const rosterList = document.getElementById(`player${playerNumber}Teams`);
   const roster = draftState.playerRosters[playerNumber];
-
-  // Generate roster HTML for regular sports
+  const rosterList = document.getElementById(`player${playerNumber}Teams`);
+  
   let rosterHTML = Object.entries(roster)
     .filter(([sport]) => sport !== 'wildcard')
     .map(([sport, teams]) => `
@@ -1447,6 +1484,9 @@ function updateRosterDisplay(playerNumber) {
             ${getSportIcon(team)}
           </div>
           ${team.name}
+          <div class="draft-pick-circle ${team.sport}">
+            ${team.round}.${team.pick}
+          </div>
         </li>
       `).join('')}
       ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
@@ -1464,11 +1504,17 @@ function updateRosterDisplay(playerNumber) {
             ${getSportIcon(team)}
           </div>
           ${team.name}
+          <div class="draft-pick-circle ${team.sport}">
+            ${team.round}.${team.pick}
+          </div>
         </li>
       `).join('')}
       ${Array(1 - roster.wildcard.length).fill('<li class="empty">Empty</li>').join('')}
     `;
   }
+
+  rosterList.innerHTML = rosterHTML;
+}
 
   // Update the roster list
   rosterList.innerHTML = rosterHTML;
