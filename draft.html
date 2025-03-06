@@ -1378,8 +1378,9 @@ const draftTeam = (teamId) => {
     playerRosters[currentPlayer].wildcard.push({ ...team, round: currentRound, pick: currentPick });
   }
 
-  // Remove team from available pool
-  DraftableTeams.splice(teamIndex, 1);
+  // Remove team from the draft pool
+  DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
+
   // Update UI
   updateRosterDisplay(currentPlayerNumber);
   updateMyTeamBox(team);
