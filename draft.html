@@ -1359,7 +1359,9 @@ const autoDraftTeam = () => {
 };
 
 // Draft a team
-const draftTeam = (teamId) => {
+function draftTeam(teamId) {
+  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
   const team = DraftableTeams.find(t => t.team_id === teamId);
   if (!team) return;
 
