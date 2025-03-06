@@ -852,6 +852,16 @@
 const urlParams = new URLSearchParams(window.location.search);
 const LEAGUE_SIZE = parseInt(urlParams.get('leagueSize')) || 8;
 
+function generateDraftOrder(size) {
+  const order = [];
+  for (let round = 1; round <= 12; round++) {
+    const roundOrder = round % 2 === 1 ? 
+      Array.from({length: size}, (_, i) => i + 1) : 
+      Array.from({length: size}, (_, i) => size - i);
+    order.push(...roundOrder);
+  }
+  return order;
+}
 
 // Initialize draft state
 let draftState = {
@@ -860,8 +870,9 @@ let draftState = {
   timerDuration: 120,
   playerRosters: {},
   settings: JSON.parse(localStorage.getItem('leagueData')),
+  // Calculate total picks based on wildcard setting
   get totalPicks() {
-    return (12 + (this.settings.wildcard === 'on' ? 1 : 0)) * LEAGUE_SIZE;
+    return (12 * LEAGUE_SIZE) + (this.settings.wildcard === 'on' ? LEAGUE_SIZE : 0)
   }
 };
 
@@ -875,20 +886,6 @@ function initializeRosters() {
 }
 // Call this during setup
 initializeRosters();
-
-// Generate snake draft order
-function generateDraftOrder(size) {
-  const totalRounds = 12 + (draftState.settings.wildcard === 'on' ? 1 : 0);
-  const order = [];
-  
-  for (let round = 1; round <= totalRounds; round++) {
-    const roundOrder = round % 2 === 1 ? 
-      Array.from({length: size}, (_, i) => i + 1) : 
-      Array.from({length: size}, (_, i) => size - i);
-    order.push(...roundOrder);
-  }
-  return order;
-}
 
 // ========================
 // Fixed Switch Roster Function
