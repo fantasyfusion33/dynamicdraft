@@ -854,8 +854,10 @@ const LEAGUE_SIZE = parseInt(urlParams.get('leagueSize')) || 8;
 
 // Generate snake draft order
 function generateDraftOrder(size) {
+  const totalRounds = 12 + (draftState.settings.wildcard === 'on' ? 1 : 0);
   const order = [];
-  for (let round = 1; round <= 12; round++) {
+  
+  for (let round = 1; round <= totalRounds; round++) {
     const roundOrder = round % 2 === 1 ? 
       Array.from({length: size}, (_, i) => i + 1) : 
       Array.from({length: size}, (_, i) => size - i);
@@ -863,7 +865,6 @@ function generateDraftOrder(size) {
   }
   return order;
 }
-
 // Initialize draft state
 let draftState = {
   currentPick: 0,
@@ -871,28 +872,20 @@ let draftState = {
   timerDuration: 120,
   playerRosters: {},
   settings: JSON.parse(localStorage.getItem('leagueData')),
-  // Calculate total picks based on wildcard setting
   get totalPicks() {
-    return (12 * LEAGUE_SIZE) + (this.settings.wildcard === 'on' ? LEAGUE_SIZE : 0)
+    return (12 + (this.settings.wildcard === 'on' ? 1 : 0)) * LEAGUE_SIZE;
   }
 };
 
-// Initialize rosters
 function initializeRosters() {
   for (let i = 1; i <= LEAGUE_SIZE; i++) {
     draftState.playerRosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: [] // Ensure wildcard exists for all players
+      NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [],
+      wildcard: [] // Explicit wildcard array
     };
   }
 }
-
-// Call this during initial setup
+// Call this during setup
 initializeRosters();
 
 // ========================
@@ -914,21 +907,16 @@ function switchRosterToCurrentPlayer() {
 // ========================
 
 function updateDraftHeader() {
-  const currentPick = draftState.currentPick;
-  const currentPlayer = draftState.draftOrder[currentPick];
+  const currentPlayer = draftState.draftOrder[draftState.currentPick];
+  const isWildcard = draftState.currentPick >= 12 * LEAGUE_SIZE;
   
-  let round = Math.floor(currentPick / LEAGUE_SIZE) + 1;
-  let pickInRound = (currentPick % LEAGUE_SIZE) + 1;
-  
-  if (draftState.settings.wildcard === 'on' && round > 12) {
-    round = 13;
-    pickInRound = currentPick - (12 * LEAGUE_SIZE) + 1;
-  }
+  const round = isWildcard ? 13 : Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1;
+  const pick = (draftState.currentPick % LEAGUE_SIZE) + 1;
 
   document.getElementById('currentPlayerBox').innerHTML = `
-    <span>On The Clock:</span> 
-    <strong>Team ${currentPlayer} - Round ${round}.${pickInRound}</strong>
-    ${round === 13 ? '<div class="wildcard-badge">WILDCARD</div>' : ''}
+    <span>On The Clock:</span>
+    <strong>Team ${currentPlayer} - ${isWildcard ? 
+      'Wildcard Round' : `Round ${round}.${pick}`}</strong>
   `;
 }
 
@@ -975,15 +963,15 @@ function updateDraftProgress() {
 function advanceDraft() {
   draftState.currentPick++;
   
-  // End draft conditions
+  // End draft condition
   if (draftState.currentPick >= draftState.totalPicks) {
     endDraft();
     return;
   }
 
-  // Wildcard round transition
+  // Wildcard transition
   if (draftState.currentPick === 12 * LEAGUE_SIZE && draftState.settings.wildcard === 'on') {
-    startWildcard();
+  alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   }
 
   updateDraftHeader();
@@ -1387,14 +1375,11 @@ function draftTeam(teamId) {
 
  if (isWildcardRound) {
     // Wildcard round handling
-    if (!currentPlayer.wildcard) {
-      currentPlayer.wildcard = []; // Initialize if undefined
-    }
-    if (currentPlayer.wildcard.length >= 1) {
-      alert("You already used your wildcard pick!");
-      return;
-    }
-    currentPlayer.wildcard.push({ 
+  if (currentPlayer.wildcard.length >= 1) {
+    alert("Wildcard slot already filled!");
+    return;
+  }
+  currentPlayer.wildcard.push({ 
       ...team, 
       wildcard: true,
       round: 13,
@@ -1553,6 +1538,7 @@ function toggleMyTeam() {
 
 // End the draft
 function endDraft() {
+  if (draftState.currentPick < draftState.totalPicks) return;
   clearInterval(draftState.timer);
   alert("Draft Complete! Click OK to view results.");
 
