@@ -852,19 +852,7 @@
 const urlParams = new URLSearchParams(window.location.search);
 const LEAGUE_SIZE = parseInt(urlParams.get('leagueSize')) || 8;
 
-// Generate snake draft order
-function generateDraftOrder(size) {
-  const totalRounds = 12 + (draftState.settings.wildcard === 'on' ? 1 : 0);
-  const order = [];
-  
-  for (let round = 1; round <= totalRounds; round++) {
-    const roundOrder = round % 2 === 1 ? 
-      Array.from({length: size}, (_, i) => i + 1) : 
-      Array.from({length: size}, (_, i) => size - i);
-    order.push(...roundOrder);
-  }
-  return order;
-}
+
 // Initialize draft state
 let draftState = {
   currentPick: 0,
@@ -887,6 +875,20 @@ function initializeRosters() {
 }
 // Call this during setup
 initializeRosters();
+
+// Generate snake draft order
+function generateDraftOrder(size) {
+  const totalRounds = 12 + (draftState.settings.wildcard === 'on' ? 1 : 0);
+  const order = [];
+  
+  for (let round = 1; round <= totalRounds; round++) {
+    const roundOrder = round % 2 === 1 ? 
+      Array.from({length: size}, (_, i) => i + 1) : 
+      Array.from({length: size}, (_, i) => size - i);
+    order.push(...roundOrder);
+  }
+  return order;
+}
 
 // ========================
 // Fixed Switch Roster Function
