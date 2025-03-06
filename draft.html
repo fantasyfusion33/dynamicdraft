@@ -1371,19 +1371,7 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
- if (isWildcardRound) {
-    // Wildcard round handling
-  if (currentPlayer.wildcard.length >= 1) {
-    alert("Wildcard slot already filled!");
-    return;
-  }
-  currentPlayer.wildcard.push({ 
-      ...team, 
-      wildcard: true,
-      round: 13,
-      pick: draftState.currentPick - (12 * LEAGUE_SIZE) + 1
-    });
-  } else {
+ if (currentRound <= 12) {
     // Regular round handling
     if (!currentPlayer[team.sport]) {
       currentPlayer[team.sport] = []; // Initialize if undefined
@@ -1396,6 +1384,14 @@ function draftTeam(teamId) {
       ...team,
       round: Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1,
       pick: (draftState.currentPick % LEAGUE_SIZE) + 1
+    });
+  } else {
+   // Wildcard round handling
+   currentPlayer.wildcard.push({ 
+      ...team, 
+      wildcard: true,
+      round: 13,
+      pick: draftState.currentPick - (12 * LEAGUE_SIZE) + 1
     });
   }
 
