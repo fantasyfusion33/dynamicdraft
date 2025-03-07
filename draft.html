@@ -1028,11 +1028,11 @@ document.addEventListener('DOMContentLoaded', () => {
     `${draftState.settings.leagueName} Draft - ${LEAGUE_SIZE} Teams`;
   
   // Update team selector
-  const teamSelector = document.getElementById('teamSelector');
-  const teamName = draftState.settings.teamNames[i - 1]; // Arrays are 0-indexed
-  teamSelector.innerHTML = Array.from({length: LEAGUE_SIZE}, (_, i) => 
-    `<option value="player${i+1}">${teamName}</option>`
-  ).join('');
+const teamSelector = document.getElementById('teamSelector');
+teamSelector.innerHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
+  const teamName = draftState.settings.teamNames[i]; // Access team name using the callback's i
+  return `<option value="player${i + 1}">${teamName}</option>`;
+}).join('');
 });
 let DraftableTeams = []; // Global variable to hold teams data
 
