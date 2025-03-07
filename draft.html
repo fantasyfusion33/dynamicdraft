@@ -1626,9 +1626,10 @@ function endDraft() {
   style.textContent = `
     .final-rosters {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      grid-template-columns: repeat(auto-fit, 350,px);
       gap: 20px;
       padding: 20px;
+      justify-content: left; /* Center the grid */
     }
     .roster {
       background: rgba(26, 26, 26, 0.8);
