@@ -854,7 +854,6 @@ const LEAGUE_SIZE = parseInt(urlParams.get('leagueSize')) || 8;
 
 function generateDraftOrder(size) {
   const order = [];
-  const totalRounds = 13 - (draftState.settings.wildcard === 'off' ? 1 : 0);
   for (let round = 1; round <= 13; round++) {
     const roundOrder = round % 2 === 1 ? 
       Array.from({length: size}, (_, i) => i + 1) : 
