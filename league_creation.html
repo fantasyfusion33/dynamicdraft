@@ -205,6 +205,13 @@ h1 {
         </div>
       </div>
 
+      <div class="form-group" id="teamNamesGroup">
+        <label>Team Names</label>
+        <div id="teamNamesContainer">
+          <!-- Team name inputs will be dynamically added here -->
+        </div>
+      </div>
+
       <div class="toggle-group">
         <div class="toggle-container">
           <label>Waiver System</label>
@@ -255,9 +262,14 @@ h1 {
     document.getElementById('leagueForm').addEventListener('submit', async (e) => {
       e.preventDefault();
 
+  const teamNames = [];
+  for (let i = 1; i <= leagueSizeSlider.value; i++) {
+    teamNames.push(document.getElementById(`team${i}Name`).value);
+  }
+
       const leagueData = {
         leagueName: document.getElementById('leagueName').value,
-        leagueSize: leagueSizeSlider.value,
+        leagueSize: leagueSizeSlider.value, teamNames,
         waiverSystem: document.getElementById('waiverSystem').checked ? 'on' : 'off',
         wildcard: document.getElementById('wildcard').checked ? 'on' : 'off',
         bonusPoints: document.getElementById('bonusPoints').checked ? 'on' : 'off'
@@ -269,6 +281,21 @@ h1 {
       // Redirect to the draft page
       window.location.href = `draft.html?leagueSize=${leagueData.leagueSize}`;
     });
+
+// Dynamically add team name inputs based on league size
+leagueSizeSlider.addEventListener('input', (e) => {
+  const teamNamesContainer = document.getElementById('teamNamesContainer');
+  teamNamesContainer.innerHTML = ''; // Clear existing inputs
+
+  for (let i = 1; i <= e.target.value; i++) {
+    teamNamesContainer.innerHTML += `
+      <div class="team-name-input">
+        <label>Team ${i} Name</label>
+        <input type="text" id="team${i}Name" placeholder="Enter Team ${i} Name" required>
+      </div>
+    `;
+  }
+});
   </script>
 </body>
 </html>

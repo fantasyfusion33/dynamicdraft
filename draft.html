@@ -909,10 +909,11 @@ function updateDraftHeader() {
   const round = Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1;
   const isWildcardRound = round === 13 && draftState.settings.wildcard !== 'off';
   const pick = (draftState.currentPick % LEAGUE_SIZE) + 1;
+  const teamName = draftState.settings.teamNames[currentPlayer - 1];
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
-    <strong>Team ${currentPlayer} - ${isWildcardRound ? 
+    <strong>Team ${teamName} - ${isWildcardRound ? 
       'Wildcard Round' : `Round ${Math.min(round, 13)}.${(draftState.currentPick % LEAGUE_SIZE) + 1}`}
     </strong>
   `;
@@ -931,7 +932,7 @@ function createTeamSidebar() {
     roster.className = `roster ${i === 1 ? 'active' : ''}`;
     roster.id = `player${i}Roster`;
     roster.innerHTML = `
-      <h2>Team ${i} Roster</h2>
+      <h2>${teamName}</h2>
       <ul id="player${i}Teams">
         ${Object.keys(draftState.playerRosters[i])
           .filter(k => k !== 'wildcard')
@@ -1028,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update team selector
   const teamSelector = document.getElementById('teamSelector');
   teamSelector.innerHTML = Array.from({length: LEAGUE_SIZE}, (_, i) => 
-    `<option value="player${i+1}">Team ${i+1}</option>`
+    `<option value="player${i+1}">${teamName}</option>`
   ).join('');
 });
 let DraftableTeams = []; // Global variable to hold teams data
@@ -1561,9 +1562,10 @@ function endDraft() {
   const rostersHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
     const playerNumber = i + 1;
     const roster = draftState.playerRosters[playerNumber];
+    const teamName = draftState.settings.teamNames[playerNumber - 1];
     return `
-<div class="roster">
-        <h2>Team ${playerNumber} Roster</h2>
+    <div class="roster">
+        <h2>${teamName}</h2>
         <ul>
           ${Object.entries(roster)
             .filter(([sport]) => sport !== 'wildcard') // Exclude wildcard from main list
