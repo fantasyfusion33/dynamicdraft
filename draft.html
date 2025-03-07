@@ -1622,6 +1622,41 @@ function endDraft() {
       </div>
     </div>
   `;
+ // Add CSS for final rosters
+  const style = document.createElement('style');
+  style.textContent = `
+    .final-rosters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .roster {
+      background: rgba(26, 26, 26, 0.8);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .roster h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .roster ul {
+      list-style: none;
+      padding: 0;
+    }
+    .roster li {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .empty {
+      opacity: 0.5;
+    }
+  `;
+  document.head.appendChild(style);
 };
 
 
