@@ -28,11 +28,36 @@
       width: 100%;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #D2042D;
-    }
+h1 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #D2042D, #FF4F4F);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+}
+
+#leagueName {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#leagueName:focus {
+  border-color: #D2042D;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+}
 
     .form-group {
       margin-bottom: 25px;
@@ -176,7 +201,7 @@
         <label>League Size</label>
         <div class="slider-container">
           <span>4</span>
-          <input type="range" id="leagueSize" min="4" max="12" step="1" value="8">
+          <input type="range" id="leagueSize" min="4" max="12" step="2" value="8">
           <span class="slider-value">8</span>
           <span>12</span>
         </div>
