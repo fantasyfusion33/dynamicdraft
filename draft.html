@@ -400,24 +400,66 @@
 }
 
 .final-rosters {
-  display: flex;
-  justify-content: center;
-  gap: 25px;
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); /* Wider columns */
+  gap: 30px; /* More spacing between rosters */
+  padding: 30px; /* Add padding around the grid */
+  max-width: 1600px; /* Limit maximum width for better readability */
+  margin: 0 auto; /* Center the grid */
 }
 
-.final-rosters .roster {
-  display: block; /* Change from flex to block */
-  width: 350px;
-  background: var(--glass);
+.roster {
+  background: rgba(26, 26, 26, 0.8);
   border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 25px; /* More padding inside each roster */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-width: 400px; /* Minimum width for each roster */
 }
 
-.final-rosters .roster h2 {
-  text-align: center; /* Center the title */
-  margin-bottom: 20px; /* Add space below the title */
+.roster h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  font-size: 1.5rem; /* Larger heading */
+}
+
+.roster ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.roster li {
+  padding: 12px 15px; /* More padding for list items */
+  margin: 8px 0; /* Increased spacing between items */
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Space between icon and text */
+}
+
+.team-icon {
+  width: 36px; /* Larger icons */
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent icons from shrinking */
+}
+
+.draft-pick-circle {
+  margin-left: auto; /* Push pick number to the right */
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.empty {
+  opacity: 0.5;
+  font-style: italic;
 }
 
     /* Sidebar Styles */
@@ -1562,6 +1604,7 @@ function endDraft() {
   const rostersHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
     const playerNumber = i + 1;
     const roster = draftState.playerRosters[playerNumber];
+
     return `
 <div class="roster">
         <h2>Team ${playerNumber} Roster</h2>
@@ -1608,55 +1651,14 @@ function endDraft() {
 
   // Update app content
   document.getElementById("app").innerHTML = `
-    <div class="draft-complete" style="padding: 20px;">
-      <h2 style="text-align: center; margin-bottom: 30px;">
-        Draft Complete! Here are your league's final rosters below:
-      </h2>
-      <div class="final-rosters" style="
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-      ">
+    <div class="draft-complete">
+      <h2>Draft Complete! Here are your league's final rosters below:</h2>
+      <div class="final-rosters">
         ${rostersHTML}
       </div>
     </div>
   `;
- // Add CSS for final rosters
-  const style = document.createElement('style');
-  style.textContent = `
-    .final-rosters {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .roster {
-      background: rgba(26, 26, 26, 0.8);
-      border-radius: 12px;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .roster h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .roster ul {
-      list-style: none;
-      padding: 0;
-    }
-    .roster li {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .empty {
-      opacity: 0.5;
-    }
-  `;
-  document.head.appendChild(style);
-};
+ };
 
 
 // Initial render
