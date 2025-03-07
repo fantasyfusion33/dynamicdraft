@@ -151,23 +151,6 @@
   border-color: var(--primary);
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .filters {
-    flex-direction: flexbox;
-    align-items: stretch;
-  }
-
-  .search-bar {
-    width: 75%;
-    margin: 0;
-  }
-
-  .filters select {
-    width: 75%;
-  }
-}
-
     .team-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -696,6 +679,148 @@
   border-radius: 4px;
   font-size: 0.8rem;
   margin-left: 8px;
+}
+
+/* Mobile Styles (applied when screen width is less than 768px) */
+@media (max-width: 768px) {
+  /* Shrink clock */
+  .countdown-clock {
+    top: 10px;
+    left: 10px;
+    font-size: 1.2rem;
+    padding: 6px 12px;
+    width: 60px;
+  }
+
+  /* Smaller sidebar */
+  .sidebar {
+    width: 200px; /* Narrower sidebar */
+    transform: translateX(-100%); /* Start hidden */
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
+
+  .sidebar:not(.collapsed) ~ .main-content {
+    margin-left: 200px; /* Adjust main content when sidebar is open */
+  }
+
+  /* Smaller sidebar toggle */
+  .sidebar-toggle {
+    top: 10px;
+    left: 10px;
+    padding: 6px;
+    font-size: 1rem;
+  }
+
+  /* Smaller text */
+  body {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  .team-card h3 {
+    font-size: 1rem;
+  }
+
+  .team-card p {
+    font-size: 0.8rem;
+  }
+
+  /* Team card grid */
+  .team-list {
+    grid-template-columns: repeat(3, 1fr); /* 3 cards per row by default */
+    gap: 8px; /* Smaller gap */
+  }
+
+  .sidebar:not(.collapsed) ~ .main-content .team-list {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row when sidebar is open */
+  }
+
+  .team-card {
+    padding: 10px; /* Smaller padding */
+  }
+
+  /* Hide My Team Box */
+  #myTeamBox {
+    display: none;
+  }
+
+  /* Tap-based popups */
+  .team-popup {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 300px;
+    background: var(--glass);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+  }
+
+  .team-card {
+    cursor: pointer; /* Show tap indication */
+  }
+/* Stack filters into two rows */
+  .filters {
+    display: grid;
+    grid-template-rows: auto auto; /* Two rows */
+    gap: 10px; /* Spacing between rows */
+    margin-bottom: 15px; /* Add spacing below filters */
+  }
+
+  /* First row: Search and sort */
+  .filters > .search-bar {
+    grid-row: 1;
+    grid-column: 1 / span 2; /* Take up both columns */
+    max-width: none; /* Full width */
+  }
+
+  .filters > #sortBy {
+    grid-row: 1;
+    grid-column: 3; /* Place sort dropdown in the third column */
+    width: 100%; /* Full width */
+  }
+
+  /* Second row: Sport and season filters */
+  .filters > #sportFilter,
+  .filters > #seasonFilter {
+    grid-row: 2;
+    width: 100%; /* Full width */
+  }
+
+  .filters > #sportFilter {
+    grid-column: 1 / span 2; /* Take up two columns */
+  }
+
+  .filters > #seasonFilter {
+    grid-column: 3; /* Place season filter in the third column */
+  }
+
+  /* Adjust search bar and dropdowns */
+  .search-bar,
+  .filters select {
+    width: 100%; /* Full width */
+    max-width: none; /* Remove max-width */
+    font-size: 14px; /* Smaller text */
+    padding: 8px; /* Smaller padding */
+  }
+
+  /* Clear search button */
+  .clear-search {
+    right: 8px; /* Adjust position */
+    font-size: 1rem; /* Smaller icon */
+  }
 }
 
   </style>
