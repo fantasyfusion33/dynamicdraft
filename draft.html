@@ -451,7 +451,7 @@
       border-radius: 0 6px 6px 0;
       cursor: pointer;
       transition: left 0.3s ease;
-      z-index: 100;
+      z-index: 300;
     }
 
     .sidebar.collapsed + .sidebar-toggle {
@@ -1559,18 +1559,40 @@ function endDraft() {
   mainContent.style.marginRight = "auto";
   mainContent.style.maxWidth = "800px";
 
-  // Build roster HTML for a player
-  const rosterHTML = (player) => {
-    const roster = playerRosters[player];
+  // Build roster HTML for all players
+  const rostersHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
+    const playerNumber = i + 1;
+    const roster = draftState.playerRosters[playerNumber];
     return `
-      <div class="roster" style="width: 350px;">
-        <h2>Player ${player} Roster</h2>
+<div class="roster">
+        <h2>Team ${playerNumber} Roster</h2>
         <ul>
-          ${['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => `
-            <strong>${sport}</strong>
-            ${roster[sport].map(team => `
+          ${Object.entries(roster)
+            .filter(([sport]) => sport !== 'wildcard') // Exclude wildcard from main list
+            .map(([sport, teams]) => `
+              <li><strong>${sport}</strong></li>
+              ${teams.map(team => `
+                <li class="${team.sport}">
+                  <div class="team-icon ${team.sport}" 
+                       style="--primaryColor: ${team.primaryColor}; 
+                              --secondaryColor: ${team.secondaryColor};"> 
+                    ${getSportIcon(team)}
+                  </div>
+                  ${team.name}
+                  <div class="draft-pick-circle ${team.sport}">
+                    ${team.round}.${team.pick}
+                  </div>
+                </li>
+              `).join('')}
+              ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
+            `).join('')}
+          ${roster.wildcard?.length > 0 ? `
+            <li><strong>Wildcard</strong></li>
+            ${roster.wildcard.map(team => `
               <li class="${team.sport}">
-                <div class="team-icon ${team.sport}" style="--primaryColor: ${team.primaryColor}; --secondaryColor: ${team.secondaryColor};">
+                <div class="team-icon ${team.sport}" 
+                     style="--primaryColor: ${team.primaryColor}; 
+                            --secondaryColor: ${team.secondaryColor};"> 
                   ${getSportIcon(team)}
                 </div>
                 ${team.name}
@@ -1579,24 +1601,11 @@ function endDraft() {
                 </div>
               </li>
             `).join('')}
-            ${Array(2 - roster[sport].length).fill('<li class="empty">Empty</li>').join('')}
-          `).join('')}
-          <strong>Wildcard</strong>
-          ${roster.wildcard ? roster.wildcard.map(team => `
-            <li class="${team.sport}">
-              <div class="team-icon ${team.sport}" style="--primaryColor: ${team.primaryColor}; --secondaryColor: ${team.secondaryColor};">
-                ${getSportIcon(team)}
-              </div>
-              ${team.name}
-              <div class="draft-pick-circle ${team.sport}">
-                ${team.round}.${team.pick}
-              </div>
-            </li>
-          `).join('') : '<li class="empty">Empty</li>'}
+          ` : ''}
         </ul>
       </div>
     `;
-  };
+  }).join('');
 
   // Update app content
   document.getElementById("app").innerHTML = `
@@ -1609,8 +1618,7 @@ function endDraft() {
         justify-content: center;
         gap: 25px;
       ">
-        ${rosterHTML(1)}
-        ${rosterHTML(2)}
+        ${rostersHTML}
       </div>
     </div>
   `;
