@@ -937,11 +937,11 @@ function createTeamSidebar() {
         ${Object.keys(draftState.playerRosters[i])
           .filter(k => k !== 'wildcard')
           .map(sport => `
-            <li><strong>${sport}</strong></li>
+            <strong>${sport}</strong>
             ${Array(2).fill('<li class="empty">Empty</li>').join('')}
           `).join('')}
         ${draftState.settings.wildcard === 'on' ? `
-          <li><strong>Wildcard</strong></li>
+          <strong>Wildcard</strong>
           <li class="empty">Empty</li>
         ` : ''}
       </ul>
@@ -1453,7 +1453,7 @@ function updateRosterDisplay(playerNumber) {
   let rosterHTML = Object.entries(roster)
     .filter(([sport]) => sport !== 'wildcard')
     .map(([sport, teams]) => `
-      <li><strong>${sport}</strong></li>
+      <strong>${sport}</strong>
       ${teams.map(team => `
         <li class="${team.sport}">
           <div class="team-icon ${team.sport}" 
@@ -1473,7 +1473,7 @@ function updateRosterDisplay(playerNumber) {
   // Add wildcard section if enabled
   if (draftState.settings.wildcard === 'on') {
     rosterHTML += `
-      <li><strong>Wildcard</strong></li>
+      <strong>Wildcard</strong>
       ${roster.wildcard.map(team => `
         <li class="${team.sport}">
           <div class="team-icon ${team.sport}" 
@@ -1570,7 +1570,7 @@ function endDraft() {
           ${Object.entries(roster)
             .filter(([sport]) => sport !== 'wildcard') // Exclude wildcard from main list
             .map(([sport, teams]) => `
-              <li><strong>${sport}</strong></li>
+              <strong>${sport}</strong>
               ${teams.map(team => `
                 <li class="${team.sport}">
                   <div class="team-icon ${team.sport}" 
@@ -1587,7 +1587,7 @@ function endDraft() {
               ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
             `).join('')}
           ${roster.wildcard?.length > 0 ? `
-            <li><strong>Wildcard</strong></li>
+            <strong>Wildcard</strong>
             ${roster.wildcard.map(team => `
               <li class="${team.sport}">
                 <div class="team-icon ${team.sport}" 
