@@ -968,25 +968,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script import { createClient } from 'jsr:@supabase/supabase-js@2'>
-  // Debug: Check if Supabase is loaded
-  console.log('Supabase:', supabase);
+<script>
 
-  if (!supabase) {
-    console.error('Supabase library not loaded!');
-  } else {
-    console.log('createClient:', supabase.createClient);
-
-    if (!supabase.createClient) {
-      console.error('createClient method not found!');
-    } else {
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-console.log('Supabase client initialized:', supabaseClient);
- }
-  }
 
 // ========================
 // Dynamic League Size Initialization
