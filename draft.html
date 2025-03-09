@@ -973,7 +973,6 @@
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // ========================
 // Dynamic League Size Initialization
@@ -1151,6 +1150,16 @@ function resetCountdown() {
 // save draft in Supabase
 // ========================
 
+ let supabase;
+  document.addEventListener("DOMContentLoaded", async () => {
+      supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+      if (!supabase) {
+          console.error("⚠️ Supabase failed to initialize.");
+      } else {
+          console.log("✅ Supabase initialized successfully.");
+      }
+
 async function saveDraftResults() {
   const draftResults = {
     league_name: draftState.settings.leagueName,
@@ -1205,6 +1214,8 @@ async function saveDraftResults() {
     alert('An unexpected error occurred. Please try again.');
   }
 }
+
+  });
 
 // Initialize dynamic draft
 document.addEventListener('DOMContentLoaded', () => {
