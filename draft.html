@@ -968,7 +968,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-<script>
+<script src="draft.js">
 
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
@@ -1153,11 +1153,11 @@ function resetCountdown() {
  let supabase;
   document.addEventListener("DOMContentLoaded", async () => {
       supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
+	
       if (!supabase) {
-          console.error("⚠️ Supabase failed to initialize.");
+          console.error("Supabase failed to initialize.");
       } else {
-          console.log("✅ Supabase initialized successfully.");
+          console.log("Supabase initialized successfully.");
       }
 
 async function saveDraftResults() {
