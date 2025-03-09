@@ -1155,56 +1155,65 @@ async function saveDraftResults() {
   const draftResults = {
     league_name: draftState.settings.leagueName,
     team_names: draftState.settings.teamNames,
-    rosters: {}, // Will store enhanced roster data
     draft_order: draftState.draftOrder,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
+    rosters: []
   };
 
-  // Add draft-specific info to rosters
+  // Enhance rosters data
   for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
-    draftResults.rosters[playerNumber] = {};
+    const playerRoster = {
+      player_id: playerNumber,
+      teams: [],
+      wildcard: null
+    };
 
-    // Add regular teams with pick info
+    // Add regular teams with round and pick info
     for (const [sport, teams] of Object.entries(roster)) {
       if (sport !== 'wildcard') {
-        draftResults.rosters[playerNumber][sport] = teams.map(team => ({
-          name: team.name,
-          round: team.round,
-          pick: team.pick
-        }));
+        teams.forEach(team => {
+          playerRoster.teams.push({
+            name: team.name,
+            sport: sport,
+            round: team.round,
+            pick: team.pick
+          });
+        });
       }
     }
 
-    // Add wildcard team with pick info
+    // Add wildcard team if available
     if (roster.wildcard?.length > 0) {
-      draftResults.rosters[playerNumber].wildcard = roster.wildcard.map(team => ({
-        name: team.name,
-        round: team.round,
-        pick: team.pick
-      }));
-    } else {
-      draftResults.rosters[playerNumber].wildcard = []; // No wildcard team
+      playerRoster.wildcard = {
+        name: roster.wildcard[0].name,
+        round: roster.wildcard[0].round,
+        pick: roster.wildcard[0].pick
+      };
     }
+
+    draftResults.rosters.push(playerRoster);
   }
+
+  // Debugging output
+  console.table(draftResults.rosters);
 
   // Save to Supabase
   try {
-    const { data, error } = await supabase
-      .from('drafts')
-      .insert([draftResults]);
+    const { data, error } = await supabase.from('drafts').insert([draftResults]);
 
     if (error) {
-      console.error('Error saving draft results:', error);
+      console.error('❌ Error saving draft results:', error);
       alert('Failed to save draft results. Please try again.');
     } else {
-      console.log('Draft results saved successfully:', data);
+      console.log('✅ Draft results saved successfully:', data);
       alert('Draft results saved successfully!');
     }
   } catch (err) {
-    console.error('Unexpected error:', err);
+    console.error('⚠️ Unexpected error:', err);
     alert('An unexpected error occurred. Please try again.');
   }
 }
+
 
 // Initialize dynamic draft
 document.addEventListener('DOMContentLoaded', () => {
