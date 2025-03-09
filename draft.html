@@ -966,8 +966,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script>
+
+// Initialize Supabase client
+const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
 // ========================
 // Dynamic League Size Initialization
 // ========================
@@ -1038,7 +1045,7 @@ function updateDraftHeader() {
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
-    <strong>Team ${teamName} - ${isWildcardRound ? 
+    <strong>${teamName} - ${isWildcardRound ? 
       'Wildcard Round' : `Round ${Math.min(round, 13)}.${(draftState.currentPick % LEAGUE_SIZE) + 1}`}
     </strong>
   `;
@@ -1139,6 +1146,64 @@ function resetCountdown() {
     clearInterval(draftState.timer);
   }
   startCountdown();
+}
+// ========================
+// save draft in Supabase
+// ========================
+
+async function saveDraftResults() {
+  const draftResults = {
+    league_name: draftState.settings.leagueName,
+    team_names: draftState.settings.teamNames,
+    rosters: {}, // Will store enhanced roster data
+    draft_order: draftState.draftOrder,
+    created_at: new Date().toISOString()
+  };
+
+  // Add draft-specific info to rosters
+  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
+    draftResults.rosters[playerNumber] = {};
+
+    // Add regular teams with pick info
+    for (const [sport, teams] of Object.entries(roster)) {
+      if (sport !== 'wildcard') {
+        draftResults.rosters[playerNumber][sport] = teams.map(team => ({
+          name: team.name,
+          round: team.round,
+          pick: team.pick
+        }));
+      }
+    }
+
+    // Add wildcard team with pick info
+    if (roster.wildcard?.length > 0) {
+      draftResults.rosters[playerNumber].wildcard = roster.wildcard.map(team => ({
+        name: team.name,
+        round: team.round,
+        pick: team.pick
+      }));
+    } else {
+      draftResults.rosters[playerNumber].wildcard = []; // No wildcard team
+    }
+  }
+
+  // Save to Supabase
+  try {
+    const { data, error } = await supabase
+      .from('drafts')
+      .insert([draftResults]);
+
+    if (error) {
+      console.error('Error saving draft results:', error);
+      alert('Failed to save draft results. Please try again.');
+    } else {
+      console.log('Draft results saved successfully:', data);
+      alert('Draft results saved successfully!');
+    }
+  } catch (err) {
+    console.error('Unexpected error:', err);
+    alert('An unexpected error occurred. Please try again.');
+  }
 }
 
 // Initialize dynamic draft
@@ -1659,6 +1724,7 @@ function toggleMyTeam() {
 // End the draft
 function endDraft() {
   if (draftState.currentPick < draftState.totalPicks) return;
+  saveDraftResults();
   clearInterval(draftState.timer);
   alert("Draft Complete! Click OK to view results.");
 
