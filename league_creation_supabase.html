@@ -282,7 +282,8 @@ h1 {
   </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script import { v4 as uuidv4 } from 'uuid'>
+<script src="https://cdn.jsdelivr.net/npm/uuid@9.0.0/dist/umd/uuidv4.min.js"></script>
+<script>
 
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
@@ -321,6 +322,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
 
   // Generate league ID
 const leagueId = uuidv4();
+console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
   // Set default owner ID
   const ownerId = '007';
