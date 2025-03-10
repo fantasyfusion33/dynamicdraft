@@ -1049,19 +1049,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize rosters
     initializeRosters();
 
-    // Create draft in Supabase
-    const draftData = {
-      league_id: leagueId,
-      league_name: draftState.settings.leagueName,
-      team_names: draftState.settings.teamNames,
-      draft_order: draftState.draftOrder,
-      created_at: new Date().toISOString(),
-    };
-
-    const draftId = await createDraft(draftData);
-
-    if (draftId) {
-      draftState.draftId = draftId;
+    // Update team selector
+    const teamSelector = document.getElementById('teamSelector');
+    teamSelector.innerHTML = draftState.settings.teamNames
+      .map((name, i) => `<option value="player${i + 1}">${name}</option>`)
+      .join('');
 
     // Set up UI
     createTeamSidebar();
@@ -1071,14 +1063,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update draft board title
     document.querySelector('h1').textContent = 
       `${draftState.settings.leagueName} Draft - ${LEAGUE_SIZE} Teams`;
-
-    // Update team selector
-    const teamSelector = document.getElementById('teamSelector');
-    teamSelector.innerHTML = draftState.settings.teamNames
-      .map((name, i) => `<option value="player${i + 1}">${name}</option>`)
-      .join('');
   }
-};
+});
 
 // ========================
 // Fixed Switch Roster Function
