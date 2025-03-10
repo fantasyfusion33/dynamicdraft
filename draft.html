@@ -1041,8 +1041,7 @@ function updateDraftHeader() {
   const round = Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1;
   const isWildcardRound = round === 13 && draftState.settings.wildcard !== 'off';
   const pick = (draftState.currentPick % LEAGUE_SIZE) + 1;
-  const teamName = draftState.settings.teamData[currentPlayer - 1]?.teamName; // Safely access team name
-
+  const teamName = draftState.settings.teamNames[currentPlayer - 1];
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
@@ -1064,7 +1063,7 @@ function createTeamSidebar() {
     const roster = document.createElement('div');
     roster.className = `roster ${i === 1 ? 'active' : ''}`;
     roster.id = `player${i}Roster`;
-    const teamName = draftState.settings.teamData[i - 1]?.teamName; // Arrays are 0-indexed
+    const teamName = draftState.settings.teamNames[i - 1]; // Arrays are 0-indexed
     roster.innerHTML = `
       <h2>${teamName}</h2>
       <ul id="player${i}Teams">
@@ -1159,8 +1158,7 @@ async function saveDraftResults() {
     !draftState.settings.leagueId ||
     !draftState.settings.ownerId ||
     !draftState.playerRosters ||
-    !draftState.draftOrder ||
-    !draftState.settings.teams
+    !draftState.draftOrder
   ) {
     console.error('Missing required data in draftState');
     alert('Failed to save draft results. Missing required data.');
@@ -1171,36 +1169,22 @@ async function saveDraftResults() {
   const draftData = {
     league_name: draftState.settings.leagueName,
     league_id: draftState.settings.leagueId,
-    team_ids: draftState.settings.teams.map(team => team.teamId), 
-    team_names: draftState.settings.teams.map(team => team.teamName), // Now includes team names
+    team_names: draftState.settings.teamNames,
+    team_ids: draftState.settings.teamNames.map((_, index) => `Team ${index + 1}`), // Adjust based on your team IDs
+    roster_ids: [], // Will be populated with roster IDs
     draft_order: draftState.draftOrder,
-    settings: {
-      waiver_system: draftState.settings.waiverSystem,
-      wildcard: draftState.settings.wildcard,
-      bonus_points: draftState.settings.bonusPoints
-    },
     created_at: new Date().toISOString()
   };
 
   // Prepare roster entries
   const rosterEntries = [];
-  for (const [playerIndex, roster] of Object.entries(draftState.playerRosters)) {
-    const teamId = draftState.settings.teams[playerIndex]?.teamId; 
-    const teamName = draftState.settings.teams[playerIndex]?.teamName; 
-
-    if (!teamId || !teamName) {
-      console.error(`Missing team ID or team name for player index: ${playerIndex}`);
-      continue;
-    }
-
+  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
     for (const [sport, teams] of Object.entries(roster)) {
       teams.forEach(team => {
         rosterEntries.push({
-          team_id: teamId, 
-          team_name: teamName, // Now includes team name with each pick
-          sport: sport,
-          pick_team: team.name,
-          round_pick: `${team.round}.${team.pick}`, 
+          team_id: team.team_id, // Ensure this matches the team_id in SportTeamDatabase
+          round: team.round,
+          pick: team.pick,
           league_id: draftState.settings.leagueId,
           owner_id: draftState.settings.ownerId
         });
@@ -1209,7 +1193,7 @@ async function saveDraftResults() {
   }
 
   try {
-    // Insert draft metadata
+    // Start a transaction
     const { data: draft, error: draftError } = await supabase
       .from('drafts')
       .insert([draftData])
@@ -1260,7 +1244,6 @@ async function saveDraftResults() {
   }
 }
 
-
 // Initialize dynamic draft
 document.addEventListener('DOMContentLoaded', () => {
   // Set up UI
@@ -1275,7 +1258,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update team selector
 const teamSelector = document.getElementById('teamSelector');
 teamSelector.innerHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
-  const teamName = draftState.settings.teamData[i]?.teamName; // Access team name using the callback's i
+  const teamName = draftState.settings.teamNames[i]; // Access team name using the callback's i
   return `<option value="player${i + 1}">${teamName}</option>`;
 }).join('');
 });
@@ -1810,7 +1793,7 @@ function endDraft() {
   const rostersHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
     const playerNumber = i + 1;
     const roster = draftState.playerRosters[playerNumber];
-    const teamName = draftState.settings.teamData[playerNumber - 1]?.teamName;
+    const teamName = draftState.settings.teamNames[playerNumber - 1];
     return `
     <div class="roster">
         <h2>${teamName}</h2>
