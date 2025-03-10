@@ -290,29 +290,45 @@ h1 {
       sliderValue.textContent = e.target.value;
     });
 
-    // Form submission
-    document.getElementById('leagueForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
+function generateLeagueId() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
+    // Form submission
+document.getElementById('leagueForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // Generate league ID
+  const leagueId = generateLeagueId();
+
+  // Set default owner ID
+  const ownerId = '007';
+
+  // Collect team names
   const teamNames = [];
   for (let i = 1; i <= leagueSizeSlider.value; i++) {
     teamNames.push(document.getElementById(`team${i}Name`).value);
   }
 
-      const leagueData = {
-        leagueName: document.getElementById('leagueName').value,
-        leagueSize: leagueSizeSlider.value, teamNames,
-        waiverSystem: document.getElementById('waiverSystem').checked ? 'on' : 'off',
-        wildcard: document.getElementById('wildcard').checked ? 'on' : 'off',
-        bonusPoints: document.getElementById('bonusPoints').checked ? 'on' : 'off'
-      };
+  // Save league data to localStorage
+  const leagueData = {
+    leagueName: document.getElementById('leagueName').value,
+    leagueId, // Add league ID
+    ownerId, // Add owner ID
+    teamNames,
+    leagueSize: leagueSizeSlider.value,
+    waiverSystem: document.getElementById('waiverSystem').checked ? 'on' : 'off',
+    wildcard: document.getElementById('wildcard').checked ? 'on' : 'off',
+    bonusPoints: document.getElementById('bonusPoints').checked ? 'on' : 'off'
+  };
 
-      // Save league data to localStorage (or send to backend)
-      localStorage.setItem('leagueData', JSON.stringify(leagueData));
-
-      // Redirect to the draft page
-      window.location.href = `draft.html?leagueSize=${leagueData.leagueSize}`;
-    });
+  localStorage.setItem('leagueData', JSON.stringify(leagueData));
+  window.location.href = `draft.html?leagueSize=${leagueData.leagueSize}`;
+});
 
 // Dynamically add team name inputs based on league size
 leagueSizeSlider.addEventListener('input', (e) => {

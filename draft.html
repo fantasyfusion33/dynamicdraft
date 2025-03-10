@@ -1152,68 +1152,96 @@ function resetCountdown() {
 // ========================
 
 async function saveDraftResults() {
-  const draftResults = {
-    league_name: draftState.settings.leagueName,
-    team_names: draftState.settings.teamNames,
-    draft_order: draftState.draftOrder,
-    created_at: new Date().toISOString(),
-    rosters: []
-  };
-
-  // Enhance rosters data
-  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
-    const playerRoster = {
-      player_id: playerNumber,
-      teams: [],
-      wildcard: null
-    };
-
-    // Add regular teams with round and pick info
-    for (const [sport, teams] of Object.entries(roster)) {
-      if (sport !== 'wildcard') {
-        teams.forEach(team => {
-          playerRoster.teams.push({
-            name: team.name,
-            sport: sport,
-            round: team.round,
-            pick: team.pick
-          });
-        });
-      }
-    }
-
-    // Add wildcard team if available
-    if (roster.wildcard?.length > 0) {
-      playerRoster.wildcard = {
-        name: roster.wildcard[0].name,
-        round: roster.wildcard[0].round,
-        pick: roster.wildcard[0].pick
-      };
-    }
-
-    draftResults.rosters.push(playerRoster);
+  // Ensure required data is available
+  if (
+    !draftState.settings.leagueName ||
+    !draftState.settings.leagueId ||
+    !draftState.settings.ownerId ||
+    !draftState.playerRosters ||
+    !draftState.draftOrder
+  ) {
+    console.error('Missing required data in draftState');
+    alert('Failed to save draft results. Missing required data.');
+    return;
   }
 
-  // Debugging output
-  console.table(draftResults.rosters);
+  // Prepare data for the drafts table
+  const draftData = {
+    league_name: draftState.settings.leagueName,
+    league_id: draftState.settings.leagueId,
+    team_ids: draftState.settings.teamNames.map((_, index) => `Team ${index + 1}`), // Adjust based on your team IDs
+    roster_ids: [], // Will be populated with roster IDs
+    draft_order: draftState.draftOrder,
+    created_at: new Date().toISOString()
+  };
 
-  // Save to Supabase
-  try {
-    const { data, error } = await supabase.from('drafts').insert([draftResults]);
-
-    if (error) {
-      console.error('❌ Error saving draft results:', error);
-      alert('Failed to save draft results. Please try again.');
-    } else {
-      console.log('✅ Draft results saved successfully:', data);
-      alert('Draft results saved successfully!');
+  // Prepare roster entries
+  const rosterEntries = [];
+  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
+    for (const [sport, teams] of Object.entries(roster)) {
+      teams.forEach(team => {
+        rosterEntries.push({
+          team_id: team.team_id, // Ensure this matches the team_id in SportTeamDatabase
+          round: team.round,
+          pick: team.pick,
+          league_id: draftState.settings.leagueId,
+          owner_id: draftState.settings.ownerId
+        });
+      });
     }
+  }
+
+  try {
+    // Start a transaction
+    const { data: draft, error: draftError } = await supabase
+      .from('drafts')
+      .insert([draftData])
+      .select('id')
+      .single();
+
+    if (draftError) {
+      console.error('Error saving draft metadata:', draftError);
+      alert('Failed to save draft metadata. Please try again.');
+      return;
+    }
+
+    // Save roster entries and collect their IDs
+    const rosterIds = [];
+    for (const entry of rosterEntries) {
+      const { data: roster, error: rosterError } = await supabase
+        .from('roster')
+        .insert([entry])
+        .select('id')
+        .single();
+
+      if (rosterError) {
+        console.error('Error saving roster entry:', rosterError);
+        alert('Failed to save roster entries. Please try again.');
+        return;
+      }
+
+      rosterIds.push(roster.id);
+    }
+
+    // Update the draft with roster IDs
+    const { error: updateError } = await supabase
+      .from('drafts')
+      .update({ roster_ids: rosterIds })
+      .eq('id', draft.id);
+
+    if (updateError) {
+      console.error('Error updating draft with roster IDs:', updateError);
+      alert('Failed to update draft with roster IDs. Please try again.');
+      return;
+    }
+
+    console.log('Draft results saved successfully!');
+    alert('Draft results saved successfully!');
   } catch (err) {
-    console.error('⚠️ Unexpected error:', err);
+    console.error('Unexpected error:', err);
     alert('An unexpected error occurred. Please try again.');
   }
 }
-
 
 // Initialize dynamic draft
 document.addEventListener('DOMContentLoaded', () => {
