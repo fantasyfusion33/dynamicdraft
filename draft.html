@@ -1158,7 +1158,8 @@ async function saveDraftResults() {
     !draftState.settings.leagueId ||
     !draftState.settings.ownerId ||
     !draftState.playerRosters ||
-    !draftState.draftOrder
+    !draftState.draftOrder ||
+    !draftState.settings.teams
   ) {
     console.error('Missing required data in draftState');
     alert('Failed to save draft results. Missing required data.');
@@ -1169,21 +1170,36 @@ async function saveDraftResults() {
   const draftData = {
     league_name: draftState.settings.leagueName,
     league_id: draftState.settings.leagueId,
-    team_ids: draftState.settings.teamNames.map((_, index) => `Team ${index + 1}`), // Adjust based on your team IDs
-    roster_ids: [], // Will be populated with roster IDs
+    team_ids: draftState.settings.teams.map(team => team.teamId), 
+    team_names: draftState.settings.teams.map(team => team.teamName), // Now includes team names
     draft_order: draftState.draftOrder,
+    settings: {
+      waiver_system: draftState.settings.waiverSystem,
+      wildcard: draftState.settings.wildcard,
+      bonus_points: draftState.settings.bonusPoints
+    },
     created_at: new Date().toISOString()
   };
 
   // Prepare roster entries
   const rosterEntries = [];
-  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
+  for (const [playerIndex, roster] of Object.entries(draftState.playerRosters)) {
+    const teamId = draftState.settings.teams[playerIndex]?.teamId; 
+    const teamName = draftState.settings.teams[playerIndex]?.teamName; 
+
+    if (!teamId || !teamName) {
+      console.error(`Missing team ID or team name for player index: ${playerIndex}`);
+      continue;
+    }
+
     for (const [sport, teams] of Object.entries(roster)) {
       teams.forEach(team => {
         rosterEntries.push({
-          team_id: team.team_id, // Ensure this matches the team_id in SportTeamDatabase
-          round: team.round,
-          pick: team.pick,
+          team_id: teamId, 
+          team_name: teamName, // Now includes team name with each pick
+          sport: sport,
+          pick_team: team.name,
+          round_pick: `${team.round}.${team.pick}`, 
           league_id: draftState.settings.leagueId,
           owner_id: draftState.settings.ownerId
         });
@@ -1192,7 +1208,7 @@ async function saveDraftResults() {
   }
 
   try {
-    // Start a transaction
+    // Insert draft metadata
     const { data: draft, error: draftError } = await supabase
       .from('drafts')
       .insert([draftData])
@@ -1242,6 +1258,7 @@ async function saveDraftResults() {
     alert('An unexpected error occurred. Please try again.');
   }
 }
+
 
 // Initialize dynamic draft
 document.addEventListener('DOMContentLoaded', () => {
