@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create League</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0A0A0A;
+      color: #FFFFFF;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .league-creation-container {
+      background: rgba(26, 26, 26, 0.8);
+      padding: 30px;
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 500px;
+      width: 100%;
+    }
+
+h1 {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #D2042D, #FF4F4F);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 25px;
+  text-transform: uppercase;
+}
+
+#leagueName {
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+#leagueName:focus {
+  border-color: #D2042D;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+}
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 500;
+      font-size: 16px;
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      outline: none;
+      flex-grow: 1;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: #D2042D;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .slider-value {
+      font-weight: 600;
+      font-size: 18px;
+      min-width: 30px;
+      text-align: center;
+    }
+
+    .toggle-group {
+      margin: 20px 0;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+    }
+
+    .toggle-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #333;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #D2042D;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(22px);
+    }
+
+    .subheading {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: #D2042D;
+      color: #FFFFFF;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #B00326;
+    }
+
+.team-name-input {
+  margin-bottom: 15px;
+}
+
+.team-name-input label {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.team-name-input input {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.team-name-input input:focus {
+  border-color: #D2042D;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+}
+
+  </style>
+</head>
+<body>
+  <div class="league-creation-container">
+    <h1>Create New League</h1>
+    <form id="leagueForm">
+      <div class="form-group">
+        <label for="leagueName">League Name</label>
+        <input type="text" id="leagueName" placeholder="Enter league name" required>
+      </div>
+
+      <div class="form-group">
+        <label>League Size</label>
+        <div class="slider-container">
+          <span>4</span>
+          <input type="range" id="leagueSize" min="2" max="12" step="1" value="8">
+          <span class="slider-value">8</span>
+          <span>12</span>
+        </div>
+      </div>
+
+      <div class="form-group" id="teamNamesGroup">
+        <label>Team Names</label>
+        <div id="teamNamesContainer">
+          <!-- Team name inputs will be dynamically added here -->
+        </div>
+      </div>
+
+      <div class="toggle-group">
+        <div class="toggle-container">
+          <label>Waiver System</label>
+          <label class="switch">
+            <input type="checkbox" id="waiverSystem" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="subheading">Allows teams to claim unclaimed players through a waiver priority system</p>
+      </div>
+
+      <div class="toggle-group">
+        <div class="toggle-container">
+          <label>Wildcard Slot</label>
+          <label class="switch">
+            <input type="checkbox" id="wildcard" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="subheading">Adds an extra roster spot that can be used for any sport</p>
+      </div>
+
+      <div class="toggle-group">
+        <div class="toggle-container">
+          <label>Bonus Points</label>
+          <label class="switch">
+            <input type="checkbox" id="bonusPoints">
+            <span class="slider"></span>
+          </label>
+        </div>
+        <p class="subheading">Award extra points for championship wins and historic performances</p>
+      </div>
+
+      <button type="submit">Create League & Start Draft</button>
+    </form>
+  </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+
+// Initialize Supabase client
+const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
+
+async function createLeague(leagueData) {
+  try {
+    const { data, error } = await supabase
+      .from('leagues')
+      .insert([leagueData])
+      .select('id')
+      .single();
+
+    if (error) throw error;
+
+    console.log('League created successfully:', data);
+    return data.league_id; // Return the newly created league_id
+  } catch (err) {
+    console.error('Error creating league:', err);
+    alert('Failed to create league. Please try again.');
+    return null;
+  }
+}
+    // League size slider functionality
+    const leagueSizeSlider = document.getElementById('leagueSize');
+    const sliderValue = document.querySelector('.slider-value');
+
+    leagueSizeSlider.addEventListener('input', (e) => {
+      sliderValue.textContent = e.target.value;
+    });
+
+    // Form submission
+document.getElementById('leagueForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  // Generate league ID
+import { v4 as uuidv4 } from 'uuid';
+const leagueId = uuidv4();
+
+  // Set default owner ID
+  const ownerId = '007';
+
+  // Collect team names
+  const teamNames = [];
+  for (let i = 1; i <= leagueSizeSlider.value; i++) {
+    teamNames.push(document.getElementById(`team${i}Name`).value);
+  }
+
+  // Save league data to localStorage
+  const leagueData = {
+    id: leagueId,
+    leagueName: document.getElementById('leagueName').value,
+    owner_id: ownerId,
+    teamCount: leagueSizeSlider.value,
+    wildcardRound: document.getElementById('wildcard').checked,
+    waivers: document.getElementById('waiverSystem').checked,
+    bonusPoints: document.getElementById('bonusPoints').checked,
+    isPrivate: false, // Set based on your logic
+    hasPassword: false, // Set based on your logic
+    hasBuyIn: false, // Set based on your logic
+    created_at: new Date().toISOString(),
+  };
+
+  // Save league to Supabase
+  const createdLeagueId = await createLeague(leagueData);
+
+  if (createdLeagueId) {
+    // Redirect to draft page with league ID
+    window.location.href = `draft_supabase.html?leagueId=${createdLeagueId}`;
+  }
+});
+
+// Dynamically add team name inputs based on league size
+leagueSizeSlider.addEventListener('input', (e) => {
+  const teamNamesContainer = document.getElementById('teamNamesContainer');
+  teamNamesContainer.innerHTML = ''; // Clear existing inputs
+
+  for (let i = 1; i <= e.target.value; i++) {
+    teamNamesContainer.innerHTML += `
+      <div class="team-name-input">
+        <label>Team ${i} Name</label>
+        <input type="text" id="team${i}Name" value="Team ${i}" required>
+      </div>
+    `;
+  }
+});
+  </script>
+</body>
+</html>
