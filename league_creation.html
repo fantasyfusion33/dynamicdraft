@@ -319,7 +319,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   // Collect team names
   const teamNames = [];
   for (let i = 1; i <= leagueSizeSlider.value; i++) {
-    teamData.push({
+    teamNames.push({
       teamId: generateTeamId(), // Generate unique team ID
       teamName: document.getElementById(`team${i}Name`).value
     });
