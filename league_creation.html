@@ -317,9 +317,9 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   const ownerId = '007';
 
   // Collect team names
-  const teamNames = [];
+  const teamData = [];
   for (let i = 1; i <= leagueSizeSlider.value; i++) {
-    teamNames.push({
+    teamData.push({
       teamId: generateTeamId(), // Generate unique team ID
       teamName: document.getElementById(`team${i}Name`).value
     });
