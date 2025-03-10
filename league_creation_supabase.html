@@ -350,9 +350,8 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   };
 
   // Save league to Supabase
-  const createdLeagueId = data.league_id;
+  const createdLeagueId = await createLeague(leagueData.id);
   console.log('Created League ID:', createdLeagueId); // Debugging
-
 
 if (createdLeagueId) {
   const redirectUrl = `draft_supabase.html?leagueId=${createdLeagueId}`;
