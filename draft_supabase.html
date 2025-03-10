@@ -1037,7 +1037,7 @@ async function createDraft(draftData) {
 let draftState = {
   leagueId: leagueId,
   currentPick: 0,
-  draftOrder: generateDraftOrder(LEAGUE_SIZE),
+  draftOrder: generateDraftOrder(teamCount),
   timerDuration: 120,
   playerRosters: {},
   settings: null, // Will be populated from Supabase
