@@ -1041,7 +1041,8 @@ function updateDraftHeader() {
   const round = Math.floor(draftState.currentPick / LEAGUE_SIZE) + 1;
   const isWildcardRound = round === 13 && draftState.settings.wildcard !== 'off';
   const pick = (draftState.currentPick % LEAGUE_SIZE) + 1;
-  const teamName = draftState.settings.teamNames[currentPlayer - 1];
+  const teamName = draftState.settings.teamData[currentPlayer - 1]?.teamName; // Safely access team name
+
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
@@ -1063,7 +1064,7 @@ function createTeamSidebar() {
     const roster = document.createElement('div');
     roster.className = `roster ${i === 1 ? 'active' : ''}`;
     roster.id = `player${i}Roster`;
-    const teamName = draftState.settings.teamNames[i - 1]; // Arrays are 0-indexed
+    const teamName = draftState.settings.teamData[i - 1]?.teamName; // Arrays are 0-indexed
     roster.innerHTML = `
       <h2>${teamName}</h2>
       <ul id="player${i}Teams">
@@ -1274,7 +1275,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update team selector
 const teamSelector = document.getElementById('teamSelector');
 teamSelector.innerHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
-  const teamName = draftState.settings.teamNames[i]; // Access team name using the callback's i
+  const teamName = draftState.settings.teamData[i]?.teamName; // Access team name using the callback's i
   return `<option value="player${i + 1}">${teamName}</option>`;
 }).join('');
 });
@@ -1809,7 +1810,7 @@ function endDraft() {
   const rostersHTML = Array.from({ length: LEAGUE_SIZE }, (_, i) => {
     const playerNumber = i + 1;
     const roster = draftState.playerRosters[playerNumber];
-    const teamName = draftState.settings.teamNames[playerNumber - 1];
+    const teamName = draftState.settings.teamData[playerNumber - 1]?.teamName;
     return `
     <div class="roster">
         <h2>${teamName}</h2>
