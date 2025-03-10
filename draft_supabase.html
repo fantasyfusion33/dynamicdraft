@@ -1000,7 +1000,7 @@ async function fetchLeagueData(leagueId) {
     const { data, error } = await supabase
       .from('leagues')
       .select('*')
-      .eq('league_id', leagueId)
+      .eq('id', leagueId)
       .single();
 
     if (error) throw error;
