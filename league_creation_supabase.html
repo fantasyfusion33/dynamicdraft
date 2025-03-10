@@ -331,7 +331,10 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   // Collect team names
   const teamNames = [];
   for (let i = 1; i <= leagueSizeSlider.value; i++) {
-    teamNames.push(document.getElementById(`team${i}Name`).value);
+    const teamName = document.getElementById(`team${i}Name`).value.trim();
+    if (teamName) {
+      teamNames.push(teamName);
+    }
   }
 
   // Save league data to localStorage
@@ -340,6 +343,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
     leagueName: document.getElementById('leagueName').value,
     owner_id: ownerId,
     teamCount: leagueSizeSlider.value,
+    teamNames: teamNames, // Include teamNames array
     wildcardRound: document.getElementById('wildcard').checked,
     waivers: document.getElementById('waiverSystem').checked,
     bonusPoints: document.getElementById('bonusPoints').checked,
