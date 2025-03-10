@@ -352,10 +352,11 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   // Save league to Supabase
   const createdLeagueId = await createLeague(leagueData);
 
-  if (createdLeagueId) {
-    // Redirect to draft page with league ID
-    window.location.href = `draft_supabase.html?leagueId=${createdLeagueId}`;
-  }
+if (createdLeagueId) {
+  const redirectUrl = `draft_supabase.html?leagueId=${createdLeagueId}`;
+  console.log('Redirect URL:', redirectUrl); // Debugging
+  window.location.href = redirectUrl;
+}
 });
 
 // Dynamically add team name inputs based on league size
