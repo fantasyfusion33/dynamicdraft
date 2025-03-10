@@ -354,7 +354,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   console.log('Created League ID:', leagueData.id); // Debugging
 
 if (createdLeagueId) {
-  const redirectUrl = `draft_supabase.html?leagueId=${createdLeagueId}`;
+  const redirectUrl = `draft_supabase.html?leagueId=${leagueData.id}`;
   console.log('Redirect URL:', redirectUrl); // Debugging
   window.location.href = redirectUrl;
 }
