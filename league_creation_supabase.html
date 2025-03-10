@@ -350,12 +350,13 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   };
 
   // Save league to Supabase
-  const createdLeagueId = await data.league_id;
-  console.log('Created League ID:', data.league_id); // Debugging
+  const createdLeagueId = data.league_id;
+  console.log('Created League ID:', createdLeagueId); // Debugging
+
 
 if (createdLeagueId) {
-  const redirectUrl = `draft_supabase.html?leagueId=${data.league_id}`;
-  console.log('Redirect URL:', data.league_id); // Debugging
+  const redirectUrl = `draft_supabase.html?leagueId=${createdLeagueId}`;
+  console.log('Redirect URL:', redirectUrl); // Debugging
   window.location.href = redirectUrl;
 }
 });
