@@ -983,7 +983,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Update
 const urlParams = new URLSearchParams(window.location.search);
 const leagueId = urlParams.get('leagueId');
 
-let leagueData = null; // Global object to store league data
+const teamCount = leagueData.teamCount 
 
 // Fetch league data from Supabase
 async function fetchLeagueData(leagueId) {
