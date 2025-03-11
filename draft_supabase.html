@@ -1123,7 +1123,7 @@ function updateDraftHeader() {
   const round = Math.floor(draftState.currentPick / teamCount) + 1;
   const isWildcardRound = round === 13 && draftState.settings.wildcard !== 'off';
   const pick = (draftState.currentPick % teamCount) + 1;
-  const teamName = draftState.settings.teamNames[currentPlayer - 1];
+  const teamName = teamNames[currentPlayer - 1];
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
@@ -1145,7 +1145,7 @@ function createTeamSidebar() {
     const roster = document.createElement('div');
     roster.className = `roster ${i === 1 ? 'active' : ''}`;
     roster.id = `player${i}Roster`;
-    const teamName = draftState.settings.teamNames[i - 1]; // Arrays are 0-indexed
+    const teamName = teamNames[i - 1]; // Arrays are 0-indexed
     roster.innerHTML = `
       <h2>${teamName}</h2>
       <ul id="player${i}Teams">
