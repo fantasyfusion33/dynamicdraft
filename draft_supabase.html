@@ -996,11 +996,14 @@ async function fetchLeagueData(leagueId) {
 
     console.log('League data fetched successfully:', data);
 
-    // Initialize draftState.settings
+     // Ensure teamNames is assigned and is always an array
+    teamNames = data.teamNames || []; 
+    teamCount = data.teamCount; // Ensure teamCount is properly assigned
+
     draftState.settings = {
       leagueName: data.leagueName,
-      teamNames: data.teamNames || [], // Ensure teamNames is an array
-      teamCount: data.teamCount,
+      teamNames, // Assign globally
+      teamCount,
       wildcard: data.wildcardRound,
       waiverSystem: data.waiverSystem,
       bonusPoints: data.bonusPoints,
