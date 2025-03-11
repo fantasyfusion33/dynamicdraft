@@ -983,8 +983,6 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Update
 const urlParams = new URLSearchParams(window.location.search);
 const leagueId = urlParams.get('leagueId');
 
-const teamCount = leagueData.teamCount 
-
 // Fetch league data from Supabase
 async function fetchLeagueData(leagueId) {
   try {
@@ -1028,6 +1026,9 @@ let draftState = {
 
 // Initialize draft state using global leagueData
 function initializeDraftState(leagueData) {
+
+  const teamCount = leagueData.teamCount;
+
   // Populate draftState.settings
   draftState.settings = {
     leagueName: leagueData.leagueName,
@@ -1078,6 +1079,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (leagueData) {
     console.log('Global League Data:', leagueData); // Debugging
+    const teamCount = leagueData.teamCount; // Extract teamCount before passing it
 
     // Initialize draft state using global leagueData
     initializeDraftState(leagueData);
