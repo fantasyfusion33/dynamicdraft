@@ -1074,6 +1074,7 @@ function generateDraftOrder(size) {
 }
   
 let teamCount;
+let teamNames = []; // Initialize as empty array
 
 // Fetch league data and store it globally
 document.addEventListener('DOMContentLoaded', async () => {
@@ -1081,16 +1082,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (leagueData) {
     console.log('Global League Data:', leagueData); // Debugging
-    const teamCount = leagueData.teamCount; // Extract teamCount before passing it
-
+    // Assign global variables
+    teamCount = leagueData.teamCount;
+    teamNames = leagueData.teamNames || []; 
     // Initialize draft state using global leagueData
     initializeDraftState(leagueData);
-
     // Update UI
     createTeamSidebar();
     updateDraftHeader();
     startCountdown();
-
     // Update draft board title
     document.querySelector('h1').textContent = 
       `${leagueData.leagueName} Draft - ${teamCount} Teams`;
