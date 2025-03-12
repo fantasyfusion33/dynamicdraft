@@ -1163,8 +1163,7 @@ for (let i = 1; i <= teamCount; i++) {
     <h2>${teamName}</h2>
     <ul id="player${i}Teams">
   `;
-console.log('Wildcard setting:', wildcard);
-
+  
   // Add slots for each sport
   roster.innerHTML = `
     <h2>${teamName}</h2>
@@ -1752,8 +1751,7 @@ function updateRosterDisplay(playerNumber) {
     `).join('');
 
   // Add wildcard section if enabled
-  if (wildcard === 'on') {
-    rosterHTML += `
+  ${wildcardEnabled ? `
       <strong>Wildcard</strong>
       ${roster.wildcard.map(team => `
         <li class="${team.sport}">
