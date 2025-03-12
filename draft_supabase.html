@@ -1048,8 +1048,8 @@ function initializeDraftState(leagueData) {
   // Initialize draftOrder
   draftState.draftOrder = generateDraftOrder(teamCount);
 
-  // Calculate totalPicks
-  draftState.totalPicks = (13 - (wildcard === 'off' ? 1 : 0)) * teamCount;
+// Calculate totalPicks based on wildcard setting
+draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * teamCount;
 }
 
 // Initialize playerRosters
@@ -1260,7 +1260,7 @@ function advanceDraft() {
 
  // If wildcard is enabled, show special message at start of round 13
   if (draftState.currentPick === 12 * teamCount && 
-     wildcard !== 'off') {
+     wildcard) {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   }
 
