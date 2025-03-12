@@ -1653,7 +1653,7 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
-  if (isWildcardRound && wildcard !== 'off') {
+  if (isWildcardRound && wildcard) {
     // Wildcard round rules
     currentPlayer.wildcard.push({ 
       ...team, 
@@ -1737,11 +1737,6 @@ function updateRosterDisplay(playerNumber) {
       <strong>${sport}</strong>
       ${teams.map(team => `
         <li class="${team.sport}">
-          <div class="team-icon ${team.sport}" 
-               style="--primaryColor: ${team.primaryColor}; 
-                      --secondaryColor: ${team.secondaryColor};"> 
-            ${getSportIcon(team)}
-          </div>
           ${team.name}
           <div class="draft-pick-circle ${team.sport}">
             ${team.round}.${team.pick}
@@ -1751,17 +1746,12 @@ function updateRosterDisplay(playerNumber) {
       ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
     `).join('');
 
-  // Add wildcard section if enabled
-    if (wildcard === 'on') {
-     rosterHTML += `
+  // Add wildcard slot if enabled
+  if (wildcard) {
+    rosterHTML += `
       <strong>Wildcard</strong>
       ${roster.wildcard.map(team => `
         <li class="${team.sport}">
-          <div class="team-icon ${team.sport}" 
-               style="--primaryColor: ${team.primaryColor}; 
-                      --secondaryColor: ${team.secondaryColor};"> 
-            ${getSportIcon(team)}
-          </div>
           ${team.name}
           <div class="draft-pick-circle ${team.sport}">
             ${team.round}.${team.pick}
