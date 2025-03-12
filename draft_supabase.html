@@ -1021,14 +1021,15 @@ async function fetchLeagueData(leagueId) {
 }
 
 // Initialize draft state
-let draftState = {
-  draftId: uuidv4(), // Generate a unique ID for the draft
+draftState = {
+  draftId: uuidv4(),
   leagueId: leagueId,
   currentPick: 0,
-  draftOrder: [], // Will be populated after fetching teamCount
-  playerRosters: {}, // Will be populated after fetching teamCount
-  settings: null, // Will be populated from Supabase
-  totalPicks: 0, // Will be calculated after fetching teamCount
+  draftOrder: generateDraftOrder(teamCount),
+  timerDuration: 120,
+  playerRosters: {},
+  settings: null,
+  timerId: null, // Add this to store the timer ID
 };
 
 // Initialize draft state using global leagueData
@@ -1293,17 +1294,16 @@ function startCountdown() {
       autoDraftTeam(); // Auto-draft if time runs out
     }
   }, 1000);
-  
-  // Save the timer ID to clear it later
-  draftState.timer = timer;
+
+  console.log('Starting new timer. Previous timer ID:', draftState.timerId);
 }
 
 // Reset the timer after each pick
 function resetCountdown() {
-  if (draftState.timer) {
-    clearInterval(draftState.timer);
+  if (draftState.timerId) {
+    clearInterval(draftState.timerId); // Clear the previous timer
   }
-  startCountdown();
+  startCountdown(); // Start a new timer
 }
 // ========================
 // save draft in Supabase
@@ -1834,6 +1834,10 @@ function toggleMyTeam() {
 // End the draft
 function endDraft() {
   if (draftState.currentPick < draftState.totalPicks) return;
+    // Clear the timer
+  if (draftState.timerId) {
+    clearInterval(draftState.timerId);
+  }
 // Generate a unique owner ID for each team ONCE
   const playerOwnerIDs = {};
   teamNames.forEach(teamName => {
