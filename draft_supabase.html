@@ -1049,7 +1049,7 @@ function initializeDraftState(leagueData) {
   draftState.draftOrder = generateDraftOrder(teamCount);
 
   // Calculate totalPicks
-  draftState.totalPicks = (13 - (draftState.settings.wildcard === 'off' ? 1 : 0)) * teamCount;
+  draftState.totalPicks = (13 - (wildcard === 'off' ? 1 : 0)) * teamCount;
 }
 
 // Initialize playerRosters
@@ -1155,7 +1155,7 @@ function switchRosterToCurrentPlayer() {
 function updateDraftHeader() {
   const currentPlayer = draftState.draftOrder[draftState.currentPick];
   const round = Math.floor(draftState.currentPick / teamCount) + 1;
-  const isWildcardRound = round === 13 && draftState.settings.wildcard !== 'off';
+  const isWildcardRound = round === 13 && wildcard !== 'off';
   const pick = (draftState.currentPick % teamCount) + 1;
   const teamName = teamNames[currentPlayer - 1];
 
