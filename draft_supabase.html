@@ -999,12 +999,14 @@ async function fetchLeagueData(leagueId) {
      // Ensure teamNames is assigned and is always an array
     teamNames = data.teamNames || []; 
     teamCount = data.teamCount; // Ensure teamCount is properly assigned
-
+    wildcard = data.wildcardRound
+    leagueName = data.leagueName
+    
     draftState.settings = {
-      leagueName: data.leagueName,
+      leagueName,
       teamNames, // Assign globally
       teamCount,
-      wildcard: data.wildcardRound,
+      wildcard,
       waiverSystem: data.waiverSystem,
       bonusPoints: data.bonusPoints,
     };
@@ -1155,7 +1157,7 @@ function createTeamSidebar() {
             <strong>${sport}</strong>
             ${Array(2).fill('<li class="empty">Empty</li>').join('')}
           `).join('')}
-        ${draftState.settings.wildcard === 'on' ? `
+        ${wildcard === 'on' ? `
           <strong>Wildcard</strong>
           <li class="empty">Empty</li>
         ` : ''}
@@ -1211,7 +1213,7 @@ function advanceDraft() {
 
  // If wildcard is enabled, show special message at start of round 13
   if (draftState.currentPick === 12 * teamCount && 
-     draftState.settings.wildcard !== 'off') {
+     wildcard !== 'off') {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   }
 
@@ -1633,7 +1635,7 @@ function draftTeam(teamId) {
   }
   const team = DraftableTeams[teamIndex];
 
-  if (isWildcardRound && draftState.settings.wildcard !== 'off') {
+  if (isWildcardRound && wildcard !== 'off') {
     // Wildcard round rules
     currentPlayer.wildcard.push({ 
       ...team, 
@@ -1732,7 +1734,7 @@ function updateRosterDisplay(playerNumber) {
     `).join('');
 
   // Add wildcard section if enabled
-  if (draftState.settings.wildcard === 'on') {
+  if (wildcard === 'on') {
     rosterHTML += `
       <strong>Wildcard</strong>
       ${roster.wildcard.map(team => `
