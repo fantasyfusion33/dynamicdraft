@@ -1833,9 +1833,17 @@ function toggleMyTeam() {
 // End the draft
 function endDraft() {
   if (draftState.currentPick < draftState.totalPicks) return;
+// Generate a unique owner ID for each team ONCE
+  const playerOwnerIDs = {};
+  teamNames.forEach(teamName => {
+    playerOwnerIDs[teamName] = uuidv4();
+  });
+  
   // Prepare roster data
   const rosterData = [];
   for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
+    const teamName = draftState.settings.teamNames[playerNumber - 1]; // Match team to player number
+    const ownerID = playerOwnerIDs[teamName]; // Assign the same owner ID for all picks
     for (const [sport, teams] of Object.entries(roster)) {
       teams.forEach(team => {
         rosterData.push({
@@ -1843,7 +1851,7 @@ function endDraft() {
           round: team.round,
           pick: team.pick,
           league_id: leagueId,
-          owner_id: uuidv4()
+          owner_id: ownerID 
         });
       });
     }
