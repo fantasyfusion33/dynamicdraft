@@ -1842,8 +1842,8 @@ function endDraft() {
           team_id: team.team_id,
           round: team.round,
           pick: team.pick,
-          league_id: draftState.leagueId,
-          owner_id: '007', // Replace with actual owner ID
+          league_id: leagueId,
+          owner_id: uuidv4()
         });
       });
     }
