@@ -1281,18 +1281,19 @@ function startWildcard() {
 // ========================
 
 function startCountdown() {
-  let timeLeft = 120;
+  let timeLeft = draftState.timerDuration;
   const timerElement = document.getElementById('countdownClock');
-  
-  const timer = setInterval(() => {
+
+  draftState.timerId = setInterval(() => {
     timeLeft--;
-    timerElement.textContent = `${String(Math.floor(timeLeft/60)).padStart(2,'0')}:${String(timeLeft%60).padStart(2,'0')}`;
-    
+    timerElement.textContent = `${String(Math.floor(timeLeft / 60)).padStart(2, '0')}:${String(timeLeft % 60).padStart(2, '0')}`;
+
     if (timeLeft <= 0) {
-      clearInterval(timer);
-      autoDraftTeam();
+      clearInterval(draftState.timerId); // Clear the timer
+      autoDraftTeam(); // Auto-draft if time runs out
     }
   }, 1000);
+}
   // Save the timer ID to clear it later
   draftState.timer = timer;
 }
