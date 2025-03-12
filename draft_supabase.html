@@ -1156,7 +1156,8 @@ for (let i = 1; i <= teamCount; i++) {
   roster.className = `roster ${i === 1 ? 'active' : ''}`;
   roster.id = `player${i}Roster`;
   const teamName = teamNames[i - 1]; // Arrays are 0-indexed
-
+  const wildcardEnabled = wildcard; // Get boolean value
+  
   // Generate roster HTML
   let rosterHTML = `
     <h2>${teamName}</h2>
@@ -1165,25 +1166,21 @@ for (let i = 1; i <= teamCount; i++) {
 console.log('Wildcard setting:', wildcard);
 
   // Add slots for each sport
-  Object.keys(draftState.playerRosters[i])
-    .filter(k => k !== 'wildcard') // Exclude wildcard from the main list
-    .forEach(sport => {
-      rosterHTML += `
-        <strong>${sport}</strong>
-        ${Array(2).fill('<li class="empty">Empty</li>').join('')}
-      `;
-    });
-
-  // Add wildcard slot if enabled
-  if (wildcard === 'on') {
-    rosterHTML += `
-      <strong>Wildcard</strong>
-      <li class="empty">Empty</li>
-    `;
-  }
-
-  rosterHTML += `</ul>`;
-  roster.innerHTML = rosterHTML;
+  roster.innerHTML = `
+    <h2>${teamName}</h2>
+    <ul id="player${i}Teams">
+      ${Object.keys(draftState.playerRosters[i])
+        .filter(k => k !== 'wildcard')
+        .map(sport => `
+          <strong>${sport}</strong>
+          ${Array(2).fill('<li class="empty">Empty</li>').join('')}
+        `).join('')}
+      ${wildcardEnabled ? `
+        <strong>Wildcard</strong>
+        <li class="empty">Empty</li>
+      ` : ''}
+    </ul>
+  `;
   rosterContainer.appendChild(roster);
 }
 }
