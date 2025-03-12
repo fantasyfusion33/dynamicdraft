@@ -1143,29 +1143,41 @@ function createTeamSidebar() {
   // Clear existing content
   rosterContainer.innerHTML = '';
   
-  // Generate team sections
-  for (let i = 1; i <= teamCount; i++) {
-    const roster = document.createElement('div');
-    roster.className = `roster ${i === 1 ? 'active' : ''}`;
-    roster.id = `player${i}Roster`;
-    const teamName = teamNames[i - 1]; // Arrays are 0-indexed
-    roster.innerHTML = `
-      <h2>${teamName}</h2>
-      <ul id="player${i}Teams">
-        ${Object.keys(draftState.playerRosters[i])
-          .filter(k => k !== 'wildcard')
-          .map(sport => `
-            <strong>${sport}</strong>
-            ${Array(2).fill('<li class="empty">Empty</li>').join('')}
-          `).join('')}
-        ${wildcard === 'on' ? `
-          <strong>Wildcard</strong>
-          <li class="empty">Empty</li>
-        ` : ''}
-      </ul>
+// Generate team sections
+for (let i = 1; i <= teamCount; i++) {
+  const roster = document.createElement('div');
+  roster.className = `roster ${i === 1 ? 'active' : ''}`;
+  roster.id = `player${i}Roster`;
+  const teamName = teamNames[i - 1]; // Arrays are 0-indexed
+
+  // Generate roster HTML
+  let rosterHTML = `
+    <h2>${teamName}</h2>
+    <ul id="player${i}Teams">
+  `;
+
+  // Add slots for each sport
+  Object.keys(draftState.playerRosters[i])
+    .filter(k => k !== 'wildcard') // Exclude wildcard from the main list
+    .forEach(sport => {
+      rosterHTML += `
+        <strong>${sport}</strong>
+        ${Array(2).fill('<li class="empty">Empty</li>').join('')}
+      `;
+    });
+
+  // Add wildcard slot if enabled
+  if (wildcard === 'on') {
+    rosterHTML += `
+      <strong>Wildcard</strong>
+      <li class="empty">Empty</li>
     `;
-    rosterContainer.appendChild(roster);
   }
+
+  rosterHTML += `</ul>`;
+  roster.innerHTML = rosterHTML;
+  rosterContainer.appendChild(roster);
+}
 }
 
 // ========================
@@ -1292,7 +1304,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update team selector
 const teamSelector = document.getElementById('teamSelector');
 teamSelector.innerHTML = Array.from({ length: teamCount }, (_, i) => {
-  const teamName = draftState.settings.teamNames[i]; // Access team name using the callback's i
+  const teamName = teamNames[i]; // Access team name using the callback's i
   return `<option value="player${i + 1}">${teamName}</option>`;
 }).join('');
 });
