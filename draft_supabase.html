@@ -1143,6 +1143,12 @@ function createTeamSidebar() {
   
   // Clear existing content
   rosterContainer.innerHTML = '';
+
+// Populate team selector
+const teamSelector = document.getElementById('teamSelector');
+teamSelector.innerHTML = teamNames
+  .map((name, index) => `<option value="player${index + 1}">${name}</option>`)
+  .join('');
   
 // Generate team sections
 for (let i = 1; i <= teamCount; i++) {
