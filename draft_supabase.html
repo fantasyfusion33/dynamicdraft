@@ -1751,7 +1751,8 @@ function updateRosterDisplay(playerNumber) {
     `).join('');
 
   // Add wildcard section if enabled
-  ${wildcardEnabled ? `
+    if (wildcard === 'on') {
+     rosterHTML += `
       <strong>Wildcard</strong>
       ${roster.wildcard.map(team => `
         <li class="${team.sport}">
