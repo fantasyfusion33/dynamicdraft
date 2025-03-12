@@ -1115,9 +1115,13 @@ async function createDraft() {
     const { data, error } = await supabase
       .from('drafts')
       .insert([{
-        draft_id: draftState.draftId, // Use the generated draft_id
-        league_id: draftState.leagueId,
-        created_at: new Date().toISOString(),
+        id: draftState.draftId, // Use the generated draft_id
+        league_name: draftState.settings.leagueName, // Required: league_name
+        team_names: draftState.settings.teamNames, // Required: team_names (jsonb)
+        draft_order: draftState.draftOrder, // Required: draft_order (jsonb)
+        league_id: draftState.leagueId, // Required: league_id (uuid)
+        team_ids: draftState.settings.teamNames.map((_, index) => `team-${index + 1}`), // Required: team_ids (text[])
+        created_at: new Date().toISOString(), // Optional: created_at
       }])
       .select();
 
