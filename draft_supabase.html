@@ -1121,7 +1121,6 @@ async function createDraft() {
         team_names: draftState.settings.teamNames, // Required: team_names (jsonb)
         draft_order: draftState.draftOrder, // Required: draft_order (jsonb)
         league_id: draftState.leagueId, // Required: league_id (uuid)
-        team_ids: draftState.settings.teamNames.map((_, index) => `team-${index + 1}`), // Required: team_ids (text[])
         created_at: new Date().toISOString(), // Optional: created_at
       }])
       .select();
