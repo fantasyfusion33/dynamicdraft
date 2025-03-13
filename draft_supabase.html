@@ -1663,10 +1663,38 @@ for (let i = 1; i <= teamCount; i++) {
 }
 
 // Auto-draft the team with the lowest odds
-const autoDraftTeam = () => {
-  const sortedTeams = DraftableTeams.sort((a, b) => a.championship_odds - b.championship_odds);
-  const team = sortedTeams.find(team => playerRosters[currentPlayer][team.sport].length < 2) || sortedTeams[0];
-  if (team) draftTeam(team.team_id);
+function autoDraftTeam() {
+  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
+  const isWildcardRound = Math.floor(draftState.currentPick / teamCount) + 1 === 13;
+
+  // Filter available teams
+  const availableTeams = DraftableTeams.filter(team => {
+    if (isWildcardRound && draftState.settings.wildcard) {
+      // Wildcard round: Any team can be drafted
+      return true;
+    } else {
+      // Regular round: Check if the player has fewer than 2 teams from this sport
+      return currentPlayer[team.sport].length < 2;
+    }
+  });
+
+  if (availableTeams.length === 0) {
+    console.error('No available teams to draft.');
+    return;
+  }
+
+  // Sort available teams by championship odds (lowest first)
+  const sortedTeams = availableTeams.sort((a, b) => a.championship_odds - b.championship_odds);
+
+  // Draft the team with the lowest odds
+  const teamToDraft = sortedTeams[0];
+  if (!teamToDraft) {
+    console.error('No team found to draft.');
+    return;
+  }
+
+  draftTeam(teamToDraft.team_id); // Draft the selected team
 };
 
 // Draft a team 
