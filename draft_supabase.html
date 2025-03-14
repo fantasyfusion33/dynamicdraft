@@ -1668,80 +1668,44 @@ function autoDraftTeam() {
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
   const isWildcardRound = Math.floor(draftState.currentPick / teamCount) + 1 === 13;
 
-  // Filter available teams
-  const availableTeams = DraftableTeams.filter(team => {
-    // Exclude teams with 0 or N/A odds
+  // 1. Filter eligible teams
+  const eligibleTeams = DraftableTeams.filter(team => {
+    // Exclude teams with 0 or invalid odds
     if (!team.championship_odds || team.championship_odds === 0 || team.championship_odds === 'N/A') {
       return false;
     }
 
-    if (isWildcardRound && draftState.settings.wildcard) {
-      // Wildcard round: Any team can be drafted
-      return true;
-    } else {
-      // Regular round: Check if the player has fewer than 2 teams from this sport
-      return currentPlayer[team.sport].length < 2;
-    }
+    // Wildcard round: All sports allowed
+    if (isWildcardRound && draftState.settings.wildcard) return true;
+
+    // Non-wildcard: Sport must have fewer than 2 teams drafted
+    return currentPlayer[team.sport]?.length < 2;
   });
 
-  if (availableTeams.length === 0) {
-    console.error('No available teams to draft.');
-    advanceDraft(); // Skip to the next pick
-    return;
-  }
-
-  // Sort available teams by championship odds (lowest first)
-  const sortedTeams = availableTeams.sort((a, b) => a.championship_odds - b.championship_odds);
-
-  // Draft the team with the lowest odds
-  const teamToDraft = sortedTeams[0];
-  if (!teamToDraft) {
-    console.error('No team found to draft.');
-    return;
-  }
-
-  console.log('Auto-drafted team:', teamToDraft);
-
-  // Use the same logic as draftTeam to handle the pick
-  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamToDraft.team_id);
-  if (teamIndex === -1) {
-    console.error('Team not found:', teamToDraft.team_id);
-    return;
-  }
-
-  const team = DraftableTeams[teamIndex];
-
-  if (isWildcardRound && draftState.settings.wildcard) {
-    // Wildcard round rules
-    currentPlayer.wildcard.push({ 
-      ...team, 
-      wildcard: true,
-      round: 13,
-      pick: draftState.currentPick - (12 * teamCount) + 1
-    });
-  } else {
-    // Regular round rules (max 2 per sport)
-    if (currentPlayer[team.sport].length >= 2) {
-      console.error(`Maximum 2 ${team.sport} teams allowed!`);
-      return;
+  // 2. Sort by lowest non-zero odds (and secondary criteria to avoid CSV order bias)
+  const sortedTeams = eligibleTeams.sort((a, b) => {
+    // Primary sort: Odds (lowest first)
+    if (a.championship_odds !== b.championship_odds) {
+      return a.championship_odds - b.championship_odds;
     }
-    currentPlayer[team.sport].push({
-      ...team,
-      round: Math.floor(draftState.currentPick / teamCount) + 1,
-      pick: (draftState.currentPick % teamCount) + 1
-    });
+    // Secondary sort: Team name (alphabetical) to break ties
+    return a.name.localeCompare(b.name);
+  });
+
+  // 3. Draft the first valid team
+  if (sortedTeams.length === 0) {
+    console.error("No draftable teams left");
+    advanceDraft();
+    return;
   }
 
-  // Remove team from available pool
-  DraftableTeams.splice(teamIndex, 1);
+  const teamToDraft = sortedTeams[0];
+  console.log("Auto-drafting:", teamToDraft.name, "with odds", teamToDraft.championship_odds);
 
-  // Update UI
-  updateRosterDisplay(currentPlayerNumber);
-  updateMyTeamBox(team);
-  renderTeams();
-  advanceDraft();
+  // 4. Use existing draftTeam logic to handle the pick
+  draftTeam(teamToDraft.team_id); 
 }
-
+  
 // Draft a team 
 function draftTeam(teamId) {
   const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
