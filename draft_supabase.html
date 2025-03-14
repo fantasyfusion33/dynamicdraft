@@ -1670,6 +1670,10 @@ function autoDraftTeam() {
 
   // Filter available teams
   const availableTeams = DraftableTeams.filter(team => {
+        // Exclude teams with 0 or N/A odds
+    if (team.championship_odds === 0 || team.championship_odds === 'N/A') {
+      return false;
+    }
     if (isWildcardRound && draftState.settings.wildcard) {
       // Wildcard round: Any team can be drafted
       return true;
@@ -1678,11 +1682,6 @@ function autoDraftTeam() {
       return currentPlayer[team.sport].length < 2;
     }
   });
-
-  if (availableTeams.length === 0) {
-    console.error('No available teams to draft.');
-    return;
-  }
 
   // Sort available teams by championship odds (lowest first)
   const sortedTeams = availableTeams.sort((a, b) => a.championship_odds - b.championship_odds);
