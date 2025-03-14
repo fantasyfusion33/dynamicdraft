@@ -1670,29 +1670,22 @@ function autoDraftTeam() {
 
   // 1. Filter eligible teams
   const eligibleTeams = DraftableTeams.filter(team => {
-    // Exclude teams with 0 or invalid odds
-    if (!team.championship_odds || team.championship_odds === 0 || team.championship_odds === 'N/A') {
-      return false;
-    }
+    // Exclude teams with invalid/non-numeric odds
+    const odds = parseFloat(team.championship_odds);
+    if (isNaN(odds) || odds <= 0) return false;
 
-    // Wildcard round: All sports allowed
-    if (isWildcardRound && draftState.settings.wildcard) return true;
-
-    // Non-wildcard: Sport must have fewer than 2 teams drafted
-    return currentPlayer[team.sport]?.length < 2;
+    // Wildcard: All teams allowed | Non-wildcard: Sport limit
+    return (isWildcardRound && draftState.settings.wildcard) || currentPlayer[team.sport]?.length < 2;
   });
 
-  // 2. Sort by lowest non-zero odds (and secondary criteria to avoid CSV order bias)
+  // 2. Sort by numeric odds
   const sortedTeams = eligibleTeams.sort((a, b) => {
-    // Primary sort: Odds (lowest first)
-    if (a.championship_odds !== b.championship_odds) {
-      return a.championship_odds - b.championship_odds;
-    }
-    // Secondary sort: Team name (alphabetical) to break ties
-    return a.name.localeCompare(b.name);
+    const aOdds = parseFloat(a.championship_odds);
+    const bOdds = parseFloat(b.championship_odds);
+    return aOdds - bOdds || a.name.localeCompare(b.name); // Tiebreaker: team name
   });
 
-  // 3. Draft the first valid team
+  // 3. Draft the team with the lowest odds
   if (sortedTeams.length === 0) {
     console.error("No draftable teams left");
     advanceDraft();
@@ -1701,9 +1694,7 @@ function autoDraftTeam() {
 
   const teamToDraft = sortedTeams[0];
   console.log("Auto-drafting:", teamToDraft.name, "with odds", teamToDraft.championship_odds);
-
-  // 4. Use existing draftTeam logic to handle the pick
-  draftTeam(teamToDraft.team_id); 
+  draftTeam(teamToDraft.team_id);
 }
   
 // Draft a team 
