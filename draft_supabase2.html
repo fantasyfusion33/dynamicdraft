@@ -1021,81 +1021,60 @@ async function fetchLeagueData(leagueId) {
 }
 
 // Initialize draft state
-draftState = {
+let draftState = {
   draftId: uuidv4(),
   leagueId: leagueId,
   currentPick: 0,
   draftOrder: [],
   playerRosters: {},
   settings: null,
-  timerId: null, // Add this to store the timer ID
+  timerId: null,
 };
 
-// Initialize draft state using global leagueData
-function initializeDraftState(leagueData) {
+// Fetch league data and initialize draft
+document.addEventListener('DOMContentLoaded', async () => {
+  const leagueData = await fetchLeagueData(leagueId);
+  if (!leagueData) return;
 
-  const teamCount = leagueData.teamCount;
-
-  // Populate draftState.settings
+  // Initialize draft state
+  draftState.draftOrder = leagueData.draft_order;
   draftState.settings = {
     leagueName: leagueData.leagueName,
     wildcard: leagueData.wildcardRound,
   };
 
-// Initialize playerRosters
-  draftState.playerRosters = initializePlayerRosters(teamCount);
+  // Initialize player rosters
+  draftState.playerRosters = initializePlayerRosters(leagueData.teamCount);
 
-  // Initialize draftOrder
-  draftState.draftOrder = generateDraftOrder(teamCount);
+  // Subscribe to draft state changes
+  const draftChannel = supabase
+    .channel('draft')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'draft_state' }, (payload) => {
+      draftState = payload.new;
+      renderTeams();
+      updateClock();
+    })
+    .subscribe();
 
-// Calculate totalPicks based on wildcard setting
-draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * teamCount;
+  // Start the draft
+  startDraft();
+});
+
+// Start the draft
+async function startDraft() {
+  const { error } = await supabase
+    .from('draft_state')
+    .insert([{
+      id: draftState.draftId,
+      league_id: draftState.leagueId,
+      current_pick: 0,
+      draft_order: draftState.draftOrder,
+      player_rosters: draftState.playerRosters,
+      status: 'active',
+    }]);
+
+  if (error) throw error;
 }
-
-// Initialize playerRosters
-function initializePlayerRosters(teamCount) {
-  const playerRosters = {};
-  for (let i = 1; i <= teamCount; i++) {
-    playerRosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: []
-    };
-  }
-  return playerRosters;
-}
-
-// Generate draft order
-function generateDraftOrder(size) {
-  const order = [];
-  for (let round = 1; round <= 13; round++) {
-    const roundOrder = round % 2 === 1 ? 
-      Array.from({ length: size }, (_, i) => i + 1) : // Odd rounds: 1, 2, 3, ...
-      Array.from({ length: size }, (_, i) => size - i); // Even rounds: ..., 3, 2, 1
-    order.push(...roundOrder);
-  }
-  return order;
-}
-  
-let teamCount;
-let teamNames = []; // Initialize as empty array
-let wildcard;
-
-// Fetch league data and store it globally
-document.addEventListener('DOMContentLoaded', async () => {
-  leagueData = await fetchLeagueData(leagueId);
-
-  if (leagueData) {
-    console.log('Global League Data:', leagueData); // Debugging
-    // Assign global variables
-    teamCount = leagueData.teamCount;
-    teamNames = leagueData.teamNames || []; 
-    // Initialize draft state using global leagueData
-    initializeDraftState(leagueData);
     // Update UI
     createTeamSidebar();
     updateDraftHeader();
