@@ -343,7 +343,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   }
   const managerId = uuidv4(); // First team's owner ID
 
-  const inviteCodes = teamNames.map((_, i) => 
+  const inviteLinks = teamNames.map((_, i) => 
   `${window.location.origin}/join.html?league=${leagueId}&team=${i}&code=${leagueData.invite_codes[i]}`
 );
 
