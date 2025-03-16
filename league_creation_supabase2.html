@@ -341,6 +341,11 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
       teamNames.push(teamName);
     }
   }
+  const managerId = uuidv4(); // First team's owner ID
+
+  const inviteCodes = teamNames.map((_, i) => 
+  `${window.location.origin}/join.html?league=${leagueId}&team=${i}&code=${leagueData.invite_codes[i]}`
+);
 
   // Save league data to localStorage
   const leagueData = {
@@ -349,6 +354,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
     owner_id: ownerId,
     teamCount: leagueSizeSlider.value,
     teamNames: teamNames, // Include teamNames array
+    league_manager: managerId,
     invite_codes: inviteCodes,
     draft_order: Array.from({ length: leagueSizeSlider.value }, (_, i) => i + 1),
     wildcardRound: document.getElementById('wildcard').checked,
