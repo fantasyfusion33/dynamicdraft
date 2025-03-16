@@ -290,6 +290,12 @@ const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
+// Generate invite codes for each team
+function generateInviteCodes(count) {
+  return Array.from({ length: count }, () => uuidv4());
+}
+
+// Create league with invite codes
 async function createLeague(leagueData) {
   try {
     const { data, error } = await supabase
@@ -299,15 +305,14 @@ async function createLeague(leagueData) {
       .single();
 
     if (error) throw error;
-
-    console.log('League created successfully:', data);
-    return data.league_id; // Return the newly created league_id
+    return data.id;
   } catch (err) {
     console.error('Error creating league:', err);
     alert('Failed to create league. Please try again.');
     return null;
   }
 }
+
     // League size slider functionality
     const leagueSizeSlider = document.getElementById('leagueSize');
     const sliderValue = document.querySelector('.slider-value');
@@ -344,6 +349,8 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
     owner_id: ownerId,
     teamCount: leagueSizeSlider.value,
     teamNames: teamNames, // Include teamNames array
+    invite_codes: inviteCodes,
+    draft_order: Array.from({ length: leagueSizeSlider.value }, (_, i) => i + 1),
     wildcardRound: document.getElementById('wildcard').checked,
     waivers: document.getElementById('waiverSystem').checked,
     bonusPoints: document.getElementById('bonusPoints').checked,
@@ -357,7 +364,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   const createdLeagueId = await createLeague(leagueData);
   console.log('Created League ID:', leagueData.id); // Debugging
 
-  const redirectUrl = `draft_supabase.html?leagueId=${leagueData.id}`;
+  const redirectUrl = `lobby.html?leagueId=${leagueData.id}&role=manager`;
   console.log('Redirect URL:', redirectUrl); // Debugging
   window.location.href = redirectUrl;
 
