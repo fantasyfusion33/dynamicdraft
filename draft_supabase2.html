@@ -976,6 +976,15 @@ const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
+  // In draft.html
+const { data } = await supabase
+  .from('draft_state')
+  .select('*')
+  .eq('league_id', leagueId)
+  .single();
+
+if (data.status !== 'active') showHoldingPage();
+
 // ========================
 // Dynamic League Initialization
 // ========================
@@ -1252,6 +1261,18 @@ function startWildcard() {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   // Render teams for the wildcard round
   renderTeams();
+}
+
+  // Pause draft
+function pauseDraft() {
+  supabase.from('draft_state')
+    .update({ status: 'paused' })
+    .eq('league_id', leagueId);
+}
+
+// Redo pick
+async function redoPick() {
+  const { data } = await supabase.rpc('undo_last_pick', { league_id: leagueId });
 }
 
 // ========================
