@@ -215,6 +215,11 @@ h1 {
   background: rgba(255, 255, 255, 0.15);
   box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
 }
+    .team-name-input strong {
+  font-weight: 700;
+  color: var(--primary); /* Use your primary color (e.g., #D2042D) */
+  margin-left: 8px;
+}
 
   </style>
 </head>
@@ -382,9 +387,10 @@ leagueSizeSlider.addEventListener('input', (e) => {
   teamNamesContainer.innerHTML = ''; // Clear existing inputs
 
   for (let i = 1; i <= e.target.value; i++) {
+    const isManager = i === 1; // Check if this is Team 1
     teamNamesContainer.innerHTML += `
       <div class="team-name-input">
-        <label>Team ${i} Name</label>
+        <label>Team ${i} Name ${isManager ? '<strong>(League Manager)</strong>' : ''}</label>
         <input type="text" id="team${i}Name" value="Team ${i}" required>
       </div>
     `;
