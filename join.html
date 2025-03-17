@@ -124,7 +124,7 @@ async function validateInvite() {
       team_index: teamIndex,
       joined: true,
       last_ping: new Date().toISOString()
-    }, { onConflict: 'league_id, team_index' }); // Handle conflicts
+    }); // Handle conflicts
 
   if (upsertError) throw upsertError;
 
