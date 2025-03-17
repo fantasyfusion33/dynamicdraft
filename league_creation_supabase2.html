@@ -306,16 +306,17 @@ function generateInviteCodes(count) {
 // Create league with invite codes
 async function createLeague(leagueData) {
   try {
+console.log('Inserting league data:', leagueData); // Debugging
     const { data, error } = await supabase
       .from('leagues')
       .insert([leagueData])
-      .select('*') // Explicitly select all columns
-      .single(); // Expect a single row
+      .select('id')
+      .single();
 
     if (error) throw error;
 
     console.log('League created successfully:', data);
-    return data.id; // Return the newly created league ID
+    return data.league_id; // Return the newly created league ID
   } catch (err) {
     console.error('Error creating league:', err);
     alert('Failed to create league. Please try again.');
@@ -337,7 +338,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
 
   // Generate league ID
 const leagueId = uuidv4();
-inviteCodes = generateInviteCodes(leagueSizeSlider.value); // Initialize inviteCodes
+const inviteCodes = generateInviteCodes(leagueSizeSlider.value); // Initialize inviteCodes
 console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
   // Set default owner ID
