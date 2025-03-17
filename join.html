@@ -76,11 +76,11 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    async function validateInvite() {
-      const params = new URLSearchParams(window.location.search);
-      const leagueId = params.get('league');
-      const teamIndex = parseInt(params.get('team'));
-      const inviteCode = params.get('code');
+async function validateInvite() {
+  const params = new URLSearchParams(window.location.search);
+  const leagueId = params.get('league');
+  const teamIndex = parseInt(params.get('team')) + 1; // Fix 0-based to 1-based index
+  const inviteCode = params.get('code');
 
       try {
         // Validate parameters
@@ -88,13 +88,19 @@
           throw new Error('Invalid invite link');
         }
 
-        // Check if invite code is valid
-        const { data: isValid, error: validationError } = await supabase
-          .rpc('validate_invite', {
-            p_league: leagueId,
-            p_team: teamIndex,
-            p_code: inviteCode
-          });
+    // Debugging: Log values
+    console.log('Validating:', {
+      leagueId,
+      teamIndex: teamIndex - 1, // Adjusted for PostgreSQL
+      inviteCode
+    });
+
+    const { data: isValid, error: validationError } = await supabase
+      .rpc('validate_invite', {
+        p_league: leagueId,
+        p_team: teamIndex - 1, // PostgreSQL uses 0-based JSONB arrays
+        p_code: inviteCode
+      });
 
         if (validationError) throw validationError;
         if (!isValid) throw new Error('Invalid or expired invite code');
