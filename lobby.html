@@ -188,6 +188,7 @@
       inviteCodes = data.invite_codes || [];
       draftOrder = Array.from({ length: teamNames.length }, (_, i) => i + 1); // Default draft order
       return data;
+          console.log('Initial leagueData:', data)
     }
     
     const isManager = role === 'manager';
@@ -252,6 +253,11 @@
         .channel('lobby')
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
           lobbyStatus[payload.new.team_index] = payload.new;
+          console.log("lobbyStatus Changed:", payload.new)
+          console.table(Object.entries(lobbyStatus).map(([teamIndex, status]) => ({
+            team_index: teamIndex,
+            joined: status.joined,
+          })));
           renderTeamList();
           checkAllJoined();
         })
