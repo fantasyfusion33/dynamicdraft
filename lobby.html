@@ -154,7 +154,9 @@
     </div>
     <button class="start-draft-button" id="startDraftButton" disabled>Start Draft</button>
   </div>
-
+  <div id="waitingMessage" style="display: none; text-align: center; margin-bottom: 20px;">
+  <p>Waiting for the draft to begin...</p>
+</div>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Initialize Supabase client
@@ -187,6 +189,8 @@
       draftOrder = Array.from({ length: teamNames.length }, (_, i) => i + 1); // Default draft order
       return data;
     }
+    
+    const isManager = role === 'manager';
 
     // Render team list
     function renderTeamList() {
@@ -194,7 +198,7 @@
       teamList.innerHTML = draftOrder
         .map((teamIndex, i) => {
           const teamName = teamNames[teamIndex - 1];
-          const isJoined = lobbyStatus[teamIndex]?.joined || false;
+          const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 1 && isManager);
           const isManager = teamIndex === 1; // Team 1 is the League Manager
           const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex - 1]}`;
 
@@ -235,26 +239,34 @@
     }
 
     // Start the draft
-    async function startDraft() {
-      try {
-        // Save draft order to drafts table
-        const { error } = await supabase
-          .from('drafts')
-          .insert([{
-            league_id: leagueId,
-            draft_order: draftOrder,
-            created_at: new Date().toISOString(),
-          }]);
+async function startDraft() {
+  try {
+    // Save draft order to drafts table
+    const { error } = await supabase
+      .from('drafts')
+      .insert([{
+        league_id: leagueId,
+        draft_order: draftOrder,
+        created_at: new Date().toISOString()
+      }]);
 
-        if (error) throw error;
+    if (error) throw error;
 
-        // Redirect to draft page
-        window.location.href = `draft.html?league=${leagueId}`;
-      } catch (err) {
-        console.error('Error starting draft:', err);
-        alert('Failed to start draft. Please try again.');
-      }
-    }
+    // Redirect ALL users to draft page
+    window.location.href = `draft_supabase.html?league=${leagueId}`;
+  } catch (err) {
+    console.error('Error starting draft:', err);
+    alert('Failed to start draft. Please try again.');
+  }
+}
+
+    // Replace existing status check logic with:
+function checkAllJoined() {
+  const allJoined = draftOrder.every(teamIndex => 
+    lobbyStatus[teamIndex]?.joined || teamIndex === 1 // Manager is auto-joined
+  );
+  document.getElementById('startDraftButton').disabled = !allJoined;
+}
 
     // Initialize lobby
     document.addEventListener('DOMContentLoaded', async () => {
@@ -264,14 +276,21 @@
       // Subscribe to lobby updates
       const lobbyChannel = supabase
         .channel('lobby')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
-          lobbyStatus[payload.new.team_index] = payload.new;
+        .on('postgres_changes',     
+            { event: '*', schema: 'public', table: 'lobby_status' }, 
+            (payload) => {
+              lobbyStatus[payload.new.team_index] = payload.new;
           renderTeamList();
           checkAllJoined();
         })
         .subscribe();
 
+        if (!isManager) {
+    document.getElementById('waitingMessage').style.display = 'block';
+    document.getElementById('teamList').style.display = 'none';
+  }
       // Start draft button
+      document.getElementById('startDraftButton').style.display = isManager ? 'block' : 'none';
       document.getElementById('startDraftButton').addEventListener('click', startDraft);
     });
   </script>
