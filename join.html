@@ -91,7 +91,7 @@ const teamIndex = parseInt(params.get('team')); // Use 0-based index
     // Debugging: Log values
     console.log('Validating:', {
       leagueId,
-      teamIndex: teamIndex - 1, // Adjusted for PostgreSQL
+      teamIndex: teamIndex, // Adjusted for PostgreSQL
       inviteCode
     });
 
