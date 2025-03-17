@@ -200,8 +200,8 @@
         .map((teamIndex, i) => {
           const isManager = teamIndex === 0; // Team 1 is the League Manager
           const teamName = teamNames[teamIndex];
-          const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 0 && isManager);
-          const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex]}`;
+          const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 1 && isManager);
+          const inviteLink = `join.html?league=${leagueId}&team=${teamIndex - 1}&code=${inviteCodes[teamIndex - 1]}`;
 
           return `
             <div class="team-item">
