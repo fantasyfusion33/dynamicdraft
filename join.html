@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +84,7 @@
 
       try {
         // Validate parameters
-        if (!leagueId || isNaN(teamIndex) {
+        if (!leagueId || isNaN(teamIndex)) {
           throw new Error('Invalid invite link');
         }
 
@@ -115,7 +116,8 @@
           .upsert({
             league_id: leagueId,
             team_index: teamIndex,
-            joined: true
+            joined: true,
+            last_ping: new Date().toISOString()
           });
 
         if (upsertError) throw upsertError;
@@ -124,7 +126,7 @@
         document.getElementById('loading').style.display = 'none';
         document.getElementById('success').textContent = 'Success! Redirecting...';
         document.getElementById('success').style.display = 'block';
-        
+
         setTimeout(() => {
           window.location.href = `lobby.html?league=${leagueId}&team=${teamIndex}`;
         }, 2000);
