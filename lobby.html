@@ -199,7 +199,7 @@
       teamList.innerHTML = draftOrder
         .map((teamIndex, i) => {
           const isManager = teamIndex === 1; // Team 1 is the League Manager
-          const teamName = teamNames[teamIndex];
+          const teamName = teamNames[teamIndex - 1];
           const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 1 && isManager);
           const inviteLink = `join.html?league=${leagueId}&team=${teamIndex - 1}&code=${inviteCodes[teamIndex - 1]}`;
 
