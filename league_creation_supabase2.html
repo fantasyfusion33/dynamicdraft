@@ -315,6 +315,21 @@ console.log('Inserting league data:', leagueData); // Debugging
 
     if (error) throw error;
 
+        // Create teams in teams table
+    const teams = leagueData.teamNames.map((name, index) => ({
+      league_id: league.id,
+      name: name,
+      owner_id: index === 0 ? leagueData.owner_id : null, // Manager is Team 1
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+        const { error: teamsError } = await supabase
+      .from('teams')
+      .insert(teams);
+
+    if (teamsError) throw teamsError;
+
     console.log('League created successfully:', data);
     return data.league_id; // Return the newly created league ID
   } catch (err) {
