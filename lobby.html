@@ -198,10 +198,10 @@
       const teamList = document.getElementById('teamList');
       teamList.innerHTML = draftOrder
         .map((teamIndex, i) => {
-          const isManager = teamIndex === 1; // Team 1 is the League Manager
-          const teamName = teamNames[teamIndex - 1];
-          const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 1 && isManager);
-          const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex - 1]}`;
+          const isManager = teamIndex === 0; // Team 1 is the League Manager
+          const teamName = teamNames[teamIndex];
+          const isJoined = lobbyStatus[teamIndex]?.joined || (teamIndex === 0 && isManager);
+          const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex]}`;
 
           return `
             <div class="team-item">
@@ -249,11 +249,11 @@
 
     // Subscribe to lobby updates
     function subscribeToLobby() {
-      return supabase
-        .channel('lobby')
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
-          lobbyStatus[payload.new.team_index] = payload.new;
-          console.log("lobbyStatus Changed:", payload.new)
+    return supabase
+      .channel('lobby')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
+        lobbyStatus[payload.new.team_index] = payload.new;
+          console.log("lobbyStatus Changed:", payload.new);
           console.table(Object.entries(lobbyStatus).map(([teamIndex, status]) => ({
             team_index: teamIndex,
             joined: status.joined,
