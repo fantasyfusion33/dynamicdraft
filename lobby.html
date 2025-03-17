@@ -198,13 +198,12 @@
   });
 
   return data;
-      
+    }
       teamNames = data.teamNames || [];
       inviteCodes = data.invite_codes || [];
       draftOrder = Array.from({ length: teamNames.length }, (_, i) => i + 1); // Default draft order
       return data;
           console.log('Initial leagueData:', data)
-    }
     
     const isManager = role === 'manager';
 
