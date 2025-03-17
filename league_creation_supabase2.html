@@ -379,19 +379,6 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
   // Save league to Supabase
   const createdLeagueId = await createLeague(leagueData);
-  if (!createdLeagueId) return;
-
-// Auto-join league manager (Team 1)
-await supabase
-  .from('lobby_status')
-  .upsert({
-    league_id: createdLeagueId,
-    team_index: 1, // Manager is always Team 1
-    joined: true,
-    last_ping: new Date().toISOString()
-  });
-  console.log('Created League ID:', leagueData.id); // Debugging
-
   const redirectUrl = `lobby.html?leagueId=${leagueData.id}&role=manager`;
   console.log('Redirect URL:', redirectUrl); // Debugging
   window.location.href = redirectUrl;
