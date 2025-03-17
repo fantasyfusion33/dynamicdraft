@@ -309,11 +309,13 @@ async function createLeague(leagueData) {
     const { data, error } = await supabase
       .from('leagues')
       .insert([leagueData])
-      .select('id')
-      .single();
+      .select('*') // Explicitly select all columns
+      .single(); // Expect a single row
 
     if (error) throw error;
-    return data.id;
+
+    console.log('League created successfully:', data);
+    return data.id; // Return the newly created league ID
   } catch (err) {
     console.error('Error creating league:', err);
     alert('Failed to create league. Please try again.');
