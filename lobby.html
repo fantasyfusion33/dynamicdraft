@@ -184,6 +184,21 @@
 
       if (error) throw error;
 
+        // Initialize lobbyStatus with current data
+  const { data: lobbyData, error: lobbyError } = await supabase
+    .from('lobby_status')
+    .select('*')
+    .eq('league_id', leagueId);
+
+  if (lobbyError) throw lobbyError;
+
+  // Populate lobbyStatus
+  lobbyData.forEach(status => {
+    lobbyStatus[status.team_index] = status;
+  });
+
+  return data;
+      
       teamNames = data.teamNames || [];
       inviteCodes = data.invite_codes || [];
       draftOrder = Array.from({ length: teamNames.length }, (_, i) => i + 1); // Default draft order
@@ -197,10 +212,10 @@
     function renderTeamList() {
       const teamList = document.getElementById('teamList');
       teamList.innerHTML = draftOrder
-        .map((teamIndex, i) => {
+        .map((teamIndex, displayOrder) => {
           const isManager = teamIndex === 1; // Team 1 is the League Manager
           const teamName = teamNames[teamIndex - 1];
-          const isJoined = lobbyStatus[teamIndex - 1]?.joined || (teamIndex === 1 && isManager);
+          const isJoined = lobbyStatus[teamIndex - 1]?.joined || (isManager && role === 'manager');
           const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex - 1]}`;
 
           return `
@@ -242,27 +257,30 @@
         // Check if all teams have joined
     function checkAllJoined() {
       const allJoined = draftOrder.every(teamIndex => 
-        lobbyStatus[teamIndex - 1]?.joined || teamIndex === 1 // Manager is auto-joined
+        lobbyStatus[teamIndex - 1]?.joined || (teamIndex === 1 && role === 'manager') // Manager is auto-joined
       );
       document.getElementById('startDraftButton').disabled = !allJoined;
+        console.log('All teams joined?', allJoined); // Debugging
     }
 
     // Subscribe to lobby updates
-    function subscribeToLobby() {
-    return supabase
-      .channel('lobby')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
-        lobbyStatus[payload.new.team_index] = payload.new;
-          console.log("lobbyStatus Changed:", payload.new);
-          console.table(Object.entries(lobbyStatus).map(([teamIndex, status]) => ({
-            team_index: teamIndex,
-            joined: status.joined,
-          })));
-          renderTeamList();
-          checkAllJoined();
-        })
-        .subscribe();
-    }
+function subscribeToLobby() {
+  return supabase
+    .channel('lobby')
+    .on('postgres_changes', { 
+      event: '*', 
+      schema: 'public', 
+      table: 'lobby_status',
+      filter: `league_id=eq.${leagueId}`
+    }, (payload) => {
+      console.log('Lobby update:', payload);
+      lobbyStatus[payload.new.team_index] = payload.new;
+      console.log('Updated lobbyStatus:', lobbyStatus); // Debugging
+      renderTeamList();
+      checkAllJoined();
+    })
+    .subscribe();
+}
 
     // Start the draft
 async function startDraft() {
