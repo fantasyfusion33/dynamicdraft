@@ -111,16 +111,16 @@
         if (lobbyData?.joined) throw new Error('Team slot already claimed');
 
         // Mark team as joined
-        const { error: upsertError } = await supabase
-          .from('lobby_status')
-          .upsert({
-            league_id: leagueId,
-            team_index: teamIndex,
-            joined: true,
-            last_ping: new Date().toISOString()
-          });
+  const { error: upsertError } = await supabase
+    .from('lobby_status')
+    .upsert({
+      league_id: leagueId,
+      team_index: teamIndex,
+      joined: true,
+      last_ping: new Date().toISOString()
+    }, { onConflict: 'league_id, team_index' }); // Handle conflicts
 
-        if (upsertError) throw upsertError;
+  if (upsertError) throw upsertError;
 
         // Redirect to lobby with team context
         document.getElementById('loading').style.display = 'none';
