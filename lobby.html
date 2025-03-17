@@ -242,7 +242,7 @@
         // Check if all teams have joined
     function checkAllJoined() {
       const allJoined = draftOrder.every(teamIndex => 
-        lobbyStatus[teamIndex]?.joined || teamIndex === 1 // Manager is auto-joined
+        lobbyStatus[teamIndex - 1]?.joined || teamIndex === 1 // Manager is auto-joined
       );
       document.getElementById('startDraftButton').disabled = !allJoined;
     }
