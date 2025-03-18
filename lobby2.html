@@ -198,7 +198,7 @@ async function fetchLeagueData() {
     // Fetch team details using teamIDs
     const { data: teamData, error: teamError } = await supabase
       .from('teams')
-      .select('id, name')
+      .select('*') 
       .in('id', league.teamIDs);
 
     if (teamError) throw teamError;
@@ -212,6 +212,7 @@ async function fetchLeagueData() {
     draftOrder = league.teamIDs; // Use teamIDs for draft order
     teams = teamData;
     teamIDs = league.teamIDs || []; // Ensure teamIDs is assigned globally
+    leagueManagerTeam = teamData.find(team => team.league_manager === true) || null;
 
     return league;
   } catch (err) {
@@ -233,7 +234,7 @@ function renderTeamList() {
 
   teamList.innerHTML = orderedTeams
     .map((team, i) => { // Added 'i' to correctly map over teams
-      const isManager = team.league_manager === true; // Team at index 0 (first team) is the League Manager
+      const isManager = leagueManagerTeam; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
         const isJoined = lobbyStatus[team.id]?.joined || isManager;
       const inviteLink = `join.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
