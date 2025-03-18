@@ -198,7 +198,7 @@ async function fetchLeagueData() {
     // Fetch team details using teamIDs
     const { data: teamData, error: teamError } = await supabase
       .from('teams')
-      .select('id, name, joined')
+      .select('id, name')
       .in('id', league.teamIDs);
 
     if (teamError) throw teamError;
