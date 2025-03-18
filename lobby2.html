@@ -177,38 +177,48 @@
     let teamIDs = [];
 
 async function fetchLeagueData() {
-  // Get team IDs from league
-  const { data: league, error } = await supabase
-    .from('leagues')
-    .select('teamIDs')
-    .eq('id', leagueId)
-    .single();
+  try {
+    // Fetch league data including teamIDs
+    const { data: league, error } = await supabase
+      .from('leagues')
+      .select('*')
+      .eq('id', leagueId)
+      .single();
 
-  // Get team details
-  const { data: teamData } = await supabase
-    .from('teams')
-    .select('id, name, joined')
-    .in('id', league.teamIDs);
+    if (error) throw error;
 
-  teams = teamData;
-}
+    // Log the fetched league data for debugging
+    console.log('Fetched league data:', league);
 
-    // Fetch league data
-    async function fetchLeagueData() {
-      const { data, error } = await supabase
-        .from('leagues')
-        .select('*')
-        .eq('id', leagueId)
-        .single();
-
-      if (error) throw error;
-
-      teamNames = data.teamNames || [];
-      inviteCodes = data.invite_codes || [];
-      draftOrder = Array.from({ length: teamNames.length }, (_, i) => i + 1); // Default draft order
-      return data;
-          console.log('Initial leagueData:', data)
+    // Ensure teamIDs is an array
+    if (!Array.isArray(league.teamIDs)) {
+      throw new Error('teamIDs is not an array');
     }
+
+    // Fetch team details using teamIDs
+    const { data: teamData, error: teamError } = await supabase
+      .from('teams')
+      .select('id, name, joined')
+      .in('id', league.teamIDs);
+
+    if (teamError) throw teamError;
+
+    // Log the fetched team data for debugging
+    console.log('Fetched team data:', teamData);
+
+    // Update global variables
+    teamNames = league.teamNames || [];
+    inviteCodes = league.invite_codes || [];
+    draftOrder = league.teamIDs; // Use teamIDs for draft order
+    teams = teamData;
+
+    return league;
+  } catch (err) {
+    console.error('Error fetching league data:', err);
+    alert('Failed to fetch league data. Please try again.');
+    return null;
+  }
+}
     
     const isManager = role === 'manager';
   console.log("teamIDs Array:", teamIDs);
