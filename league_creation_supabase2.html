@@ -394,7 +394,7 @@ if (team1Name) {
 
   // Save league to Supabase
   const createdLeagueId = await createLeague(leagueData);
-  const redirectUrl = `lobby.html?leagueId=${leagueData.id}&role=manager`;
+  const redirectUrl = `lobby2.html?leagueId=${leagueData.id}&role=manager`;
   console.log('Redirect URL:', redirectUrl); // Debugging
   window.location.href = redirectUrl;
 
