@@ -177,48 +177,31 @@
     let teamIDs = [];
 
 async function fetchLeagueData() {
-  try {
-    // Fetch league data including teamIDs
-    const { data: league, error } = await supabase
-      .from('leagues')
-      .select('*')
-      .eq('id', leagueId)
-      .single();
+  const { data: league, error } = await supabase
+    .from('leagues')
+    .select('*')
+    .eq('id', leagueId)
+    .single();
 
-    if (error) throw error;
+  if (error) throw error;
 
-    // Log the fetched league data for debugging
-    console.log('Fetched league data:', league);
+  // Fetch teams using teamIDs
+  const { data: teams, error: teamsError } = await supabase
+    .from('teams')
+    .select('*')
+    .in('id', league.teamIDs);
 
-    // Ensure teamIDs is an array
-    if (!Array.isArray(league.teamIDs)) {
-      throw new Error('teamIDs is not an array');
-    }
+  if (teamsError) throw teamsError;
 
-    // Fetch team details using teamIDs
-    const { data: teamData, error: teamError } = await supabase
-      .from('teams')
-      .select('id, name')
-      .in('id', league.teamIDs);
+  // Initialize lobbyStatus
+  teams.forEach(team => {
+    lobbyStatus[team.id] = {
+      joined: team.owner_id !== null, // Team is joined if owner_id is set
+      name: team.name
+    };
+  });
 
-    if (teamError) throw teamError;
-
-    // Log the fetched team data for debugging
-    console.log('Fetched team data:', teamData);
-
-    // Update global variables
-    teamNames = league.teamNames || [];
-    inviteCodes = league.invite_codes || [];
-    draftOrder = league.teamIDs; // Use teamIDs for draft order
-    teams = teamData;
-    teamIDs = league.teamIDs || []; // Ensure teamIDs is assigned globally
-
-    return league;
-  } catch (err) {
-    console.error('Error fetching league data:', err);
-    alert('Failed to fetch league data. Please try again.');
-    return null;
-  }
+  return { league, teams };
 }
     
     const isManager = role === 'manager';
