@@ -211,6 +211,7 @@ async function fetchLeagueData() {
     inviteCodes = league.invite_codes || [];
     draftOrder = league.teamIDs; // Use teamIDs for draft order
     teams = teamData;
+    teamIDs = league.teamIDs || []; // Ensure teamIDs is assigned globally
 
     return league;
   } catch (err) {
