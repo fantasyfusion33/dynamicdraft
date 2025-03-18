@@ -315,20 +315,19 @@ async function createLeague(leagueData) {
 
     if (leagueError) throw leagueError;
 
-// Generate UUIDs for each team, ensuring Team 1 gets a fixed ID
-const teamIDs = leagueData.teamNames.map((_, index) => 
-  index === 0 ? "561bd4b1-c0a1-455f-86b6-3c785fbebfe5" : crypto.randomUUID()
-);
+// Generate random UUIDs for each team
+const teamIDs = leagueData.teamNames.map(() => crypto.randomUUID());
 
-    // Create teams in teams table
-    const teams = leagueData.teamNames.map((name, index) => ({
-      id: teamIDs[index], // Use the generated UUID
-      league_id: league.id, // Link to the league
-      name: name,
-      owner_id: index === 0 ? leagueData.owner_id : null, // Manager is Team 1
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }));
+// Create teams in teams table
+const teams = leagueData.teamNames.map((name, index) => ({
+  id: teamIDs[index], // Assign a randomly generated UUID as team ID
+  league_id: league.id, // Link to the league
+  name: name,
+  owner_id: index === 0 ? "561bd4b1-c0a1-455f-86b6-3c785fbebfe5" : null, // Ensure first team has fixed owner_id
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+}));
+
 
     const { error: teamsError } = await supabase
       .from('teams')
