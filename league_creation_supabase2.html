@@ -414,8 +414,8 @@ if (team1Name) {
     created_at: new Date().toISOString(),
   };
 
-      const inviteLinks = teamNames.map((_, i) => 
-  `${window.location.origin}/join.html?league=${leagueId}&team=${i}&code=${leagueData.invite_codes[i]}`
+const inviteLinks = teamIDs.map((teamId, index) => 
+  `${window.location.origin}/join.html?league=${leagueId}&team=${teamId}&code=${inviteCodes[index]}`
 );
 
 
