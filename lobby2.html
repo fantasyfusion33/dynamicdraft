@@ -259,17 +259,17 @@ function renderTeamList() {
 
 
     // Move team up in draft order
-    function moveTeamUp(index) {
-      if (index > 0) {
-        [draftOrder[index], draftOrder[index - 1]] = [draftOrder[index - 1], draftOrder[index]];
+    function moveTeamUp(i) {
+      if (i > 0) {
+        [draftOrder[i], draftOrder[i - 1]] = [draftOrder[i - 1], draftOrder[i]];
         renderTeamList();
       }
     }
 
     // Move team down in draft order
-    function moveTeamDown(index) {
-      if (index < draftOrder.length - 1) {
-        [draftOrder[index], draftOrder[index + 1]] = [draftOrder[index + 1], draftOrder[index]];
+    function moveTeamDown(i) {
+      if (i < draftOrder.length - 1) {
+        [draftOrder[i], draftOrder[i + 1]] = [draftOrder[i + 1], draftOrder[i]];
         renderTeamList();
       }
     }
