@@ -212,31 +212,36 @@ async function fetchLeagueData() {
     const isManager = role === 'manager';
 
     // Render team list
-    function renderTeamList() {
-      const teamList = document.getElementById('teamList');
-      const isManager = teamIndex === 1; // Team 1 is the League Manager
-      const teamName = teamNames[teamIndex - 1];
-      const isJoined = lobbyStatus[teamIndex - 1]?.joined || (teamIndex === 1 && isManager);
-      const inviteLink = `join.html?league=${leagueId}&team=${teamIndex}&code=${inviteCodes[teamIndex - 1]}`;
-  teamList.innerHTML = teams.map(team => `
-    <div class="team-item" data-team-id="${team.id}">
-              <div class="team-info">
-                <span class="draft-order">${i + 1}</span>
-                <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
-      <div class="status-circle ${team.joined ? 'joined' : ''}"></div>
-              </div>
-              <div class="invite-link">
-                <a href="${inviteLink}" target="_blank">Invite Link</a>
-              </div>
-              <div class="arrow-buttons">
-                <button onclick="moveTeamUp(${i})">⬆️</button>
-                <button onclick="moveTeamDown(${i})">⬇️</button>
-              </div>
-            </div>
-          `;
-        )
-        .join('');
-    }
+function renderTeamList() {
+  const teamList = document.getElementById('teamList');
+
+  teamList.innerHTML = teams
+    .map((team, i) => { // Added 'i' to correctly map over teams
+      const isManager = i === 0; // Team at index 0 (first team) is the League Manager
+      const teamName = teamNames[i]; // Correctly accessing teamNames
+      const isJoined = lobbyStatus[i]?.joined || isManager;
+      const inviteLink = `join.html?league=${leagueId}&team=${i + 1}&code=${inviteCodes[i]}`;
+
+      return `
+        <div class="team-item" data-team-id="${team.id}">
+          <div class="team-info">
+            <span class="draft-order">${i + 1}</span>
+            <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
+            <div class="status-circle ${isJoined ? 'joined' : ''}"></div>
+          </div>
+          <div class="invite-link">
+            <a href="${inviteLink}" target="_blank">Invite Link</a>
+          </div>
+          <div class="arrow-buttons">
+            <button onclick="moveTeamUp(${i})">⬆️</button>
+            <button onclick="moveTeamDown(${i})">⬇️</button>
+          </div>
+        </div>
+      `;
+    }) // Closing parenthesis correctly placed here
+    .join('');
+}
+
 
     // Move team up in draft order
     function moveTeamUp(index) {
