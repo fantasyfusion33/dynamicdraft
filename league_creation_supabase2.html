@@ -387,7 +387,6 @@ if (team1Name) {
       teamIDs.push(uuidv4()); // Generate a UUID for each team
     }
   }
-  const managerId = teamIDs[1]; // First team's owner ID
   const ownerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5';
   
   // Save league data to localStorage
@@ -398,7 +397,6 @@ if (team1Name) {
     teamCount: leagueSizeSlider.value,
     teamNames: teamNames, // Include teamNames array
     teamIDs: teamIDs, // Add teamIDs to the league data
-    league_manager: managerId,
     invite_codes: inviteCodes,
     wildcardRound: document.getElementById('wildcard').checked,
     waivers: document.getElementById('waiverSystem').checked,
