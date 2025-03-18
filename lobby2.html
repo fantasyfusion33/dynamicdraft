@@ -237,7 +237,7 @@ function renderTeamList() {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
         const isJoined = lobbyStatus[team.id]?.joined || isManager;
-      const inviteLink = `join.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
+      const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
       
       return `
         <div class="team-item" data-team-id="${team.id}">
