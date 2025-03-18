@@ -228,22 +228,32 @@ async function fetchLeagueData() {
 function renderTeamList() {
   const teamList = document.getElementById('teamList');
 
+  console.log("Teams Array:", teams);
+  console.log("Team Names Array:", teamNames);
+  console.log("Lobby Status:", lobbyStatus);
+  
+  if (!Array.isArray(teams) || teams.length === 0) {
+    console.error("No teams found!");
+    return;
+  }
+
   teamList.innerHTML = teams
-    .map((team, i) => { // Added 'i' to correctly map over teams
-      const isManager = i === 0; // Team at index 0 (first team) is the League Manager
-      const teamName = teamNames[i]; // Correctly accessing teamNames
-      const isJoined = lobbyStatus[i]?.joined || isManager;
-      const inviteLink = `join.html?league=${leagueId}&team=${i + 1}&code=${inviteCodes[i]}`;
+    .map((team, i) => {
+      const isManager = i === 0; // First team is League Manager
+      const teamID = team.id; // Ensure we are using the actual ID from `teams`
+      const teamName = teamNames.find((name, index) => index === i) || `Team ${i + 1}`;
+      const inviteCode = inviteCodes.find((code, index) => index === i) || "";
+      const isJoined = lobbyStatus.find((status, index) => index === i)?.joined || isManager;
 
       return `
-        <div class="team-item" data-team-id="${team.id}">
+        <div class="team-item" data-team-id="${teamID}">
           <div class="team-info">
             <span class="draft-order">${i + 1}</span>
             <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
             <div class="status-circle ${isJoined ? 'joined' : ''}"></div>
           </div>
           <div class="invite-link">
-            <a href="${inviteLink}" target="_blank">Invite Link</a>
+            <a href="join.html?league=${leagueId}&team=${i + 1}&code=${inviteCode}" target="_blank">Invite Link</a>
           </div>
           <div class="arrow-buttons">
             <button onclick="moveTeamUp(${i})">⬆️</button>
@@ -251,9 +261,12 @@ function renderTeamList() {
           </div>
         </div>
       `;
-    }) // Closing parenthesis correctly placed here
+    })
     .join('');
+
+  console.log("Team List Rendered Successfully!");
 }
+
 
 
     // Move team up in draft order
