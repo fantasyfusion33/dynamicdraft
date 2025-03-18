@@ -323,7 +323,7 @@ const teams = leagueData.teamNames.map((name, index) => ({
   id: teamIDs[index], // Assign a randomly generated UUID as team ID
   league_id: league.id, // Link to the league
   name: name,
-  owner_id: index === 0 ? "561bd4b1-c0a1-455f-86b6-3c785fbebfe5" : null, // Ensure first team has fixed owner_id
+  league_manager: index === 0, // First team is the league manager (true), others are false
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString()
 }));
@@ -387,8 +387,9 @@ if (team1Name) {
       teamIDs.push(uuidv4()); // Generate a UUID for each team
     }
   }
-  const managerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5'; // First team's owner ID
-
+  const managerId = teamIDs[0]; // First team's owner ID
+  const ownerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5';
+  
   // Save league data to localStorage
   const leagueData = {
     id: leagueId,
