@@ -205,7 +205,6 @@ async function fetchLeagueData() {
     teamNames = league.teamNames || [];
     inviteCodes = league.invite_codes || [];
     draftOrder = league.teamIDs; // Use teamIDs for draft order
-    teams = teams;
     teamIDs = league.teamIDs || []; // Ensure teamIDs is assigned globally
 
   return { league, teams };
