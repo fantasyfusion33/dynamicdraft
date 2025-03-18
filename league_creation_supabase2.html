@@ -315,8 +315,10 @@ async function createLeague(leagueData) {
 
     if (leagueError) throw leagueError;
 
-    // Generate UUIDs for each team
-    const teamIDs = leagueData.teamNames.map(() => crypto.randomUUID());
+// Generate UUIDs for each team, ensuring Team 1 gets a fixed ID
+const teamIDs = leagueData.teamNames.map((_, index) => 
+  index === 0 ? "561bd4b1-c0a1-455f-86b6-3c785fbebfe5" : crypto.randomUUID()
+);
 
     // Create teams in teams table
     const teams = leagueData.teamNames.map((name, index) => ({
