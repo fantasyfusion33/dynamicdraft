@@ -263,14 +263,17 @@ function renderTeamList() {
     function moveTeamUp(i) {
       if (i > 0) {
         [draftOrder[i], draftOrder[i - 1]] = [draftOrder[i - 1], draftOrder[i]];
+        [teamNames[i], teamNames[i - 1]] = [teamNames[i - 1], teamNames[i]];
+        [inviteCodes[i], inviteCodes[i - 1]] = [inviteCodes[i - 1], inviteCodes[i]];
         renderTeamList();
       }
     }
-
     // Move team down in draft order
     function moveTeamDown(i) {
       if (i < draftOrder.length - 1) {
         [draftOrder[i], draftOrder[i + 1]] = [draftOrder[i + 1], draftOrder[i]];
+        [teamNames[i], teamNames[i + 1]] = [teamNames[i + 1], teamNames[i]];
+        [inviteCodes[i], inviteCodes[i + 1]] = [inviteCodes[i + 1], inviteCodes[i]];
         renderTeamList();
       }
     }
