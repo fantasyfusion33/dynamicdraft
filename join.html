@@ -75,11 +75,13 @@
     const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    import { v4 as uuidv4, validate as isUUID } from 'uuid';
 
 async function validateInvite() {
   const params = new URLSearchParams(window.location.search);
   const leagueId = params.get('league');
   const teamId = params.get('team'); // Use team_id instead of team_index
+    teamId = uuidv4(teamId); // Ensure proper UUID format
   const inviteCode = params.get('code');
 
   try {
