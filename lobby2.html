@@ -3,160 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>League Lobby</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Join League</title>
   <style>
     :root {
       --primary: #D2042D;
       --dark: #0A0A0A;
       --light: #FFFFFF;
       --gray: #1A1A1A;
-      --glass: rgba(26, 26, 26, 0.8);
     }
 
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       background: var(--dark);
       color: var(--light);
-      margin: 0;
-      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
     }
 
-    .lobby-container {
-      background: var(--glass);
-      padding: 30px;
+    .container {
+      background: rgba(26, 26, 26, 0.8);
+      padding: 2rem;
       border-radius: 12px;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      max-width: 600px;
-      width: 100%;
+      max-width: 500px;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 28px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      background: linear-gradient(90deg, #D2042D, #FF4F4F);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 25px;
-      text-transform: uppercase;
-    }
-
-    .team-list {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .team-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-    }
-
-    .team-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .team-name {
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    .draft-order {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--primary);
-    }
-
-    .status-circle {
-      width: 20px;
-      height: 20px;
+    .loader {
+      border: 4px solid var(--gray);
+      border-top-color: var(--primary);
       border-radius: 50%;
-      background: var(--gray);
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
     }
 
-    .status-circle.joined {
-      background: #00FF00;
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
-    .invite-link {
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.8);
+    .error {
+      color: #ff4444;
+      margin-top: 1rem;
     }
 
-    .invite-link a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .invite-link a:hover {
-      text-decoration: underline;
-    }
-
-    .arrow-buttons {
-      display: flex;
-      gap: 8px;
-    }
-
-    .arrow-buttons button {
-      background: none;
-      border: none;
-      color: var(--light);
-      cursor: pointer;
-      font-size: 18px;
-    }
-
-    .arrow-buttons button:hover {
-      color: var(--primary);
-    }
-
-    .start-draft-button {
-      width: 100%;
-      padding: 14px;
-      background: var(--primary);
-      color: var(--light);
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 20px;
-      transition: background 0.2s ease;
-    }
-
-    .start-draft-button:hover {
-      background: #B00326;
-    }
-
-    .start-draft-button:disabled {
-      background: rgba(210, 4, 45, 0.3);
-      cursor: not-allowed;
+    .success {
+      color: #00ff00;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="lobby-container">
-    <h1>League Lobby</h1>
-    <div class="team-list" id="teamList">
-      <!-- Team items will be dynamically inserted here -->
+  <div class="container">
+    <div id="loading">
+      <div class="loader"></div>
+      <p>Validating your invite...</p>
     </div>
-    <button class="start-draft-button" id="startDraftButton" disabled>Start Draft</button>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="success" class="success" style="display: none;"></div>
   </div>
-  <div id="waitingMessage" style="display: none; text-align: center; margin-bottom: 20px;">
-  <p>Waiting for the draft to begin...</p>
-</div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     // Initialize Supabase client
@@ -164,214 +76,89 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Get league ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const leagueId = urlParams.get('leagueId');
-    const role = urlParams.get('role'); // 'manager' or 'member'
+    // Validate invite and mark team as joined
+    async function validateAndJoin() {
+      const params = new URLSearchParams(window.location.search);
+      const leagueId = params.get('league');
+      const teamId = params.get('team');
+      const inviteCode = params.get('code');
 
-    let teamNames = [];
-    let inviteCodes = [];
-    let draftOrder = [];
-    let lobbyStatus = {};
-    let teams = [];
-    let teamIDs = [];
+      console.log('URL Parameters:', { leagueId, teamId, inviteCode }); // Debugging
 
-async function fetchLeagueData() {
-  try {
-    // Fetch league data including teamIDs
-    const { data: league, error } = await supabase
-      .from('leagues')
-      .select('*')
-      .eq('id', leagueId)
-      .single();
-
-    if (error) throw error;
-
-    // Log the fetched league data for debugging
-    console.log('Fetched league data:', league);
-
-    // Ensure teamIDs is an array
-    if (!Array.isArray(league.teamIDs)) {
-      throw new Error('teamIDs is not an array');
-    }
-
-    // Fetch team details using teamIDs
-    const { data: teamData, error: teamError } = await supabase
-      .from('teams')
-      .select('*') 
-      .in('id', league.teamIDs);
-
-    if (teamError) throw teamError;
-
-    // Log the fetched team data for debugging
-    console.log('Fetched team data:', teamData);
-
-    // Update global variables
-    teamNames = league.teamNames || [];
-    inviteCodes = league.invite_codes || [];
-    draftOrder = league.teamIDs; // Use teamIDs for draft order
-    teams = teamData;
-    teamIDs = league.teamIDs || []; // Ensure teamIDs is assigned globally
-    leagueManagerTeam = teamData.find(team => team.league_manager === true) || null;
-
-    return league;
-  } catch (err) {
-    console.error('Error fetching league data:', err);
-    alert('Failed to fetch league data. Please try again.');
-    return null;
-  }
-}
-    
-    const isManager = role === 'manager';
-  console.log("teamIDs Array:", teamIDs);
-
-    // Render team list
-function renderTeamList() {
-  const teamList = document.getElementById('teamList');
-
-   // Ensure teams are ordered based on draftOrder
-  const orderedTeams = draftOrder.map(id => teams.find(team => team.id === id));
-
-  teamList.innerHTML = orderedTeams
-    .map((team, i) => { // Added 'i' to correctly map over teams
-      const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
-      const teamName = teamNames[i]; // Correctly accessing teamNames
-        const isJoined = lobbyStatus[team.id]?.joined || isManager;
-      const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
-      
-      return `
-        <div class="team-item" data-team-id="${team.id}">
-          <div class="team-info">
-            <span class="draft-order">${i + 1}</span>
-            <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
-            <div class="status-circle ${isJoined ? 'joined' : ''}"></div>
-          </div>
-          <div class="invite-link">
-            <a href="${inviteLink}" target="_blank">Invite Link</a>
-          </div>
-          <div class="arrow-buttons">
-            <button onclick="moveTeamUp(${i})">⬆️</button>
-            <button onclick="moveTeamDown(${i})">⬇️</button>
-          </div>
-        </div>
-      `;
-    }) // Closing parenthesis correctly placed here
-    .join('');
-}
-
-    // Move team up in draft order
-    function moveTeamUp(i) {
-      if (i > 0) {
-        [draftOrder[i], draftOrder[i - 1]] = [draftOrder[i - 1], draftOrder[i]];
-        [teamNames[i], teamNames[i - 1]] = [teamNames[i - 1], teamNames[i]];
-        [inviteCodes[i], inviteCodes[i - 1]] = [inviteCodes[i - 1], inviteCodes[i]];
-        renderTeamList();
-      }
-    }
-    // Move team down in draft order
-    function moveTeamDown(i) {
-      if (i < draftOrder.length - 1) {
-        [draftOrder[i], draftOrder[i + 1]] = [draftOrder[i + 1], draftOrder[i]];
-        [teamNames[i], teamNames[i + 1]] = [teamNames[i + 1], teamNames[i]];
-        [inviteCodes[i], inviteCodes[i + 1]] = [inviteCodes[i + 1], inviteCodes[i]];
-        renderTeamList();
-      }
-    }
-
-        // Check if all teams have joined
-    function checkAllJoined() {
-      const allJoined = draftOrder.every(teamIndex => 
-        lobbyStatus[teamIndex - 1]?.joined || teamIndex === 1 // Manager is auto-joined
-      );
-      document.getElementById('startDraftButton').disabled = !allJoined;
-    }
-
-    // Subscribe to lobby updates
-    function subscribeToLobby() {
-    return supabase
-      .channel('lobby')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
-        lobbyStatus[payload.new.team_index] = payload.new;
-          console.log("lobbyStatus Changed:", payload.new);
-          console.table(Object.entries(lobbyStatus).map(([teamIndex, status]) => ({
-            team_index: teamIndex,
-            joined: status.joined,
-          })));
-          renderTeamList();
-          checkAllJoined();
-        })
-        .subscribe();
-    }
-
-    // Start the draft
-async function startDraft() {
-  try {
-    // Save draft order to drafts table
-    const { error } = await supabase
-      .from('drafts')
-      .insert([{
-        league_id: leagueId,
-        draft_order: draftOrder,
-        created_at: new Date().toISOString()
-      }]);
-
-    if (error) throw error;
-
-    // Redirect ALL users to draft page
-    window.location.href = `draft_supabase.html?league=${leagueId}`;
-  } catch (err) {
-    console.error('Error starting draft:', err);
-    alert('Failed to start draft. Please try again.');
-  }
-}
-
-    // Initialize lobby
-    document.addEventListener('DOMContentLoaded', async () => {
-      const leagueData = await fetchLeagueData();
-      if (!leagueData) return;
-
-            // Auto-join League Manager (Team 1)
-      if (role === 'manager') {
-        const { error: lobbyError } = await supabase
-          .from('lobby_status')
-          .upsert({
-            league_id: leagueId,
-            team_index: 1, // Manager is always Team 1
-            team_id: teamIDs[0],
-            joined: true,
-            last_ping: new Date().toISOString()
-          });
-
-        if (lobbyError) {
-          console.error('Error joining manager:', lobbyError);
-          return;
+      try {
+        // Validate parameters
+        if (!leagueId || !teamId || !inviteCode) {
+          throw new Error('Invalid invite link. Please check the URL.');
         }
 
-        console.log('Manager auto-joined'); // Debugging
+        // Fetch the team from the database
+        const { data: team, error: teamError } = await supabase
+          .from('teams')
+          .select('*')
+          .eq('id', teamId)
+          .eq('league_id', leagueId)
+          .single();
+
+        console.log('Team Data:', team); // Debugging
+
+        if (teamError || !team) {
+          throw new Error('Team not found in this league.');
+        }
+
+        // Validate the invite code
+        if (team.invite_code !== inviteCode) {
+          console.log('Stored Invite Code:', team.invite_code); // Debugging
+          console.log('Provided Invite Code:', inviteCode); // Debugging
+          throw new Error('Invalid or expired invite code.');
+        }
+
+        // Check if the team is already joined
+        const { data: lobbyStatus, error: lobbyError } = await supabase
+          .from('lobby_status')
+          .select('*')
+          .eq('team_id', teamId)
+          .single();
+
+        console.log('Lobby Status:', lobbyStatus); // Debugging
+
+        if (lobbyError && !lobbyStatus) {
+          throw new Error('Failed to check lobby status.');
+        }
+
+        if (lobbyStatus?.joined) {
+          throw new Error('This team has already joined the lobby.');
+        }
+
+        // Mark the team as joined in the lobby_status table
+        const { error: updateError } = await supabase
+          .from('lobby_status')
+          .upsert({
+            team_id: teamId,
+            league_id: leagueId,
+            joined: true,
+            last_ping: new Date().toISOString(),
+          });
+
+        if (updateError) throw updateError;
+
+        // Show success message and redirect to lobby
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('success').textContent = 'Success! Redirecting to the lobby...';
+        document.getElementById('success').style.display = 'block';
+
+        setTimeout(() => {
+          window.location.href = `lobby2.html?league=${leagueId}&team=${teamId}`;
+        }, 2000);
+      } catch (err) {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').textContent = err.message;
+        document.getElementById('error').style.display = 'block';
+        console.error('Validation error:', err);
       }
-      renderTeamList();
-            subscribeToLobby();
+    }
 
-      // Subscribe to lobby updates
-      const lobbyChannel = supabase
-        .channel('lobby')
-        .on('postgres_changes',     
-            { event: '*', schema: 'public', table: 'lobby_status' }, 
-            (payload) => {
-              lobbyStatus[payload.new.team_index] = payload.new;
-          renderTeamList();
-          checkAllJoined();
-        })
-        .subscribe();
-
-        if (!isManager) {
-    document.getElementById('waitingMessage').style.display = 'block';
-    document.getElementById('teamList').style.display = 'none';
-  }
-      // Start draft button
-      document.getElementById('startDraftButton').style.display = isManager ? 'block' : 'none';
-      document.getElementById('startDraftButton').addEventListener('click', startDraft);
-    });
+    // Start validation on page load
+    validateAndJoin();
   </script>
 </body>
 </html>
