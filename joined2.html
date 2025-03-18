@@ -83,6 +83,8 @@
       const teamId = params.get('team');
       const inviteCode = params.get('code');
 
+      console.log('URL Parameters:', { leagueId, teamId, inviteCode }); // Debugging
+
       try {
         // Validate parameters
         if (!leagueId || !teamId || !inviteCode) {
@@ -97,12 +99,16 @@
           .eq('league_id', leagueId)
           .single();
 
+        console.log('Team Data:', team); // Debugging
+
         if (teamError || !team) {
           throw new Error('Team not found in this league.');
         }
 
         // Validate the invite code
         if (team.invite_code !== inviteCode) {
+          console.log('Stored Invite Code:', team.invite_code); // Debugging
+          console.log('Provided Invite Code:', inviteCode); // Debugging
           throw new Error('Invalid or expired invite code.');
         }
 
@@ -112,6 +118,8 @@
           .select('*')
           .eq('team_id', teamId)
           .single();
+
+        console.log('Lobby Status:', lobbyStatus); // Debugging
 
         if (lobbyError && !lobbyStatus) {
           throw new Error('Failed to check lobby status.');
