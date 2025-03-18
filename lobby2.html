@@ -232,9 +232,9 @@ function renderTeamList() {
     .map((team, i) => { // Added 'i' to correctly map over teams
       const isManager = i === 0; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
-      const isJoined = lobbyStatus[i]?.joined || isManager;
-      const inviteLink = `join.html?league=${leagueId}&team=${i + 1}&code=${inviteCodes[i]}`;
-
+        const isJoined = lobbyStatus[team.id]?.joined || isManager;
+      const inviteLink = `join.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[index]}`;
+      
       return `
         <div class="team-item" data-team-id="${team.id}">
           <div class="team-info">
@@ -246,8 +246,8 @@ function renderTeamList() {
             <a href="${inviteLink}" target="_blank">Invite Link</a>
           </div>
           <div class="arrow-buttons">
-            <button onclick="moveTeamUp(${i})">⬆️</button>
-            <button onclick="moveTeamDown(${i})">⬇️</button>
+            <button onclick="moveTeamUp(${index})">⬆️</button>
+            <button onclick="moveTeamDown(${index})">⬇️</button>
           </div>
         </div>
       `;
