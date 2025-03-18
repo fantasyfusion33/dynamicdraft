@@ -348,7 +348,18 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   // Collect team names
   const teamNames = [];
   const teamIDs = [];
-  for (let i = 1; i <= leagueSizeSlider.value; i++) {
+
+  // Generate a UUID for Team 1 (League Manager)
+const team1ID = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5'; // UUID for Team 1
+teamIDs.push(team1ID); // Add Team 1's ID to the teamIDs array
+
+// Add Team 1's name
+const team1Name = document.getElementById('team1Name').value.trim();
+if (team1Name) {
+  teamNames.push(team1Name);
+}
+
+  for (let i = 2; i <= leagueSizeSlider.value; i++) {
     const teamName = document.getElementById(`team${i}Name`).value.trim();
     if (teamName) {
       teamNames.push(teamName);
@@ -379,6 +390,21 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
       const inviteLinks = teamNames.map((_, i) => 
   `${window.location.origin}/join.html?league=${leagueId}&team=${i}&code=${leagueData.invite_codes[i]}`
 );
+  // Create teams in teams table
+const teams = teamNames.map((name, index) => ({
+  id: teamIDs[index], // Use the generated UUID
+  league_id: leagueId,
+  name: name,
+  owner_id: index === 0 ? ownerId : null, // Assign owner_id to Team 1 (League Manager)
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+}));
+
+const { error: teamsError } = await supabase
+  .from('teams')
+  .insert(teams);
+
+if (teamsError) throw teamsError;
 
   // Save league to Supabase
   const createdLeagueId = await createLeague(leagueData);
