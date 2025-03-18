@@ -390,7 +390,15 @@ if (team1Name) {
       const inviteLinks = teamNames.map((_, i) => 
   `${window.location.origin}/join.html?league=${leagueId}&team=${i}&code=${leagueData.invite_codes[i]}`
 );
-  // Create teams in teams table
+
+
+  // Save league to Supabase
+  const createdLeagueId = await createLeague(leagueData);
+  const redirectUrl = `lobby.html?leagueId=${leagueData.id}&role=manager`;
+  console.log('Redirect URL:', redirectUrl); // Debugging
+  window.location.href = redirectUrl;
+
+    // Create teams in teams table
 const teams = teamNames.map((name, index) => ({
   id: teamIDs[index], // Use the generated UUID
   league_id: leagueId,
@@ -405,12 +413,6 @@ const { error: teamsError } = await supabase
   .insert(teams);
 
 if (teamsError) throw teamsError;
-
-  // Save league to Supabase
-  const createdLeagueId = await createLeague(leagueData);
-  const redirectUrl = `lobby.html?leagueId=${leagueData.id}&role=manager`;
-  console.log('Redirect URL:', redirectUrl); // Debugging
-  window.location.href = redirectUrl;
 
 });
   
