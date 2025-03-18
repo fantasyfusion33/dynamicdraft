@@ -296,10 +296,10 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
 let leagueData; // Declare leagueData globally
-let inviteCodes = []; // Declare inviteCodes globally
+let invite_codes = []; // Declare invite_codes globally
 
 // Generate invite codes for each team
-function generateInviteCodes(count) {
+function generateinvite_codes(count) {
   return Array.from({ length: count }, () => uuidv4());
 }
 
@@ -366,7 +366,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
 
   // Generate league ID
 const leagueId = uuidv4();
-const inviteCodes = generateInviteCodes(leagueSizeSlider.value); // Initialize inviteCodes
+const invite_codes = generateinvite_codes(leagueSizeSlider.value); // Initialize invite_codes
 console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
  
@@ -397,7 +397,7 @@ if (team1Name) {
     teamCount: leagueSizeSlider.value,
     teamNames: teamNames, // Include teamNames array
     teamIDs: teamIDs, // Add teamIDs to the league data
-    invite_codes: inviteCodes,
+    invite_codes: invite_codes,
     wildcardRound: document.getElementById('wildcard').checked,
     waivers: document.getElementById('waiverSystem').checked,
     bonusPoints: document.getElementById('bonusPoints').checked,
@@ -408,7 +408,7 @@ if (team1Name) {
   };
 
 const inviteLinks = teamIDs.map((teamId, index) => 
-  `${window.location.origin}/join.html?league=${leagueId}&team=${teamId}&code=${inviteCodes[index]}`
+  `${window.location.origin}/join.html?league=${leagueId}&team=${teamId}&code=${invite_codes[index]}`
 );
 
 
@@ -421,6 +421,7 @@ const inviteLinks = teamIDs.map((teamId, index) =>
     // Create teams in teams table
 const teams = teamNames.map((name, index) => ({
   id: teamIDs[index], // Use the generated UUID
+  invite_code: invite_codes[index],
   league_id: leagueId,
   name: name,
   owner_id: index === 0 ? ownerId : null, // Assign owner_id to Team 1 (League Manager)
