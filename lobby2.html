@@ -228,9 +228,12 @@ async function fetchLeagueData() {
 function renderTeamList() {
   const teamList = document.getElementById('teamList');
 
-  teamList.innerHTML = teams
+   // Ensure teams are ordered based on draftOrder
+  const orderedTeams = draftOrder.map(id => teams.find(team => team.id === id));
+
+  teamList.innerHTML = orderedTeams
     .map((team, i) => { // Added 'i' to correctly map over teams
-      const isManager = i === 0; // Team at index 0 (first team) is the League Manager
+      const isManager = team.league_manager === TRUE; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
         const isJoined = lobbyStatus[team.id]?.joined || isManager;
       const inviteLink = `join.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
@@ -254,9 +257,6 @@ function renderTeamList() {
     }) // Closing parenthesis correctly placed here
     .join('');
 }
-
-
-
 
     // Move team up in draft order
     function moveTeamUp(i) {
