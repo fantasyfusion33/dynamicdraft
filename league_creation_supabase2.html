@@ -306,17 +306,44 @@ function generateInviteCodes(count) {
 // Create league with invite codes
 async function createLeague(leagueData) {
   try {
-console.log('Inserting league data:', leagueData); // Debugging
-    const { data, error } = await supabase
+    // Insert league into leagues table
+    const { data: league, error: leagueError } = await supabase
       .from('leagues')
       .insert([leagueData])
       .select('id')
       .single();
 
-    if (error) throw error;
+    if (leagueError) throw leagueError;
 
-    console.log('League created successfully:', data);
-    return data.league_id; // Return the newly created league ID
+    // Generate UUIDs for each team
+    const teamIDs = leagueData.teamNames.map(() => crypto.randomUUID());
+
+    // Create teams in teams table
+    const teams = leagueData.teamNames.map((name, index) => ({
+      id: teamIDs[index], // Use the generated UUID
+      league_id: league.id, // Link to the league
+      name: name,
+      owner_id: index === 0 ? leagueData.owner_id : null, // Manager is Team 1
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }));
+
+    const { error: teamsError } = await supabase
+      .from('teams')
+      .insert(teams);
+
+    if (teamsError) throw teamsError;
+
+    // Update league with teamIDs
+    const { error: updateError } = await supabase
+      .from('leagues')
+      .update({ teamIDs: teamIDs })
+      .eq('id', league.id);
+
+    if (updateError) throw updateError;
+
+    console.log('League and teams created successfully');
+    return league.id;
   } catch (err) {
     console.error('Error creating league:', err);
     alert('Failed to create league. Please try again.');
