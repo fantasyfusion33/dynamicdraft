@@ -136,8 +136,6 @@ async function validateInvite() {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('error').textContent = err.message;
     document.getElementById('error').style.display = 'block';
-    console.log("Type of league.teamIDs:", typeof "teamIDs");
-    console.log("Value of league.teamIDs:", "teamIDs");
     console.error('Join error:', err);
   }
 }
