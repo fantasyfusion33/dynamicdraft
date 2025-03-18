@@ -80,7 +80,7 @@
 async function validateInvite() {
   const params = new URLSearchParams(window.location.search);
   const leagueId = params.get('league');
-  const teamId = params.get('team'); // Use team_id instead of team_index
+  let teamId = params.get('team'); // Use team_id instead of team_index
     teamId = uuidv4(teamId); // Ensure proper UUID format
   const inviteCode = params.get('code');
 
