@@ -122,7 +122,7 @@ const teamIndex = parseInt(params.get('team')); // Use 0-based index
     .upsert({
       league_id: leagueId,
       team_index: teamIndex,
-      team_id: teamIDs[],
+      team_id: teamIDs[i],
       joined: true,
       last_ping: new Date().toISOString()
     }); 
