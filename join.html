@@ -79,72 +79,66 @@
 async function validateInvite() {
   const params = new URLSearchParams(window.location.search);
   const leagueId = params.get('league');
-const teamIndex = parseInt(params.get('team')); // Use 0-based index
+  const teamId = params.get('team'); // Use team_id instead of team_index
   const inviteCode = params.get('code');
 
-      try {
-        // Validate parameters
-        if (!leagueId || isNaN(teamIndex)) {
-          throw new Error('Invalid invite link');
-        }
+  try {
+    // Validate parameters
+    if (!leagueId || !teamId) {
+      throw new Error('Invalid invite link');
+    }
 
     // Debugging: Log values
     console.log('Validating:', {
       leagueId,
-      teamIndex: teamIndex, // Adjusted for PostgreSQL
+      teamId,
       inviteCode
     });
 
+    // Validate invite code
     const { data: isValid, error: validationError } = await supabase
       .rpc('validate_invite', {
         p_league: leagueId,
-        p_team: teamIndex, // PostgreSQL uses 0-based JSONB arrays
+        p_team: teamId, // Use team_id
         p_code: inviteCode
       });
 
-        if (validationError) throw validationError;
-        if (!isValid) throw new Error('Invalid or expired invite code');
+    if (validationError) throw validationError;
+    if (!isValid) throw new Error('Invalid or expired invite code');
 
-        // Check if team slot is available
-        const { data: lobbyData, error: lobbyError } = await supabase
-          .from('lobby_status')
-          .select('joined')
-          .eq('league_id', leagueId)
-          .eq('team_index', teamIndex)
-          .single();
+    // Check if team is already claimed
+    const { data: team, error: teamError } = await supabase
+      .from('teams')
+      .select('owner_id')
+      .eq('id', teamId) // Use team_id
+      .single();
 
-        if (lobbyError && lobbyError.code !== 'PGRST116') throw lobbyError;
-        if (lobbyData?.joined) throw new Error('Team slot already claimed');
+    if (teamError) throw teamError;
+    if (team.owner_id) throw new Error('Team slot already claimed');
 
-        // Mark team as joined
-  const { error: upsertError } = await supabase
-    .from('lobby_status')
-    .upsert({
-      league_id: leagueId,
-      team_index: teamIndex,
-      team_id: teamIDs[i],
-      joined: true,
-      last_ping: new Date().toISOString()
-    }); 
+    // Claim the team
+    const { error: updateError } = await supabase
+      .from('teams')
+      .update({ owner_id: 'user-uuid-here' }) // Replace with actual user ID
+      .eq('id', teamId); // Use team_id
 
-  if (upsertError) throw upsertError;
+    if (updateError) throw updateError;
 
-        // Redirect to lobby with team context
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('success').textContent = 'Success! Redirecting...';
-        document.getElementById('success').style.display = 'block';
+    // Redirect to lobby
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('success').textContent = 'Success! Redirecting...';
+    document.getElementById('success').style.display = 'block';
 
-        setTimeout(() => {
-          window.location.href = `lobby.html?league=${leagueId}&team=${teamIndex}`;
-        }, 2000);
-
-      } catch (err) {
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('error').textContent = err.message;
-        document.getElementById('error').style.display = 'block';
-        console.error('Join error:', err);
-      }
-    }
+    setTimeout(() => {
+      window.location.href = `lobby.html?league=${leagueId}&team=${teamId}`;
+    }, 2000);
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').textContent = err.message;
+    document.getElementById('error').style.display = 'block';
+    console.error('Join error:', err);
+  }
+}
 
     // Start validation on page load
     validateInvite();
