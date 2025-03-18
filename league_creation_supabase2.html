@@ -369,17 +369,10 @@ const leagueId = uuidv4();
 const inviteCodes = generateInviteCodes(leagueSizeSlider.value); // Initialize inviteCodes
 console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
-  // Set default owner ID
-  const ownerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5';
-  console.log(ownerId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
-
+ 
   // Collect team names
   const teamNames = [];
   const teamIDs = [];
-
-  // Generate a UUID for Team 1 (League Manager)
-const team1ID = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5'; // UUID for Team 1
-teamIDs.push(team1ID); // Add Team 1's ID to the teamIDs array
 
 // Add Team 1's name
 const team1Name = document.getElementById('team1Name').value.trim();
