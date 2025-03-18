@@ -318,7 +318,7 @@ async function startDraft() {
           .upsert({
             league_id: leagueId,
             team_index: 1, // Manager is always Team 1
-            team_id: teamIDs[1]
+            team_id: teamIDs[1],
             joined: true,
             last_ping: new Date().toISOString()
           });
