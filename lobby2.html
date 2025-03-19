@@ -401,7 +401,7 @@ async function startDraft() {
 
     // 4. Redirect the manager to the draft page
     const teamid = leagueData.teamIDs.find(id => draftOrder.includes(id)) || leagueData.teamIDs[0];
-    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamid}&admin=true`;
+    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamid}&league=${leagueId}&admin=true`;
     window.location.href = draftUrl;
 
     // 5. Update league status
@@ -424,11 +424,11 @@ function subscribeToLobbyEvents() {
       const { draftId, teamIds } = payload.payload;
 
       // Find the user's team ID
-    const teamid = leagueData.teamIDs.find(id => draftOrder.includes(id)) || leagueData.teamIDs[0];
+    const teamid = teamIds.find(id => draftOrder.includes(id));
 
       if (teamid) {
         // Redirect the user to their draft page
-        const draftUrl = `draft_supabase2.html?draft=${draftId}&team=${teamid}`;
+        const draftUrl = `draft_supabase2.html?draft=${draftId}&team=${teamid}&league=${leagueId}`;
         window.location.href = draftUrl;
       } else {
         console.error('User team ID not found in draft order:', teamid);
