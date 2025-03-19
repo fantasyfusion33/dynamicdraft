@@ -388,7 +388,7 @@ async function startDraft() {
     if (stateError) throw stateError;
 
     // 3. Redirect all users
-    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamId}`;
+    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${team.id}`;
     
     // For manager, add admin param
     if (isManager) {
