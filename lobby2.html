@@ -358,7 +358,7 @@ async function startDraft() {
       .from('drafts')
       .insert([{
         league_id: leagueId,
-        league_name: leagueData.leagueName,
+        league_name: league.leagueName,
         team_names: draftOrder.map(id => 
           teams.find(t => t.id === id)?.name
         ),
