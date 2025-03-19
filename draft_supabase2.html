@@ -976,17 +976,32 @@ const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
-  async function initializeDraft() {
-  const params = new URLSearchParams(window.location.search);
-  const draftId = params.get('draft');
-  const teamId = params.get('team');
-  const leagueId = params.get('league');
-  const isAdmin = params.has('admin');
-    // Global variables
+  // Global variables
+let draftId = null;
+let teamId = null;
+let leagueId = null;
+let isAdmin = false;
 let teamNames = [];
 let teamCount = 0;
 let leagueData = {};
+let draftState = {
+  draftId: uuidv4(),
+  leagueId: null,
+  currentPick: 0,
+  draftOrder: [],
+  playerRosters: {},
+  settings: null,
+  timerId: null,
+};
+  
+  async function initializeDraft() {
+  const params = new URLSearchParams(window.location.search);
 
+  // Assign values to global variables
+  draftId = params.get('draft');
+  teamId = params.get('team');
+  leagueId = params.get('league');
+  isAdmin = params.has('admin');
 
   // Load draft state
   const { data: draftState } = await supabase
@@ -995,12 +1010,26 @@ let leagueData = {};
     .eq('draft_id', draftId)
     .single();
 
+      if (draftStateError) {
+    console.error('Error fetching draft state:', draftStateError);
+    alert('Failed to fetch draft state. Please try again.');
+    return;
+  }
+     // Assign draft state to global variable
+  draftState = draftStateData;
+
   // Load team data
   const { data: team } = await supabase
     .from('teams')
     .select('*')
     .eq('id', teamId)
     .single();
+
+      if (teamError) {
+    console.error('Error fetching team data:', teamError);
+    alert('Failed to fetch team data. Please try again.');
+    return;
+  }
 
   // Real-time subscription
   const channel = supabase
@@ -1021,6 +1050,7 @@ let leagueData = {};
       el.style.display = 'inline-block';
     });
   }
+      console.log('Draft initialized successfully:', { draftId, teamId, leagueId, isAdmin });
 }
 
 // ========================
@@ -1235,7 +1265,7 @@ async function startDraft() {
       .from('draft_state')
       .insert([{
         id: draftState.draftId,
-        league_id: draftState.leagueId,
+        league_id: leagueId,
         current_pick: 0,
         draft_order: draftState.draftOrder,
         player_rosters: draftState.playerRosters,
