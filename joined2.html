@@ -141,8 +141,6 @@ if (upsertError) {
 
 console.log('Successfully updated lobby status.');
 
-        if (updateError) throw updateError;
-
         // Show success message and redirect to lobby
         document.getElementById('loading').style.display = 'none';
         document.getElementById('success').textContent = 'Success! Redirecting to the lobby...';
