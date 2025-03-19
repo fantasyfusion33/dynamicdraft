@@ -302,8 +302,8 @@ function subscribeToLobby() {
 
         console.log('Lobby Status Changed:', payload.new);
         console.table(
-          Object.entries(lobbyStatus).map(([teamId, status]) => ({
-            team_id: teamId,
+          Object.entries(lobbyStatus).map(([id, status]) => ({
+            team_id: id,
             joined: status.joined,
           }))
         );
