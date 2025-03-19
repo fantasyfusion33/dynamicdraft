@@ -976,6 +976,46 @@ const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
+  async function initializeDraft() {
+  const params = new URLSearchParams(window.location.search);
+  const draftId = params.get('draft');
+  const teamId = params.get('team');
+  const isAdmin = params.has('admin');
+
+  // Load draft state
+  const { data: draftState } = await supabase
+    .from('draft_state')
+    .select('*')
+    .eq('draft_id', draftId)
+    .single();
+
+  // Load team data
+  const { data: team } = await supabase
+    .from('teams')
+    .select('*')
+    .eq('id', teamId)
+    .single();
+
+  // Real-time subscription
+  const channel = supabase
+    .channel('draft-channel')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'draft_state'
+    }, (payload) => {
+      updateDraftUI(payload.new);
+    })
+    .subscribe();
+
+  // Initialize admin controls
+  if (isAdmin) {
+    document.getElementById('admin-controls').style.display = 'block';
+    document.querySelectorAll('.admin-only').forEach(el => {
+      el.style.display = 'inline-block';
+    });
+  }
+}
   // In draft.html
 const { data } = await supabase
   .from('draft_state')
@@ -985,6 +1025,105 @@ const { data } = await supabase
 
 if (data.status !== 'active') showHoldingPage();
 
+// ========================
+// Admin Controls
+// ========================
+  
+async function pauseDraft() {
+  await supabase
+    .from('draft_state')
+    .update({ 
+      is_paused: true,
+      status: 'paused'
+    })
+    .eq('draft_id', draftId);
+}
+
+async function resumeDraft() {
+  await supabase
+    .from('draft_state')
+    .update({ 
+      is_paused: false,
+      status: 'active'
+    })
+    .eq('draft_id', draftId);
+}
+
+async function redoPick() {
+  const { data: state } = await supabase
+    .from('draft_state')
+    .select('current_pick')
+    .eq('draft_id', draftId)
+    .single();
+
+  await supabase
+    .from('draft_state')
+    .update({ current_pick: state.current_pick - 1 })
+    .eq('draft_id', draftId);
+}
+
+async function advancePick() {
+  const { data: state } = await supabase
+    .from('draft_state')
+    .select('current_pick')
+    .eq('draft_id', draftId)
+    .single();
+
+  await supabase
+    .from('draft_state')
+    .update({ current_pick: state.current_pick + 1 })
+    .eq('draft_id', draftId);
+}
+
+// ========================
+// updateDraftUI 
+// ========================
+  function updateDraftUI(state) {
+  // Update current pick
+  document.getElementById('current-pick').textContent = state.current_pick;
+
+  // Update draft status
+  document.getElementById('draft-status').textContent = state.status;
+
+  // Update player rosters
+  const rostersContainer = document.getElementById('rosters');
+  rostersContainer.innerHTML = Object.entries(state.player_rosters)
+    .map(([teamId, roster]) => {
+      const team = teams.find(t => t.id === teamId);
+      return `
+        <div class="roster">
+          <h3>${team.name}</h3>
+          <ul>
+            ${roster.map(player => `<li>${player.name}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    })
+    .join('');
+
+  // Update pause/resume button
+  const pauseButton = document.getElementById('pause-button');
+  if (state.is_paused) {
+    pauseButton.textContent = 'Resume Draft';
+    pauseButton.onclick = resumeDraft;
+  } else {
+    pauseButton.textContent = 'Pause Draft';
+    pauseButton.onclick = pauseDraft;
+  }
+}
+
+  function subscribeToLobby() {
+  return supabase
+    .channel('draft-channel')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'draft_state'
+    }, (payload) => {
+      updateDraftUI(payload.new);
+    })
+    .subscribe();
+}
 // ========================
 // Dynamic League Initialization
 // ========================
@@ -1261,18 +1400,6 @@ function startWildcard() {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   // Render teams for the wildcard round
   renderTeams();
-}
-
-  // Pause draft
-function pauseDraft() {
-  supabase.from('draft_state')
-    .update({ status: 'paused' })
-    .eq('league_id', leagueId);
-}
-
-// Redo pick
-async function redoPick() {
-  const { data } = await supabase.rpc('undo_last_pick', { league_id: leagueId });
 }
 
 // ========================
