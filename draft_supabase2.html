@@ -991,6 +991,8 @@ const params = new URLSearchParams(window.location.search);
 let teamNames = [];
 let teamCount = 0;
 let leagueData = {};
+let draftState = null; // Initialize as null
+
   async function fetchDraftState(draftId) {
   const { data, error } = await supabase
     .from('draft_state')
@@ -1020,21 +1022,24 @@ async function updateDraftState(draftId, updates) {
   return data;
 }
   async function initializeDraft() {
+  const params = new URLSearchParams(window.location.search);
+  draftId = params.get('draft'); // Assign draftId globally
 
-  // Load draft state
-  const { data: draftState } = await supabase
-    .from('draft_state')
-    .select('*')
-    .eq('draft_id', draftId)
-    .single();
-
-      if (draftStateError) {
-    console.error('Error fetching draft state:', draftStateError);
-    alert('Failed to fetch draft state. Please try again.');
+  if (!draftId) {
+    console.error('Draft ID is missing from the URL.');
     return;
   }
-     // Assign draft state to global variable
-  draftState = draftStateData;
+
+  try {
+    // Fetch draft state and assign it to the global variable
+    draftState = await fetchDraftState(draftId);
+
+    if (!draftState) {
+      console.error('Failed to fetch draft state.');
+      return;
+    }
+
+    console.log('Draft state fetched successfully:', draftState);
 
   // Load team data
   const { data: team } = await supabase
