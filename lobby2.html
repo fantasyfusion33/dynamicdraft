@@ -353,27 +353,57 @@ function subscribeToLobby() {
 // Start the draft
 async function startDraft() {
   try {
-    // Save draft order to drafts table
-    const { error } = await supabase
+    // 1. Create draft record
+    const { data: newDraft, error: draftError } = await supabase
       .from('drafts')
-      .insert([
-        {
-          league_id: leagueId,
-          draft_order: draftOrder,
-          created_at: new Date().toISOString(),
-        },
-      ]);
+      .insert([{
+        league_id: leagueId,
+        league_name: leagueData.leagueName,
+        team_names: draftOrder.map(id => 
+          teams.find(t => t.id === id)?.name
+        ),
+        draft_order: draftOrder,
+        roster_ids: [] // Initialize empty roster array
+      }])
+      .select('id')
+      .single();
 
-    if (error) throw error;
+    if (draftError) throw draftError;
 
-    // Redirect ALL users to draft page
-    window.location.href = `draft_supabase2.html?league=${leagueId}`;
+    // 2. Create initial draft state
+    const { error: stateError } = await supabase
+      .from('draft_state')
+      .insert({
+        draft_id: newDraft.id,
+        current_pick: 0,
+        status: 'not_started',
+        league_id: leagueId
+      });
+
+    if (stateError) throw stateError;
+
+    // 3. Redirect all users
+    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamId}`;
+    
+    // For manager, add admin param
+    if (isManager) {
+      window.location.href = `${draftUrl}&admin=true`;
+    } else {
+      window.location.href = draftUrl;
+    }
+
+    // 4. Update league status
+    await supabase
+      .from('leagues')
+      .update({ status: 'drafting' })
+      .eq('id', leagueId);
+
   } catch (err) {
-    console.error("Error starting draft:", err);
-    alert("Failed to start draft. Please try again.");
+    console.error('Error starting draft:', err);
+    alert('Failed to start draft. Please try again.');
   }
 }
-
+    
 // Initialize lobby
 document.addEventListener("DOMContentLoaded", async () => {
   const leagueData = await fetchLeagueData();
