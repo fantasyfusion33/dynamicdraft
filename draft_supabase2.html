@@ -989,17 +989,9 @@ const params = new URLSearchParams(window.location.search);
   leagueId = params.get('league');
   isAdmin = params.has('admin');
 let teamNames = [];
-let teamCount = 0;
+let teamCount;
 let leagueData = {};
-let draftState = {
-  draftId: uuidv4(),
-  leagueId: null,
-  currentPick: 1,
-  draftOrder: [],
-  playerRosters: {},
-  settings: null,
-  timerId: null,
-};
+let draftState = {};
 
   async function initializeDraft() {
 
