@@ -236,6 +236,7 @@ function renderTeamList() {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
       const isJoined = lobbyStatus[team.id]?.joined || isManager; // Check if team is joined
+      const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
 
       return `
         <div class="team-item" data-team-id="${team.id}">
@@ -243,6 +244,9 @@ function renderTeamList() {
             <span class="draft-order">${i + 1}</span>
             <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
             <div class="status-circle ${isJoined ? 'joined' : ''}"></div>
+          </div>
+          <div class="invite-link">
+             <a href="${inviteLink}" target="_blank">Invite Link</a>
           </div>
           <div class="arrow-buttons">
             <button onclick="moveTeamUp(${i})">⬆️</button>
