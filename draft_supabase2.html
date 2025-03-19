@@ -1137,11 +1137,11 @@ async function fetchLeagueData(leagueId) {
 
     console.log('League data fetched successfully:', data);
 
-     // Ensure teamNames is assigned and is always an array
+    // Ensure teamNames is assigned and is always an array
     teamNames = data.teamNames || []; 
     teamCount = data.teamCount; // Ensure teamCount is properly assigned
-    wildcard = data.wildcardRound
-    leagueName = data.leagueName
+    wildcard = data.wildcardRound;
+    leagueName = data.leagueName;
     
     draftState.settings = {
       leagueName,
@@ -1173,55 +1173,67 @@ let draftState = {
 
 // Fetch league data and initialize draft
 document.addEventListener('DOMContentLoaded', async () => {
-  const leagueData = await fetchLeagueData(leagueId);
-  if (!leagueData) return;
+  try {
+    const leagueData = await fetchLeagueData(leagueId);
+    if (!leagueData) return;
 
-  // Initialize draft state
-  draftState.draftOrder = leagueData.draft_order;
-  draftState.settings = {
-    leagueName: leagueData.leagueName,
-    wildcard: leagueData.wildcardRound,
-  };
+    // Initialize draft state
+    draftState.draftOrder = leagueData.draft_order;
+    draftState.settings = {
+      leagueName: leagueData.leagueName,
+      wildcard: leagueData.wildcardRound,
+    };
 
-  // Initialize player rosters
-  draftState.playerRosters = initializePlayerRosters(leagueData.teamCount);
+    // Initialize player rosters
+    draftState.playerRosters = initializePlayerRosters(leagueData.teamCount);
 
-  // Subscribe to draft state changes
-  const draftChannel = supabase
-    .channel('draft')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'draft_state' }, (payload) => {
-      draftState = payload.new;
-      renderTeams();
-      updateClock();
-    })
-    .subscribe();
+    // Subscribe to draft state changes
+    const draftChannel = supabase
+      .channel('draft')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'draft_state' }, (payload) => {
+        draftState = payload.new;
+        renderTeams();
+        updateClock();
+      })
+      .subscribe();
 
-  // Start the draft
-  startDraft();
-});
+    // Start the draft
+    await startDraft();
 
-// Start the draft
-async function startDraft() {
-  const { error } = await supabase
-    .from('draft_state')
-    .insert([{
-      id: draftState.draftId,
-      league_id: draftState.leagueId,
-      current_pick: 0,
-      draft_order: draftState.draftOrder,
-      player_rosters: draftState.playerRosters,
-      status: 'active',
-    }]);
-
-  if (error) throw error;
-}
     // Update UI
     createTeamSidebar();
     updateDraftHeader();
     createDraft();
+
     // Update draft board title
     document.querySelector('h1').textContent = 
       `${leagueData.leagueName} Draft - ${teamCount} Teams`;
+  } catch (err) {
+    console.error('Error initializing draft:', err);
+    alert('Failed to initialize draft. Please try again.');
+  }
+});
+
+// Start the draft
+async function startDraft() {
+  try {
+    const { error } = await supabase
+      .from('draft_state')
+      .insert([{
+        id: draftState.draftId,
+        league_id: draftState.leagueId,
+        current_pick: 0,
+        draft_order: draftState.draftOrder,
+        player_rosters: draftState.playerRosters,
+        status: 'active',
+      }]);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error('Error starting draft:', err);
+    throw err; // Re-throw the error to be handled by the caller
+  }
+}
 
 // ========================
 // Create Draft in Supabase
