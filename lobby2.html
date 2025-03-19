@@ -235,11 +235,11 @@ function renderTeamList() {
     .map((team, i) => {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
-      const isJoined = lobbyStatus[id]?.joined || isManager; // Check if team is joined
+      const isJoined = lobbyStatus[team.id]?.joined || isManager; // Check if team is joined
       const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
 
       return `
-        <div class="team-item" data-team-id="${id}">
+        <div class="team-item" data-team-id="${team.id}">
           <div class="team-info">
             <span class="draft-order">${i + 1}</span>
             <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
@@ -281,7 +281,7 @@ function renderTeamList() {
 function checkAllJoined() {
   const allJoined = draftOrder.every(id => {
     // Check if the team is joined or if it's the manager (auto-joined)
-    return lobbyStatus[id]?.joined || id === leagueManagerTeam?.id;
+    return lobbyStatus[team.id]?.joined || team.id === leagueManagerTeam?.id;
   });
 
   // Enable/disable the "Start Draft" button based on whether all teams have joined
@@ -302,8 +302,8 @@ function subscribeToLobby() {
 
         console.log('Lobby Status Changed:', payload.new);
         console.table(
-          Object.entries(lobbyStatus).map(([id, status]) => ({
-            team_id: id,
+          Object.entries(lobbyStatus).map(([team.id, status]) => ({
+            team_id: team.id,
             joined: status.joined,
           }))
         );
