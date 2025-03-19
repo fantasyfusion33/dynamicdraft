@@ -1138,10 +1138,10 @@ async function fetchLeagueData(leagueId) {
     console.log('League data fetched successfully:', data);
 
     // Ensure teamNames is assigned and is always an array
-    teamNames = data.teamNames || []; 
-    teamCount = data.teamCount; // Ensure teamCount is properly assigned
-    wildcard = data.wildcardRound;
-    leagueName = data.leagueName;
+    const teamNames = data.teamNames || []; 
+    const teamCount = data.teamCount; // Ensure teamCount is properly assigned
+    const wildcard = data.wildcardRound;
+    const leagueName = data.leagueName;
     
     draftState.settings = {
       leagueName,
@@ -1152,7 +1152,7 @@ async function fetchLeagueData(leagueId) {
       bonusPoints: data.bonusPoints,
     };
 
-    return data;
+    return { ...data, teamNames, teamCount }; // Return teamNames and teamCount
   } catch (err) {
     console.error('Error fetching league data:', err);
     alert('Failed to fetch league data. Please try again.');
@@ -1201,13 +1201,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await startDraft();
 
     // Update UI
-    createTeamSidebar();
+    createTeamSidebar(leagueData.teamNames, leagueData.teamCount); // Pass teamNames and teamCount
     updateDraftHeader();
     createDraft();
 
     // Update draft board title
     document.querySelector('h1').textContent = 
-      `${leagueData.leagueName} Draft - ${teamCount} Teams`;
+      `${leagueData.leagueName} Draft - ${leagueData.teamCount} Teams`;
   } catch (err) {
     console.error('Error initializing draft:', err);
     alert('Failed to initialize draft. Please try again.');
@@ -1234,7 +1234,6 @@ async function startDraft() {
     throw err; // Re-throw the error to be handled by the caller
   }
 }
-
 // ========================
 // Create Draft in Supabase
 // ========================
