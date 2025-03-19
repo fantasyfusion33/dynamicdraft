@@ -235,7 +235,7 @@ function renderTeamList() {
     .map((team, i) => {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
-      const isJoined = lobbyStatus[team.id]?.joined || isManager; // Check if team is joined
+      const isJoined = !!lobbyStatus[team.id]; // Check if the team has a row in lobby_status
       const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
 
       return `
@@ -277,11 +277,39 @@ function renderTeamList() {
       }
     }
 
+    async function initializeLobby() {
+  // Fetch lobby status for all teams
+  const { data: initialLobbyStatus, error } = await supabase
+    .from('lobby_status')
+    .select('*')
+    .in('team_id', teams.map(team => team.id));
+
+  if (error) {
+    console.error('Error fetching lobby status:', error);
+    return;
+  }
+
+  // Populate lobbyStatus
+  initialLobbyStatus.forEach(status => {
+    lobbyStatus[status.team_id] = status;
+  });
+
+  // Render the team list and check if all teams have joined
+  renderTeamList();
+  checkAllJoined();
+
+  // Subscribe to real-time updates
+  subscribeToLobby();
+}
+
+// Call this function when the page loads
+initializeLobby();
+
         // Check if all teams have joined
 function checkAllJoined() {
-  // Check if all teams have joined
+  // Check if all teams have a row in lobby_status
   const allJoined = teams.every(team => 
-    lobbyStatus[team.id]?.joined || team.id === leagueManagerTeam?.id
+    !!lobbyStatus[team.id] || team.id === leagueManagerTeam?.id
   );
 
   // Enable/disable the "Start Draft" button
@@ -291,22 +319,15 @@ function checkAllJoined() {
 function subscribeToLobby() {
   return supabase
     .channel('lobby')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'lobby_status' },
+    .on('postgres_changes', 
+      { 
+        event: 'INSERT', // Only listen for new rows
+        schema: 'public', 
+        table: 'lobby_status' 
+      }, 
       (payload) => {
-        if (!payload.new || !payload.new.team_id) return;
-
-        // Update the lobbyStatus object with the new status
+        // Add the new team to lobbyStatus
         lobbyStatus[payload.new.team_id] = payload.new;
-
-        console.log('Lobby Status Changed:', payload.new);
-        console.table(
-          Object.entries(lobbyStatus).map(([id, status]) => ({
-            team_id: team.id,
-            joined: status.joined,
-          }))
-        );
 
         // Re-render the team list and check if all teams have joined
         renderTeamList();
