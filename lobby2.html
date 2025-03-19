@@ -279,12 +279,12 @@ function renderTeamList() {
 
         // Check if all teams have joined
 function checkAllJoined() {
-  const allJoined = draftOrder.every(id => {
-    // Check if the team is joined or if it's the manager (auto-joined)
-    return lobbyStatus[team.id]?.joined || team.id === leagueManagerTeam?.id;
-  });
+  // Check if all teams have joined
+  const allJoined = teams.every(team => 
+    lobbyStatus[team.id]?.joined || team.id === leagueManagerTeam?.id
+  );
 
-  // Enable/disable the "Start Draft" button based on whether all teams have joined
+  // Enable/disable the "Start Draft" button
   document.getElementById('startDraftButton').disabled = !allJoined;
 }
 
@@ -293,7 +293,7 @@ function subscribeToLobby() {
     .channel('lobby')
     .on(
       'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'lobby_status' },
+      { event: '*', schema: 'public', table: 'lobby_status' },
       (payload) => {
         if (!payload.new || !payload.new.team_id) return;
 
