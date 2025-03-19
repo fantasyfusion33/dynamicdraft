@@ -225,20 +225,18 @@ async function fetchLeagueData() {
     const isManager = role === 'manager';
   console.log("teamIDs Array:", teamIDs);
 
-    // Render team list
 function renderTeamList() {
   const teamList = document.getElementById('teamList');
 
-   // Ensure teams are ordered based on draftOrder
+  // Ensure teams are ordered based on draftOrder
   const orderedTeams = draftOrder.map(id => teams.find(team => team.id === id));
 
   teamList.innerHTML = orderedTeams
-    .map((team, i) => { // Added 'i' to correctly map over teams
+    .map((team, i) => {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
-        const isJoined = lobbyStatus[team.id]?.joined || isManager;
-      const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
-      
+      const isJoined = lobbyStatus[team.id]?.joined || isManager; // Check if team is joined
+
       return `
         <div class="team-item" data-team-id="${team.id}">
           <div class="team-info">
@@ -246,16 +244,13 @@ function renderTeamList() {
             <span class="team-name">${teamName} ${isManager ? '⭐' : ''}</span>
             <div class="status-circle ${isJoined ? 'joined' : ''}"></div>
           </div>
-          <div class="invite-link">
-            <a href="${inviteLink}" target="_blank">Invite Link</a>
-          </div>
           <div class="arrow-buttons">
             <button onclick="moveTeamUp(${i})">⬆️</button>
             <button onclick="moveTeamDown(${i})">⬇️</button>
           </div>
         </div>
       `;
-    }) // Closing parenthesis correctly placed here
+    })
     .join('');
 }
 
@@ -279,34 +274,41 @@ function renderTeamList() {
     }
 
         // Check if all teams have joined
-    function checkAllJoined() {
-      const allJoined = draftOrder.every(teamIndex => 
-        lobbyStatus[teamIndex - 1]?.joined || teamIndex === 1 // Manager is auto-joined
-      );
-      document.getElementById('startDraftButton').disabled = !allJoined;
-    }
+function checkAllJoined() {
+  const allJoined = draftOrder.every(teamId => {
+    // Check if the team is joined or if it's the manager (auto-joined)
+    return lobbyStatus[teamId]?.joined || teamId === leagueManagerTeam?.id;
+  });
 
-// Subscribe to lobby updates
+  // Enable/disable the "Start Draft" button based on whether all teams have joined
+  document.getElementById('startDraftButton').disabled = !allJoined;
+}
+
 function subscribeToLobby() {
   return supabase
     .channel('lobby')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'lobby_status' }, (payload) => {
-      if (!payload.new || !payload.new.team_id) return;
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'lobby_status' },
+      (payload) => {
+        if (!payload.new || !payload.new.team_id) return;
 
-      // Use team_id as the key instead of team_index
-      lobbyStatus[payload.new.team_id] = payload.new;
+        // Update the lobbyStatus object with the new status
+        lobbyStatus[payload.new.team_id] = payload.new;
 
-      console.log("Lobby Status Changed:", payload.new);
-      console.table(
-        Object.entries(lobbyStatus).map(([teamId, status]) => ({
-          team_id: teamId,
-          joined: status.joined,
-        }))
-      );
+        console.log('Lobby Status Changed:', payload.new);
+        console.table(
+          Object.entries(lobbyStatus).map(([teamId, status]) => ({
+            team_id: teamId,
+            joined: status.joined,
+          }))
+        );
 
-      renderTeamList();
-      checkAllJoined();
-    })
+        // Re-render the team list and check if all teams have joined
+        renderTeamList();
+        checkAllJoined();
+      }
+    )
     .subscribe();
 }
 
