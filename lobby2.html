@@ -235,7 +235,7 @@ function renderTeamList() {
     .map((team, i) => {
       const isManager = team.id === leagueManagerTeam?.id; // Team at index 0 (first team) is the League Manager
       const teamName = teamNames[i]; // Correctly accessing teamNames
-      const isJoined = !!lobbyStatus[team.id]; // Check if the team has a row in lobby_status
+      const isJoined = !!lobbyStatus[team.id] || isManager;  // Check if the team has a row in lobby_status
       const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
 
             console.log(`Team ${teamName} (${team.id}): Joined = ${isJoined}`);
