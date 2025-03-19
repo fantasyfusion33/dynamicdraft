@@ -279,9 +279,9 @@ function renderTeamList() {
 
         // Check if all teams have joined
 function checkAllJoined() {
-  const allJoined = draftOrder.every(teamId => {
+  const allJoined = draftOrder.every(id => {
     // Check if the team is joined or if it's the manager (auto-joined)
-    return lobbyStatus[teamId]?.joined || teamId === leagueManagerTeam?.id;
+    return lobbyStatus[id]?.joined || id === leagueManagerTeam?.id;
   });
 
   // Enable/disable the "Start Draft" button based on whether all teams have joined
