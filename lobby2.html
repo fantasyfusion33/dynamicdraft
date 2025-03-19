@@ -375,9 +375,12 @@ async function startDraft() {
       .from('draft_state')
       .insert({
         draft_id: newDraft.id,
-        current_pick: 0,
-        status: 'not_started',
-        league_id: leagueId
+        league_id: leagueId,
+        current_pick: 1, // Default to 1
+        is_paused: false, // Default to false
+        draft_order: draftOrder, // JSONB array of team IDs
+        player_rosters: {}, // Initialize empty JSONB object
+        status: 'pre_draft' // Initial status
       });
 
     if (stateError) throw stateError;
