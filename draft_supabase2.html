@@ -1259,7 +1259,6 @@ async function startDraft() {
     const { error } = await supabase
       .from('draft_state')
       .insert([{
-        id: draftState.draftId,
         league_id: leagueId,
         current_pick: 0,
         draft_order: draftState.draftOrder,
