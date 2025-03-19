@@ -976,11 +976,13 @@ const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
-  // Global variables
-let draftId = null;
-let teamId = null;
-let leagueId = null;
-let isAdmin = false;
+// Global variables
+const params = new URLSearchParams(window.location.search);
+// Assign values to global variables
+  draftId = params.get('draft');
+  teamId = params.get('team');
+  leagueId = params.get('league');
+  isAdmin = params.has('admin');
 let teamNames = [];
 let teamCount = 0;
 let leagueData = {};
@@ -993,15 +995,8 @@ let draftState = {
   settings: null,
   timerId: null,
 };
-  
-  async function initializeDraft() {
-  const params = new URLSearchParams(window.location.search);
 
-  // Assign values to global variables
-  draftId = params.get('draft');
-  teamId = params.get('team');
-  leagueId = params.get('league');
-  isAdmin = params.has('admin');
+  async function initializeDraft() {
 
   // Load draft state
   const { data: draftState } = await supabase
