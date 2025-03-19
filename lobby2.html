@@ -421,23 +421,26 @@ function subscribeToLobbyEvents() {
 
   channel
     .on('broadcast', { event: 'draft_started' }, (payload) => {
-      const { draftId, teamIds } = payload.payload;
+      const { draftId } = payload.payload;
 
-      // Find the user's team ID
-    const teamid = teamIds.find(id => draftOrder.includes(id));
+      // Extract teamId from the current lobby URL parameters
+      const params = new URLSearchParams(window.location.search);
+      const teamId = params.get('team');
 
-      if (teamid) {
-        // Redirect the user to their draft page
-        const draftUrl = `draft_supabase2.html?draft=${draftId}&team=${teamid}&league=${leagueId}`;
+      if (teamId) {
+        // Redirect the user to their draft page with the correct teamId
+        const draftUrl = `draft_supabase2.html?draft=${draftId}&team=${teamId}&league=${leagueId}`;
         window.location.href = draftUrl;
       } else {
-        console.error('User team ID not found in draft order:', teamid);
+        console.error('Team ID not found in URL:', teamId);
       }
     })
     .subscribe();
 
   return channel;
-}    
+}
+
+    
 // Initialize lobby
 document.addEventListener("DOMContentLoaded", async () => {
   const leagueData = await fetchLeagueData();
