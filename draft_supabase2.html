@@ -965,6 +965,11 @@
     </div>
   </div>
 </div>
+<div id="admin-controls" class="admin-only" style="display: none;">
+  <button onclick="pauseDraft()">⏸️ Pause</button>
+  <button onclick="redoPick()">↩️ Redo Pick</button>
+  <button onclick="advancePick()">⏭️ Next Pick</button>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
@@ -989,7 +994,7 @@ let leagueData = {};
 let draftState = {
   draftId: uuidv4(),
   leagueId: null,
-  currentPick: 0,
+  currentPick: 1,
   draftOrder: [],
   playerRosters: {},
   settings: null,
