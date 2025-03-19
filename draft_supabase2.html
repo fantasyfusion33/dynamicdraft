@@ -989,10 +989,36 @@ const params = new URLSearchParams(window.location.search);
   leagueId = params.get('league');
   isAdmin = params.has('admin');
 let teamNames = [];
-let teamCount;
+let teamCount = 0;
 let leagueData = {};
-let draftState = {};
+  async function fetchDraftState(draftId) {
+  const { data, error } = await supabase
+    .from('draft_state')
+    .select('*')
+    .eq('draft_id', draftId)
+    .single();
 
+  if (error) {
+    console.error('Error fetching draft state:', error);
+    return null;
+  }
+
+  return data;
+}
+async function updateDraftState(draftId, updates) {
+  const { data, error } = await supabase
+    .from('draft_state')
+    .update(updates)
+    .eq('draft_id', draftId)
+    .select();
+
+  if (error) {
+    console.error('Error updating draft state:', error);
+    return null;
+  }
+
+  return data;
+}
   async function initializeDraft() {
 
   // Load draft state
@@ -1193,7 +1219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!leagueData) return;
 
     // Initialize draft state
-    draftState.draftOrder = leagueData.draft_order;
+    draftState.draft_order = leagueData.draft_order;
     draftState.settings = {
       leagueName: leagueData.leagueName,
       wildcard: leagueData.wildcardRound,
@@ -1258,7 +1284,7 @@ async function startDraft() {
       .insert([{
         league_id: leagueId,
         current_pick: 0,
-        draft_order: draftState.draftOrder,
+        draft_order: draftState.draft_order,
         player_rosters: draftState.playerRosters,
         status: 'active',
       }]);
@@ -1281,7 +1307,7 @@ async function createDraft() {
         id: draftState.draftId, // Use the generated draft_id
         league_name: leagueName, // Required: league_name
         team_names: teamNames, // Required: team_names (jsonb)
-        draft_order: draftState.draftOrder, // Required: draft_order (jsonb)
+        draft_order: draftState.draft_order, // Required: draft_order (jsonb)
         league_id: draftState.leagueId, // Required: league_id (uuid)
         created_at: new Date().toISOString(), // Optional: created_at
       }])
@@ -1300,7 +1326,7 @@ async function createDraft() {
 // Fixed Switch Roster Function
 // ========================
 function switchRosterToCurrentPlayer() {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayerNumber = draftState.draft_order[draftState.current_pick];
   const teamSelector = document.getElementById('teamSelector');
   
   // Update the selector
@@ -1315,16 +1341,16 @@ function switchRosterToCurrentPlayer() {
 // ========================
 
 function updateDraftHeader() {
-  const currentPlayer = draftState.draftOrder[draftState.currentPick];
-  const round = Math.floor(draftState.currentPick / teamCount) + 1;
+  const currentPlayer = draftState.draft_order[draftState.current_pick];
+  const round = Math.floor(draftState.current_Pick / teamCount) + 1;
   const isWildcardRound = round === 13 && wildcard !== 'off';
-  const pick = (draftState.currentPick % teamCount) + 1;
+  const pick = (draftState.current_Pick % teamCount) + 1;
   const teamName = teamNames[currentPlayer - 1];
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
     <strong>${teamName} - ${isWildcardRound ? 
-      'Wildcard Round' : `Round ${Math.min(round, 13)}.${(draftState.currentPick % teamCount) + 1}`}
+      'Wildcard Round' : `Round ${Math.min(round, 13)}.${(draftState.current_pick % teamCount) + 1}`}
     </strong>
   `;
 }
@@ -1385,14 +1411,14 @@ async function saveDraftState() {
     const { data, error } = await supabase
       .from('draft_state')
       .upsert([{
-        draft_id: draftState.draftId,
-        current_pick: draftState.currentPick,
-        draft_order: draftState.draftOrder,
+        draft_id: draftState.draft_id,
+        current_pick: draftState.current_pick,
+        draft_order: draftState.draft_order,
         player_rosters: draftState.playerRosters,
         league_id: draftState.leagueId,
         created_at: new Date().toISOString(),
       }])
-      .eq('draft_id', draftState.draftId);
+      .eq('draft_id', draftState.draft_id);
 
     if (error) throw error;
 
@@ -1404,24 +1430,24 @@ async function saveDraftState() {
 }
 
 function updateDraftProgress() {
-  const progress = (draftState.currentPick / draftState.totalPicks) * 100;
+  const progress = (draftState.current_pick / draftState.totalPicks) * 100;
   document.querySelector('.draft-progress').style.width = `${progress}%`;
 }
 
 function advanceDraft() {
-  draftState.currentPick++;
+  draftState.current_pick++;
 
   // Save draft progress to Supabase
   saveDraftState();
   
   // End draft condition
-  if (draftState.currentPick >= draftState.totalPicks) {
+  if (draftState.current_pick >= draftState.totalPicks) {
     endDraft();
     return;
   }
 
  // If wildcard is enabled, show special message at start of round 13
-  if (draftState.currentPick === 12 * teamCount && 
+  if (draftState.current_pick === 12 * teamCount && 
      wildcard) {
   alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
   }
@@ -1807,7 +1833,7 @@ renderTeams();
 // Draft state
 let currentPlayer = 1; // 1 or 2
 let currentRound = 1;
-let currentPick = 1;
+let current_pick = 1;
 let totalPicks = 0; // Track total picks
 
 // Initialize playerRosters
@@ -1826,9 +1852,9 @@ for (let i = 1; i <= teamCount; i++) {
 
 // Auto-draft the team with the lowest odds
 function autoDraftTeam() {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayerNumber = draftState.draft_order[draftState.current_pick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = Math.floor(draftState.currentPick / teamCount) + 1 === 13;
+  const isWildcardRound = Math.floor(draftState.current_pick / teamCount) + 1 === 13;
 
   // 1. Filter eligible teams
   const eligibleTeams = DraftableTeams.filter(team => {
@@ -1861,9 +1887,9 @@ function autoDraftTeam() {
   
 // Draft a team 
 function draftTeam(teamId) {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayerNumber = draftState.draft_order[draftState.current_Pick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = Math.floor(draftState.currentPick / teamCount) + 1 === 13;
+  const isWildcardRound = Math.floor(draftState.current_pick / teamCount) + 1 === 13;
 
   // Find team in DraftableTeams
   const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
@@ -1879,7 +1905,7 @@ function draftTeam(teamId) {
       ...team, 
       wildcard: true,
       round: 13,
-      pick: draftState.currentPick - (12 * teamCount) + 1
+      pick: draftState.current_pick - (12 * teamCount) + 1
     });
   } else {
     // Regular round rules (max 2 per sport)
@@ -1889,8 +1915,8 @@ function draftTeam(teamId) {
     }
     currentPlayer[team.sport].push({
       ...team,
-      round: Math.floor(draftState.currentPick / teamCount) + 1,
-      pick: (draftState.currentPick % teamCount) + 1
+      round: Math.floor(draftState.current_pick / teamCount) + 1,
+      pick: (draftState.current_pick % teamCount) + 1
     });
   }
 
@@ -1987,13 +2013,13 @@ function updateRosterDisplay(playerNumber) {
 
 // Update My Team Box
 function updateMyTeamBox(team) {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
+  const currentPlayerNumber = draftState.draftOrder[draftState.current_pick];
   const currentPlayer = draftState.playerRosters[currentPlayerNumber];
 
   // Find the sport container using data attributes
   const sportContainer = document.querySelector(`.sport-slot[data-sport="${team.sport}"]`);
   const wildcardContainer = document.querySelector(`.sport-slot[data-sport="Wildcard"]`);
-  const container = draftState.currentPick >= (12 * teamCount) ? wildcardContainer : sportContainer;
+  const container = draftState.current_pick >= (12 * teamCount) ? wildcardContainer : sportContainer;
 
   if (!container) return;
 
@@ -2022,7 +2048,7 @@ function toggleMyTeam() {
 
 // End the draft
 function endDraft() {
-  if (draftState.currentPick < draftState.totalPicks) return;
+  if (draftState.current_pick < draftState.totalPicks) return;
     // Clear the timer
   if (draftState.timerId) {
     clearInterval(draftState.timerId);
