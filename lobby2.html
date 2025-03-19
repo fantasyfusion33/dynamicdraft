@@ -461,10 +461,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     console.log("Manager auto-joined");
   }
-
-    const leagueData = await fetchLeagueData(leagueId);
-  if (!leagueData) return;
-
+  
   // Fetch team data
   const { data: teamData, error: teamError } = await supabase
     .from('teams')
