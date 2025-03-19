@@ -104,32 +104,42 @@
           throw new Error('Team not found in this league.');
         }
 
-        // Check if the team is already joined
-        const { data: lobbyStatus, error: lobbyError } = await supabase
-          .from('lobby_status')
-          .select('*')
-          .eq('team_id', teamId)
-          .single();
+// Check if the team is already joined
+const { data: lobbyStatus, error: lobbyError } = await supabase
+  .from('lobby_status')
+  .select('*')
+  .eq('team_id', teamId)
+  .maybeSingle(); // Returns null if no row exists, preventing a throw error
 
-        console.log('Lobby Status:', lobbyStatus); // Debugging
+console.log('Lobby Status:', lobbyStatus); // Debugging
 
-        if (lobbyError && !lobbyStatus) {
-          throw new Error('Failed to check lobby status.');
-        }
+// If there was an actual error (not just "row not found"), handle it
+if (lobbyError) {
+  console.error('Failed to check lobby status:', lobbyError);
+  throw new Error('Failed to check lobby status.');
+}
 
-        if (lobbyStatus?.joined) {
-          throw new Error('This team has already joined the lobby.');
-        }
+// If team has already joined, prevent duplicate join
+if (lobbyStatus && lobbyStatus.joined) {
+  throw new Error('This team has already joined the lobby.');
+}
 
-        // Mark the team as joined in the lobby_status table
-        const { error: updateError } = await supabase
-          .from('lobby_status')
-          .upsert({
-            team_id: teamId,
-            league_id: leagueId,
-            joined: true,
-            last_ping: new Date().toISOString(),
-          });
+// Mark the team as joined in the lobby_status table
+const { error: upsertError } = await supabase
+  .from('lobby_status')
+  .upsert({
+    team_id: teamId,
+    league_id: leagueId,
+    joined: true,
+    last_ping: new Date().toISOString(),
+  });
+
+if (upsertError) {
+  console.error('Failed to update lobby status:', upsertError);
+  throw new Error('Failed to update lobby status.');
+}
+
+console.log('Successfully updated lobby status.');
 
         if (updateError) throw updateError;
 
