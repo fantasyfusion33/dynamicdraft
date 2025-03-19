@@ -238,6 +238,8 @@ function renderTeamList() {
       const isJoined = !!lobbyStatus[team.id]; // Check if the team has a row in lobby_status
       const inviteLink = `joined2.html?league=${leagueId}&team=${team.id}&code=${inviteCodes[i]}`;
 
+            console.log(`Team ${teamName} (${team.id}): Joined = ${isJoined}`);
+
       return `
         <div class="team-item" data-team-id="${team.id}">
           <div class="team-info">
@@ -289,10 +291,16 @@ function renderTeamList() {
     return;
   }
 
+        // Log the fetched lobby status for debugging
+  console.log('Initial Lobby Status:', initialLobbyStatus);
+      
   // Populate lobbyStatus
   initialLobbyStatus.forEach(status => {
     lobbyStatus[status.team_id] = status;
   });
+
+       // Log the populated lobbyStatus for debugging
+  console.log('Populated Lobby Status:', lobbyStatus);
 
   // Render the team list and check if all teams have joined
   renderTeamList();
@@ -312,6 +320,9 @@ function checkAllJoined() {
     !!lobbyStatus[team.id] || team.id === leagueManagerTeam?.id
   );
 
+    // Log the result for debugging
+  console.log('All Teams Joined:', allJoined);
+
   // Enable/disable the "Start Draft" button
   document.getElementById('startDraftButton').disabled = !allJoined;
 }
@@ -327,7 +338,9 @@ function subscribeToLobby() {
       }, 
       (payload) => {
         // Add the new team to lobbyStatus
+                console.log('Lobby Status Update:', payload.new);
         lobbyStatus[payload.new.team_id] = payload.new;
+                console.log('Updated Lobby Status:', lobbyStatus);
 
         // Re-render the team list and check if all teams have joined
         renderTeamList();
