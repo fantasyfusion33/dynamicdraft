@@ -1123,6 +1123,7 @@ async function advancePick() {
 // Get league ID from URL
 const urlParams = new URLSearchParams(window.location.search);
 const leagueId = urlParams.get('leagueId');
+console.log('Extracted leagueId from URL:', leagueId);
 
 // Fetch league data from Supabase
 async function fetchLeagueData(leagueId) {
