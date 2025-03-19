@@ -387,18 +387,24 @@ async function startDraft() {
 
     if (stateError) throw stateError;
 
-    // 3. Redirect all users
-    const teamid = leagueData.teamIDs.find(id => draftOrder.includes(id)) || leagueData.teamIDs[0];
-    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamid}`;
-    
-    // For manager, add admin param
-    if (isManager) {
-      window.location.href = `${draftUrl}&admin=true`;
-    } else {
-      window.location.href = draftUrl;
-    }
+    // 3. Broadcast a real-time event to all users in the lobby
+    const channel = supabase.channel(`lobby-${leagueId}`);
+    await channel.subscribe();
+    channel.send({
+      type: 'broadcast',
+      event: 'draft_started',
+      payload: {
+        draftId: newDraft.id,
+        teamIds: draftOrder // Array of team IDs in draft order
+      }
+    });
 
-    // 4. Update league status
+    // 4. Redirect the manager to the draft page
+    const teamid = leagueData.teamIDs.find(id => draftOrder.includes(id)) || leagueData.teamIDs[0];
+    const draftUrl = `draft_supabase2.html?draft=${newDraft.id}&team=${teamid}&admin=true`;
+    window.location.href = draftUrl;
+
+    // 5. Update league status
     await supabase
       .from('leagues')
       .update({ status: 'drafting' })
@@ -410,6 +416,28 @@ async function startDraft() {
   }
 }
     
+function subscribeToLobbyEvents() {
+  const channel = supabase.channel(`lobby-${leagueId}`);
+
+  channel
+    .on('broadcast', { event: 'draft_started' }, (payload) => {
+      const { draftId, teamIds } = payload.payload;
+
+      // Find the user's team ID
+    const teamid = leagueData.teamIDs.find(id => draftOrder.includes(id)) || leagueData.teamIDs[0];
+
+      if (teamid) {
+        // Redirect the user to their draft page
+        const draftUrl = `draft_supabase2.html?draft=${draftId}&team=${teamid}`;
+        window.location.href = draftUrl;
+      } else {
+        console.error('User team ID not found in draft order:', teamid);
+      }
+    })
+    .subscribe();
+
+  return channel;
+}    
 // Initialize lobby
 document.addEventListener("DOMContentLoaded", async () => {
   const leagueData = await fetchLeagueData();
@@ -433,6 +461,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     console.log("Manager auto-joined");
   }
+
+    const leagueData = await fetchLeagueData(leagueId);
+  if (!leagueData) return;
+
+  // Fetch team data
+  const { data: teamData, error: teamError } = await supabase
+    .from('teams')
+    .select('*')
+    .in('id', leagueData.teamIDs);
+
+  if (teamError) {
+    console.error('Error fetching teams:', teamError);
+    return;
+  }
+
+  // Assign teams globally
+  teams = teamData;
+
+  // Initialize the lobby
+  await initializeLobby();
+
+  // Subscribe to real-time lobby events
+  subscribeToLobbyEvents();
 
   renderTeamList();
   subscribeToLobby();
