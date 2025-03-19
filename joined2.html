@@ -63,7 +63,7 @@
   <div class="container">
     <div id="loading">
       <div class="loader"></div>
-      <p>Validating your invite...</p>
+      <p>Validating your team...</p>
     </div>
     <div id="error" class="error" style="display: none;"></div>
     <div id="success" class="success" style="display: none;"></div>
@@ -76,19 +76,18 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Validate invite and mark team as joined
+    // Validate team and mark as joined
     async function validateAndJoin() {
       const params = new URLSearchParams(window.location.search);
       const leagueId = params.get('league');
       const teamId = params.get('team');
-      const inviteCode = params.get('code');
 
-      console.log('URL Parameters:', { leagueId, teamId, inviteCode }); // Debugging
+      console.log('URL Parameters:', { leagueId, teamId }); // Debugging
 
       try {
         // Validate parameters
-        if (!leagueId || !teamId || !inviteCode) {
-          throw new Error('Invalid invite link. Please check the URL.');
+        if (!leagueId || !teamId) {
+          throw new Error('Invalid link. Please check the URL.');
         }
 
         // Fetch the team from the database
@@ -103,13 +102,6 @@
 
         if (teamError || !team) {
           throw new Error('Team not found in this league.');
-        }
-
-        // Validate the invite code
-        if (team.invite_code !== inviteCode) {
-          console.log('Stored Invite Code:', team.invite_code); // Debugging
-          console.log('Provided Invite Code:', inviteCode); // Debugging
-          throw new Error('Invalid or expired invite code.');
         }
 
         // Check if the team is already joined
