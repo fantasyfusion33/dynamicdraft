@@ -175,6 +175,7 @@
     let lobbyStatus = [];
     let teams = [];
     let teamIDs = [];
+    let leagueData = {}; // Global object to store league details
 
 async function fetchLeagueData() {
   try {
@@ -186,9 +187,10 @@ async function fetchLeagueData() {
       .single();
 
     if (error) throw error;
+    leagueData = league; // ✅ Store globally
 
     // Log the fetched league data for debugging
-    console.log('Fetched league data:', league);
+    console.log('Fetched league data:', leagueData);
 
     // Ensure teamIDs is an array
     if (!Array.isArray(league.teamIDs)) {
@@ -358,7 +360,7 @@ async function startDraft() {
       .from('drafts')
       .insert([{
         league_id: leagueId,
-        league_name: league.leagueName,
+        league_name: leagueData.leagueName,
         team_names: draftOrder.map(id => 
           teams.find(t => t.id === id)?.name
         ),
