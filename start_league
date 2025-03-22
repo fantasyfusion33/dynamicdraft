@@ -220,7 +220,8 @@ h1 {
 </head>
 <body>
   <div class="league-creation-container">
-    <h1>Create New League</h1>
+    <h1>Fantasy Fusion</h1>
+    <h1>Create Fusion League</h1>
     <form id="leagueForm">
       <div class="form-group">
         <label for="leagueName">League Name</label>
