@@ -85,14 +85,39 @@ section {
 }
 
 .logo {
-  font-size: 4rem;
+  font-size: 3rem; /* Default size for larger screens */
   font-weight: 800;
   background: linear-gradient(90deg, #D2042D, #FF4F4F);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin-bottom: 20px;
-  letter-spacing: -2px;
-  padding: 0 5%;
+  text-shadow: 0 0 20px rgba(210, 4, 45, 0.5);
+  margin: 0 auto;
+  letter-spacing: -1px;
+  white-space: nowrap; /* Ensures text stays on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90vw; /* Prevents overflow on small screens */
+  padding: 0 20px;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .logo {
+    font-size: 2rem; /* Smaller size for mobile */
+    padding: 0 15px; /* Reduced padding */
+  }
+  
+  .site-header {
+    padding: 15px 0 5px;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.8rem; /* Even smaller for very small screens */
+    letter-spacing: 0; /* Remove negative spacing */
+  }
 }
 
     /* Hero Section */
