@@ -22,6 +22,24 @@ body {
   transform: none !important; /* Remove initial transform */
   visibility: visible !important;
 }
+    /* Fix opacity only - add this to your CSS */
+section {
+  opacity: 1 !important;
+}
+
+/* Preserve animation starting points */
+[class*="animate-in"] {
+  opacity: 0; /* Let GSAP handle the animation */
+}
+    /* Ensure content stacks above background */
+.hero-content,
+.features,
+.how-it-works,
+.waitlist-container,
+.social-proof {
+  position: relative;
+  z-index: 2;
+}
 
 /* Temporary debug to identify hidden elements */
 /* [class*="animate-in"] {
@@ -444,7 +462,7 @@ body {
 
     /* Animations */
     .animate-in {
-      opacity: 0;
+      opacity: 1;
       transform: translateY(30px);
     }
 
