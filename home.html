@@ -215,6 +215,10 @@ section {
       transform-style: preserve-3d;
       animation: rotate 20s infinite linear;
     }
+
+      @keyframes rotate {
+     0% { transform: rotateY(0deg) rotateX(10deg); }
+     100% { transform: rotateY(360deg) rotateX(10deg); }
     
     .cube-face {
       position: absolute;
@@ -560,7 +564,7 @@ section {
       }
       
       .hero-buttons {
-        justify-content: center;
+       flex-direction: column;
       }
     }
 
