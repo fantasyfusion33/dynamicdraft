@@ -9,6 +9,24 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
   <style>
+body {
+  background: var(--dark) !important; /* Force dark background */
+}
+
+.hero-content, 
+.features, 
+.how-it-works, 
+.waitlist, 
+.social-proof {
+  opacity: 1 !important; /* Override GSAP initial opacity */
+  transform: none !important; /* Remove initial transform */
+  visibility: visible !important;
+}
+
+/* Temporary debug to identify hidden elements */
+/* [class*="animate-in"] {
+  outline: 1px solid red;
+} */
     :root {
       --primary: #D2042D;
       --dark: #0A0A0A;
