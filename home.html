@@ -90,6 +90,7 @@ section {
   background: linear-gradient(90deg, #D2042D, #FF4F4F);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 20px rgba(210, 4, 45, 0.5);
   margin: 0 auto;
   letter-spacing: -1px;
   white-space: nowrap; /* Ensures text stays on one line */
@@ -180,65 +181,50 @@ section {
       box-shadow: 0 10px 20px rgba(210, 4, 45, 0.3);
     }
 
-    /* Cube container - desktop */
     .hero-visual {
-      width: 200px;
+      width: 200px; /* Fixed pixel size for better control */
       height: 200px;
       margin-left: auto;
       margin-right: 5%;
-      perspective: 1000px;
     }
     
-    /* Cube container - mobile */
-    @media (max-width: 768px) {
-      .hero-visual {
-        width: 150px;
-        height: 150px;
-        margin: 0 auto 30px; /* Center on mobile */
-        position: relative;
-        right: auto;
-      }
-    }
-    
-    /* Extra small devices */
-    @media (max-width: 480px) {
-      .hero-visual {
-        width: 120px;
-        height: 120px;
-      }
-    }
-    
-    /* Cube faces - adjust for all sizes */
     .fusion-cube {
       width: 100%;
       height: 100%;
       transform-style: preserve-3d;
       animation: rotate 20s infinite linear;
+      position: relative;
     }
 
-      @keyframes rotate {
-     0% { transform: rotateY(0deg) rotateX(10deg); }
-     100% { transform: rotateY(360deg) rotateX(10deg); }
-    
+    @keyframes rotate {
+      0% { transform: rotateY(0deg) rotateX(10deg); }
+      100% { transform: rotateY(360deg) rotateX(10deg); }
+    }
+
     .cube-face {
       position: absolute;
       width: 100%;
       height: 100%;
-      /* Keep existing styles */
+      background: rgba(26, 26, 26, 0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem; /* Adjust if needed */
     }
     
-    /* Adjust face positions proportionally */
-    .front { transform: translateZ(calc(50%)); }
-    .back { transform: rotateY(180deg) translateZ(calc(50%)); }
-    .right { transform: rotateY(90deg) translateZ(calc(50%)); }
-    .left { transform: rotateY(-90deg) translateZ(calc(50%)); }
-    .top { transform: rotateX(90deg) translateZ(calc(50%)); }
-    .bottom { transform: rotateX(-90deg) translateZ(calc(50%)); }
-    
-    /* Sport ball sizing - responsive */
+    /* Precise cube face positioning */
+    .front { transform: translateZ(100px); }
+    .back { transform: rotateY(180deg) translateZ(100px); }
+    .right { transform: rotateY(90deg) translateZ(100px); }
+    .left { transform: rotateY(-90deg) translateZ(100px); }
+    .top { transform: rotateX(90deg) translateZ(100px); }
+    .bottom { transform: rotateX(-90deg) translateZ(100px); }
+
     .sport-ball {
-      font-size: clamp(1.5rem, 4vw, 2rem); /* Scales between 1.5rem and 2rem */
-      margin: 0 5px;
+      font-size: 4rem;
+      margin: 0 10px;
+      transition: all 0.3s ease;
     }
 
     .sport-ball.nfl { color: var(--nfl); }
@@ -551,22 +537,11 @@ section {
         margin-top: 20px;
       }
 
-    @media (max-width: 768px) {
-      .hero {
-        flex-direction: column-reverse; /* Cube above text on mobile */
-        text-align: center;
-        padding-top: 10px;
-      }
-      
-      .hero-content {
-        margin-bottom: 0;
-        padding: 0 20px;
-      }
-      
-      .hero-buttons {
-       flex-direction: column;
-      }
-    }
+  @media (max-width: 768px) {
+    .hero-buttons {
+      flex-direction: column;
+     }
+  }
 
       .timeline::before {
         left: 30px;
