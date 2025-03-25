@@ -77,7 +77,8 @@ section {
   position: fixed;
   top: 0;
   width: 100%;
-  padding: 20px 5%;
+  text-align: center;
+  padding: 40px 0 20px;
   z-index: 1000;
   background: rgba(10,10,10,0.8);
   backdrop-filter: blur(10px);
@@ -85,12 +86,14 @@ section {
 }
 
 .logo {
-  font-size: 1.8rem;
+  font-size: 4rem;
   font-weight: 800;
   background: linear-gradient(90deg, #D2042D, #FF4F4F);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  margin: 0;
+  text-shadow: 0 0 20px rgba(210, 4, 45, 0.5);
+  margin-bottom: 20px;
+  letter-spacing: -2px;
 }
 
     /* Hero Section */
@@ -101,6 +104,7 @@ section {
       padding: 0 5%;
       position: relative;
       overflow: hidden;
+      padding-top: 20px; /* Reduced space between header and content */
     }
 
     .hero::before {
@@ -129,7 +133,7 @@ section {
     }
 
     .hero p {
-      font-size: 1.25rem;
+      font-size: 1rem;
       margin-bottom: 2.5rem;
       opacity: 0.9;
     }
@@ -154,20 +158,18 @@ section {
     }
 
     .hero-visual {
-      position: absolute;
-      right: 5%;
-      width: 20%;
-      max-width: 600px;
-      height: 30vh;
-      perspective: 1000px;
+      width: 200px; /* Fixed pixel size for better control */
+      height: 200px;
+      margin-left: auto;
+      margin-right: 5%;
     }
-
+    
     .fusion-cube {
       width: 100%;
       height: 100%;
-      position: relative;
       transform-style: preserve-3d;
       animation: rotate 20s infinite linear;
+      position: relative;
     }
 
     @keyframes rotate {
@@ -179,22 +181,21 @@ section {
       position: absolute;
       width: 100%;
       height: 100%;
-      background: var(--glass);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
+      background: rgba(26, 26, 26, 0.6);
+      border: 1px solid rgba(255,255,255,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      backdrop-filter: blur(10px);
-      overflow: hidden;
+      font-size: 1.5rem; /* Adjust if needed */
     }
-
-  .front { transform: translateZ(100px); }
-  .back { transform: rotateY(180deg) translateZ(100px); }
-  .right { transform: rotateY(90deg) translateZ(100px); }
-  .left { transform: rotateY(-90deg) translateZ(100px); }
-  .top { transform: rotateX(90deg) translateZ(100px); }
-  .bottom { transform: rotateX(-90deg) translateZ(100px); }
+    
+    /* Precise cube face positioning */
+    .front { transform: translateZ(100px); }
+    .back { transform: rotateY(180deg) translateZ(100px); }
+    .right { transform: rotateY(90deg) translateZ(100px); }
+    .left { transform: rotateY(-90deg) translateZ(100px); }
+    .top { transform: rotateX(90deg) translateZ(100px); }
+    .bottom { transform: rotateX(-90deg) translateZ(100px); }
 
     .sport-ball {
       font-size: 4rem;
@@ -544,7 +545,7 @@ section {
       }
 
       .hero p {
-        font-size: 1.1rem;
+        font-size: 1rem;
       }
 
       .features-grid {
