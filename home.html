@@ -201,27 +201,6 @@ section {
       position: relative;
     }
 
-    @media (max-width: 768px) {
-      :root {
-        --cube-size: 150px;
-      }
-    
-      .hero {
-        flex-direction: column;
-        text-align: center;
-        padding-top: 60px;
-        padding-bottom: 60px;
-      }
-    
-      .hero-visual {
-        margin: 30px auto;
-      }
-    
-      .hero-content {
-        max-width: 90%;
-      }
-    }
-
     @keyframes rotate {
       0% { transform: rotateY(0deg) rotateX(10deg); }
       100% { transform: rotateY(360deg) rotateX(10deg); }
@@ -246,6 +225,27 @@ section {
     .left   { transform: rotateY(-90deg) translateZ(calc(var(--cube-size) / 2)); }
     .top    { transform: rotateX(90deg)  translateZ(calc(var(--cube-size) / 2)); }
     .bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
+
+    @media (max-width: 768px) {
+      :root {
+        --cube-size: 150px;
+      }
+    
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 60px;
+        padding-bottom: 60px;
+      }
+    
+      .hero-visual {
+        margin: 30px auto;
+      }
+    
+      .hero-content {
+        max-width: 90%;
+      }
+    }
 
     .sport-ball {
       font-size: 4rem;
