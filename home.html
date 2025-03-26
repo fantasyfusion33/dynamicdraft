@@ -226,16 +226,7 @@ section {
     .top    { transform: rotateX(90deg)  translateZ(calc(var(--cube-size) / 2)); }
     .bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
 
-@media (max-width: 768px) {
-   .fusion-cube {
-    animation: rotate-mobile 20s infinite linear;
-  }
-
-  @keyframes rotate-mobile {
-    0%   { transform: rotateY(0deg) rotateX(5deg); }
-    100% { transform: rotateY(360deg) rotateX(5deg); }
-  }
-  
+@media (max-width: 768px) { 
   .hero {
     flex-direction: column;
     text-align: center;
@@ -252,15 +243,6 @@ section {
   .cube-face {
     width: 150px;
     height: 150px;
-  }
-
-  .front,
-  .back,
-  .right,
-  .left,
-  .top,
-  .bottom {
-    transform: none;
   }
 
   .front  { transform: translateZ(75px); }
