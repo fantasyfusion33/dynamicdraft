@@ -226,25 +226,27 @@ section {
     .top    { transform: rotateX(90deg)  translateZ(calc(var(--cube-size) / 2)); }
     .bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
 
-@media (max-width: 768px) { 
-  .hero {
-    flex-direction: column;
-    text-align: center;
-    padding-top: 60px;
-    padding-bottom: 60px;
+@media (max-width: 768px) {
+  .hero-visual {
+    margin: 30px auto;
+    max-width: 150px;
+    max-height: 150px;
+    perspective: 800px;
   }
 
-  .hero-visual {
+  .fusion-cube {
     width: 150px;
     height: 150px;
-    margin: 30px auto;
+    transform-style: preserve-3d;
+    transform-origin: center center; /* <-- important */
+    animation: rotate 20s infinite linear;
+    position: relative;
+    margin: 0 auto;
   }
 
   .cube-face {
     width: 150px;
     height: 150px;
-    align-items: center;
-    justify-content: center;
   }
 
   .front  { transform: translateZ(75px); }
