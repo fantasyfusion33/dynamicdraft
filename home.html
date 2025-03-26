@@ -634,35 +634,30 @@ section {
       </div>
     </div>
     <div class="hero-visual animate-in">
+            <p>Draft teams from your favorite sports:</p>
       <div class="fusion-cube">
         <div class="cube-face front">
-          <div class="sport-ball nfl"><i class="fa-solid fa-football"></i></div>
-          <div class="sport-ball nba"><i class="fa-solid fa-basketball"></i></div>
+          <h1>NBA</h1>
         </div>
         <div class="cube-face back">
-          <div class="sport-ball mlb"><i class="fa-solid fa-baseball"></i></div>
-          <div class="sport-ball nhl"><i class="fa-solid fa-hockey-puck"></i></div>
+         <h1>NFL</h1>
         </div>
         <div class="cube-face right">
-          <div class="sport-ball ncaaf"><i class="fa-solid fa-football"></i></div>
-          <div class="sport-ball ncaab"><i class="fa-solid fa-basketball"></i></div>
+          <h1>MLB</h1>
         </div>
         <div class="cube-face left">
           <div style="font-size: 1.5rem; text-align: center;">
-            <p>Draft Teams</p>
-            <p>Not Players</p>
+            <h1>NHL</h1>
           </div>
         </div>
         <div class="cube-face top">
           <div style="font-size: 1.5rem; text-align: center;">
-            <p>Year-Round</p>
-            <p>Fantasy</p>
+            <h1>NCAA Football</h1>
           </div>
         </div>
         <div class="cube-face bottom">
           <div style="font-size: 1.5rem; text-align: center;">
-            <p>Win Based on</p>
-            <p>Championships</p>
+            <h1>NCAA Basketball</h1>
           </div>
         </div>
       </div>
@@ -675,15 +670,20 @@ section {
     <div class="features-grid">
       <div class="feature-card animate-in">
         <div class="feature-icon">👥</div>
+        <h3>Multisport Champions League</h3>
+        <p>Players compete to test their sports knowledge through a combination of draft strategy and some luck.</p>
+      </div>     
+      <div class="feature-card animate-in" style="transition-delay: 0.1s">
+        <div class="feature-icon">👥</div>
         <h3>Leagues with 4-12 Players</h3>
         <p>Create private leagues with friends or join public competitions with sports fans worldwide.</p>
       </div>
-      <div class="feature-card animate-in" style="transition-delay: 0.1s">
-        <div class="feature-icon">🏈🏀⚾</div>
+      <div class="feature-card animate-in" style="transition-delay: 0.2s">
+        <div class="feature-icon">🏈🏀⚾🏒</div>
         <h3>Draft Across 6 Major Leagues</h3>
         <p>Build your roster from NFL, NBA, MLB, NHL, NCAA Football and Basketball teams.</p>
       </div>
-      <div class="feature-card animate-in" style="transition-delay: 0.2s">
+      <div class="feature-card animate-in" style="transition-delay: 0.3s">
         <div class="feature-icon">📊</div>
         <h3>Live Standings & Projections</h3>
         <p>Track your performance in real-time as your teams compete in their actual seasons.</p>
@@ -720,7 +720,7 @@ section {
       <div class="timeline-step animate-in" style="transition-delay: 0.4s">
         <div class="step-number">5</div>
         <h3>Draft Your Roster</h3>
-        <p>Select real teams based on championship odds, rivalries, or personal strategy.</p>
+        <p>Draft teams in snake draft format based on championship odds, rivalries, or personal strategy.</p>
       </div>
       <div class="timeline-step animate-in" style="transition-delay: 0.5s">
         <div class="step-number">6</div>
@@ -730,7 +730,7 @@ section {
       <div class="timeline-step animate-in" style="transition-delay: 0.6s">
         <div class="step-number">7</div>
         <h3>Win the Championship!</h3>
-        <p>Compete all season to prove you're the ultimate multi-sport general manager.</p>
+        <p>Compete all season to be crowned champion at the end of the season.</p>
       </div>
     </div>
   </section>
@@ -749,17 +749,10 @@ section {
           <input type="email" id="email" placeholder="Enter your email">
         </div>
         <div class="form-group">
-          <label for="team">Favorite Team</label>
-          <select id="team">
-            <option value="">Select your favorite team</option>
-            <option value="NFL">NFL Team</option>
-            <option value="NBA">NBA Team</option>
-            <option value="MLB">MLB Team</option>
-            <option value="NHL">NHL Team</option>
-            <option value="NCAAF">NCAA Football Team</option>
-            <option value="NCAAB">NCAA Basketball Team</option>
-          </select>
-        </div>
+          <div class="form-group">
+            <label for="team">Favorite Team(s)</label>
+            <input type="text" id="team" placeholder="E.g. Kansas City Chiefs, Los Angeles Lakers">
+          </div>
         <div class="button-group">
           <button class="cta-button" id="joinWaitlist">Join Waitlist</button>
         </div>
@@ -779,7 +772,7 @@ section {
 
   <!-- Footer -->
   <footer>
-    <p>© 2023 Fantasy Fusion. All rights reserved.</p>
+    <p>Property of Fantasy Fusion, LLC. All rights reserved.</p>
   </footer>
 
   <script>
