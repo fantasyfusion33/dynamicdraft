@@ -180,6 +180,86 @@ section {
       box-shadow: 0 10px 20px rgba(210, 4, 45, 0.3);
     }
 
+    /* Add these new styles */
+.hero-boxes {
+  display: flex;
+  gap: 30px;
+  margin-left: auto;
+  margin-right: 5%;
+  max-width: 800px;
+}
+
+.hero-box {
+  flex: 1;
+  min-height: 250px;
+  background: rgba(26, 26, 26, 0.6);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  transition: all 0.5s ease;
+}
+
+.box-content {
+  text-align: center;
+}
+
+.hero-box h3 {
+  font-size: 1.8rem;
+  line-height: 1.3;
+  margin-top: 20px;
+  background: linear-gradient(90deg, #FFFFFF, #EEEEEE);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sport-icon {
+  font-size: 3rem;
+  color: var(--primary);
+}
+
+/* Animations */
+.hero-box {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.hero-box.animate-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .hero-boxes {
+    flex-direction: column;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+  }
+  
+  .hero-box {
+    min-height: 200px;
+  }
+  
+  .hero-box h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-box h3 {
+    font-size: 1.3rem;
+  }
+  
+  .sport-icon {
+    font-size: 2.5rem;
+  }
+}
+
   
     .sport-ball {
       font-size: 4rem;
@@ -557,6 +637,21 @@ section {
         <button class="cta-button secondary-button" onclick="window.location.href='mock-draft.html'">Try A Mock Draft</button>
       </div>
     </div>
+    <div class="hero-boxes">
+      <div class="hero-box box-left animate-in">
+        <div class="box-content">
+          <div class="sport-icon"><i class="fa-solid fa-users"></i></div>
+          <h3>Draft Teams,<br>Not Players</h3>
+        </div>
+      </div>
+      
+      <div class="hero-box box-right animate-in" style="transition-delay: 0.2s">
+        <div class="box-content">
+          <div class="sport-icon"><i class="fa-solid fa-calendar"></i></div>
+          <h3>Just because football ends<br>doesn't mean fantasy has to</h3>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- Features Section -->
@@ -713,7 +808,29 @@ section {
     // Animate elements on scroll
     function setupAnimations() {
       const animateElements = document.querySelectorAll('.animate-in');
+            // Animate boxes
+      gsap.to(".box-left", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        scrollTrigger: {
+          trigger: ".box-left",
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      });
       
+      gsap.to(".box-right", {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        delay: 0.2,
+        scrollTrigger: {
+          trigger: ".box-right",
+          start: "top 80%",
+          toggleActions: "play none none none"
+        }
+      });
       animateElements.forEach((el, index) => {
         gsap.from(el, {
           opacity: 0,
