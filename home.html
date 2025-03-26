@@ -226,26 +226,41 @@ section {
     .top    { transform: rotateX(90deg)  translateZ(calc(var(--cube-size) / 2)); }
     .bottom { transform: rotateX(-90deg) translateZ(calc(var(--cube-size) / 2)); }
 
-    @media (max-width: 768px) {
-      :root {
-        --cube-size: 100px;
-      }
-    
-      .hero {
-        flex-direction: column;
-        text-align: center;
-        padding-top: 60px;
-        padding-bottom: 60px;
-      }
-    
-      .hero-visual {
-        margin: 30px auto;
-      }
-    
-      .hero-content {
-        max-width: 90%;
-      }
-    }
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
+  .hero-visual {
+    width: 150px;
+    height: 150px;
+    margin: 30px auto;
+  }
+
+  .cube-face {
+    width: 150px;
+    height: 150px;
+  }
+
+  .front,
+  .back,
+  .right,
+  .left,
+  .top,
+  .bottom {
+    transform: none;
+  }
+
+  .front  { transform: translateZ(75px); }
+  .back   { transform: rotateY(180deg) translateZ(75px); }
+  .right  { transform: rotateY(90deg)  translateZ(75px); }
+  .left   { transform: rotateY(-90deg) translateZ(75px); }
+  .top    { transform: rotateX(90deg)  translateZ(75px); }
+  .bottom { transform: rotateX(-90deg) translateZ(75px); }
+}
 
     .sport-ball {
       font-size: 4rem;
