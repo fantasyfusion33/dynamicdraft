@@ -620,6 +620,222 @@ section {
         font-size: 2rem;
       }
     }
+ /* Sports Timeline Styles */
+  .sports-timeline-section {
+    padding: 60px 5%;
+    position: relative;
+  }
+
+  .sports-timeline {
+    background: rgba(26,26,26,0.6);
+    border-radius: 16px;
+    padding: 40px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    max-width: 1200px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timeline-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+
+  .timeline-header h2 {
+    font-size: 2.5rem;
+    line-height: 1.3;
+    background: linear-gradient(90deg, #FFFFFF, #EEEEEE);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 15px;
+  }
+
+  .highlight {
+    background: linear-gradient(90deg, #D2042D, #FF4F4F);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header-underline {
+    width: 100px;
+    height: 4px;
+    background: linear-gradient(90deg, #D2042D, #FF4F4F);
+    margin: 0 auto;
+    border-radius: 2px;
+  }
+
+  .season-track {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 60px 0;
+    min-height: 120px;
+  }
+
+  .sport-segment {
+    flex: 1;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    z-index: 2;
+  }
+
+  .sport-icon {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+  }
+
+  .sport-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+  }
+
+  .sport-dates {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    margin-bottom: 5px;
+  }
+
+  .sport-highlight {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+  }
+
+  .sport-connector {
+    position: absolute;
+    top: 25px;
+    right: -10%;
+    width: 20%;
+    height: 2px;
+    background: rgba(255,255,255,0.3);
+    z-index: -1;
+  }
+
+  /* Sport Color Coding */
+  .nfl .sport-icon { color: var(--nfl); }
+  .ncaaf .sport-icon { color: var(--ncaaf); }
+  .nba .sport-icon { color: var(--nba); }
+  .nhl .sport-icon { color: var(--nhl); }
+  .mlb .sport-icon { color: var(--mlb); }
+  .ncaab .sport-icon { color: var(--ncaab); }
+
+  /* CTA Styles */
+  .timeline-cta {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .timeline-cta p {
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+
+  .pulse-button {
+    position: relative;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .pulse-effect {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50px;
+    z-index: -1;
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  /* Animations */
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes pulseEffect {
+    0% { transform: scale(0); opacity: 0.5; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  .pulse-button:hover {
+    animation: pulse 1.5s infinite;
+  }
+
+  .pulse-button:hover .pulse-effect {
+    animation: pulseEffect 1s forwards;
+  }
+
+  .sport-segment:hover {
+    transform: translateY(-10px);
+  }
+
+  .sport-segment:hover .sport-icon {
+    animation: pulse 1s infinite;
+  }
+
+  /* Responsive */
+  @media (max-width: 992px) {
+    .season-track {
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: center;
+    }
+    
+    .sport-segment {
+      flex: 0 0 calc(33.333% - 30px);
+    }
+    
+    .sport-connector {
+      display: none;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .timeline-header h2 {
+      font-size: 2rem;
+    }
+    
+    .sports-timeline {
+      padding: 30px 20px;
+    }
+    
+    .sport-segment {
+      flex: 0 0 calc(50% - 20px);
+    }
+  }
+
+  @media (max-width: 576px) {
+    .timeline-header h2 {
+      font-size: 1.8rem;
+    }
+    
+    .sport-segment {
+      flex: 0 0 100%;
+      margin-bottom: 30px;
+    }
+    
+    .sport-icon {
+      font-size: 2rem;
+    }
+  }
   </style>
 </head>
 <body>
@@ -637,20 +853,95 @@ section {
         <button class="cta-button secondary-button" onclick="window.location.href='mock-draft.html'">Try A Mock Draft</button>
       </div>
     </div>
-    <div class="hero-boxes">
-      <div class="hero-box box-left animate-in">
-        <div class="box-content">
-          <h3>Just because football ends..<br>doesn't mean fantasy has to!</h3>         
+  </section>
+  
+  <!-- Sports Timeline Section -->
+<section class="sports-timeline-section">
+  <div class="sports-timeline">
+    <!-- Animated Header -->
+    <div class="timeline-header animate-in">
+      <h2>"Just because football ends...<br><span class="highlight">doesn't mean your fantasy season has to</span>"</h2>
+      <div class="header-underline"></div>
+    </div>
+
+    <!-- Interactive Timeline -->
+    <div class="season-track">
+      <!-- NFL Segment -->
+      <div class="sport-segment nfl" data-sport="NFL">
+        <div class="sport-icon"><i class="fa-solid fa-football"></i></div>
+        <div class="sport-info">
+          <h3>NFL Season</h3>
+          <div class="sport-dates">SEP - FEB</div>
+          <div class="sport-highlight">Super Bowl</div>
         </div>
+        <div class="sport-connector"></div>
       </div>
       
-      <div class="hero-box box-right animate-in" style="transition-delay: 0.2s">
-        <div class="box-content">
-           <h3>Fantasy Fusion is the only year-round<br>Multisport Champions League</h3>
+      <!-- NCAAF Segment -->
+      <div class="sport-segment ncaaf" data-sport="NCAAF">
+        <div class="sport-icon"><i class="fa-solid fa-helmet-un"></i></div>
+        <div class="sport-info">
+          <h3>College Football</h3>
+          <div class="sport-dates">AUG - JAN</div>
+          <div class="sport-highlight">Playoffs</div>
+        </div>
+        <div class="sport-connector"></div>
+      </div>
+      
+      <!-- NBA Segment -->
+      <div class="sport-segment nba" data-sport="NBA">
+        <div class="sport-icon"><i class="fa-solid fa-basketball"></i></div>
+        <div class="sport-info">
+          <h3>NBA Season</h3>
+          <div class="sport-dates">OCT - JUN</div>
+          <div class="sport-highlight">Finals</div>
+        </div>
+        <div class="sport-connector"></div>
+      </div>
+      
+      <!-- NHL Segment -->
+      <div class="sport-segment nhl" data-sport="NHL">
+        <div class="sport-icon"><i class="fa-solid fa-hockey-puck"></i></div>
+        <div class="sport-info">
+          <h3>NHL Season</h3>
+          <div class="sport-dates">OCT - JUN</div>
+          <div class="sport-highlight">Stanley Cup</div>
+        </div>
+        <div class="sport-connector"></div>
+      </div>
+      
+      <!-- MLB Segment -->
+      <div class="sport-segment mlb" data-sport="MLB">
+        <div class="sport-icon"><i class="fa-solid fa-baseball"></i></div>
+        <div class="sport-info">
+          <h3>MLB Season</h3>
+          <div class="sport-dates">MAR - NOV</div>
+          <div class="sport-highlight">World Series</div>
+        </div>
+        <div class="sport-connector"></div>
+      </div>
+      
+      <!-- NCAAB Segment -->
+      <div class="sport-segment ncaab" data-sport="NCAAB">
+        <div class="sport-icon"><i class="fa-solid fa-basketball"></i></div>
+        <div class="sport-info">
+          <h3>March Madness</h3>
+          <div class="sport-dates">NOV - APR</div>
+          <div class="sport-highlight">Final Four</div>
         </div>
       </div>
     </div>
-  </section>
+
+    <!-- Animated CTA -->
+    <div class="timeline-cta animate-in" style="--delay: 0.3s">
+      <p>Fantasy Fusion lets you draft <strong>teams—not players—</strong> across all six major U.S. sports. One draft. One roster. Year-round competition.</p>
+      <button class="pulse-button" onclick="document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' })">
+        <span class="pulse-effect"></span>
+        Claim Early Access
+      </button>
+    </div>
+  </div>
+</section>
 
   <!-- Features Section -->
   <section class="features">
@@ -799,6 +1090,32 @@ section {
         container.appendChild(ball);
       }
     }
+    // Animate header underline on scroll
+  document.addEventListener('DOMContentLoaded', () => {
+    gsap.to(".header-underline", {
+      width: "200px",
+      scrollTrigger: {
+        trigger: ".timeline-header",
+        start: "top 80%",
+        toggleActions: "play none none none"
+      }
+    });
+    
+    // Segment animations
+    gsap.utils.toArray(".sport-segment").forEach((segment, i) => {
+      gsap.from(segment, {
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        delay: i * 0.1,
+        scrollTrigger: {
+          trigger: segment,
+          start: "top 90%",
+          toggleActions: "play none none none"
+        }
+      });
+    });
+  });
 
     // Animate elements on scroll
     function setupAnimations() {
