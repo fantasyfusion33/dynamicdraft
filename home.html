@@ -22,13 +22,18 @@ body {
   transform: none !important; /* Remove initial transform */
   visibility: visible !important;
 }
+/* Improve scroll performance */
+html {
+  scroll-behavior: smooth;
+}
     /* Fix opacity only - add this to your CSS */
 section {
   opacity: 1 !important;
+  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
 }
-
 /* Preserve animation starting points */
 [class*="animate-in"] {
+  transform: translateY(20px); /* Reduced from 30px */
   opacity: 0; /* Let GSAP handle the animation */
 }
     /* Ensure content stacks above background */
