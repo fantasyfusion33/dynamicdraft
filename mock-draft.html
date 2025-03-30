@@ -432,10 +432,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
       current_pick: 0,
       draft_order: Array.from({length: teamCount}, (_, i) => i), // [0,1,2,...]
       user_team_position: 0, // Will be updated after moves
-      player_rosters: {},
-      settings: {
-        wildcard: leagueData.wildcardRound,
-        team_count: teamCount
+      player_rosters: {}
       }
     };
 
