@@ -416,19 +416,32 @@ leagueSizeSlider.addEventListener('input', (e) => {
                  value="Team ${i + 1}" 
                  required>
         </div>
-        <div class="arrow-buttons">
-          <button onclick="moveTeamUp(${i})" ${i === 0 ? 'disabled' : ''}>
-            ⬆️
-          </button>
-          <button onclick="moveTeamDown(${i})" ${i === e.target.value - 1 ? 'disabled' : ''}>
-            ⬇️
-          </button>
+          <div class="arrow-buttons">
+            <button onclick="moveTeamUp(${i})">⬆️</button>
+            <button onclick="moveTeamDown(${i})">⬇️</button>
+          </div>
         </div>
       </div>
     `;
   }
 });
 let draftOrder = [];
+     // Move team up in draft order
+    function moveTeamUp(i) {
+      if (i > 0) {
+        [draftOrder[i], draftOrder[i - 1]] = [draftOrder[i - 1], draftOrder[i]];
+        [teamNames[i], teamNames[i - 1]] = [teamNames[i - 1], teamNames[i]];
+        renderTeamList();
+      }
+    }
+    // Move team down in draft order
+    function moveTeamDown(i) {
+      if (i < draftOrder.length - 1) {
+        [draftOrder[i], draftOrder[i + 1]] = [draftOrder[i + 1], draftOrder[i]];
+        [teamNames[i], teamNames[i + 1]] = [teamNames[i + 1], teamNames[i]];
+        renderTeamList();
+      }
+    }
 
 function updateDraftOrder() {
   const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
