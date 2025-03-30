@@ -371,13 +371,7 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
   const teamNames = [];
   const teamIDs = [];
 
-// Add Team 1's name
-const team1Name = document.getElementById('team1Name').value.trim();
-if (team1Name) {
-  teamNames.push(team1Name);
-}
-
-  for (let i = 2; i <= leagueSizeSlider.value; i++) {
+  for (let i = 1; i <= leagueSizeSlider.value; i++) {
     const teamName = document.getElementById(`team${i}Name`).value.trim();
     if (teamName) {
       teamNames.push(teamName);
