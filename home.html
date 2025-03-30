@@ -1115,29 +1115,6 @@ section {
     // Animate elements on scroll
     function setupAnimations() {
       const animateElements = document.querySelectorAll('.animate-in');
-            // Animate boxes
-      gsap.to(".box-left", {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        scrollTrigger: {
-          trigger: ".box-left",
-          start: "top 80%",
-          toggleActions: "play none none none"
-        }
-      });
-      
-      gsap.to(".box-right", {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: 0.2,
-        scrollTrigger: {
-          trigger: ".box-right",
-          start: "top 80%",
-          toggleActions: "play none none none"
-        }
-      });
       animateElements.forEach((el, index) => {
         gsap.from(el, {
           opacity: 0,
@@ -1147,7 +1124,7 @@ section {
           ease: "power3.out",
           scrollTrigger: {
             trigger: el,
-            start: "top 80%",
+            start: "top 99%",
             toggleActions: "play none none none"
           }
         });
@@ -1163,7 +1140,7 @@ section {
           ease: "power3.out",
           scrollTrigger: {
             trigger: step,
-            start: "top 80%",
+            start: "top 99%",
             toggleActions: "play none none none"
           }
         });
