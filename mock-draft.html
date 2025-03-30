@@ -280,10 +280,6 @@ h1 {
         <div id="teamNamesContainer">
           <!-- Team name inputs will be dynamically added here -->
         </div>
-            <div class="arrow-buttons">
-            <button onclick="moveTeamUp(${i})">⬆️</button>
-            <button onclick="moveTeamDown(${i})">⬇️</button>
-          </div>
       </div>
 
       <div class="toggle-group">
@@ -422,10 +418,10 @@ leagueSizeSlider.addEventListener('input', (e) => {
         </div>
         <div class="arrow-buttons">
           <button onclick="moveTeamUp(${i})" ${i === 0 ? 'disabled' : ''}>
-            ↑
+            ⬆️
           </button>
           <button onclick="moveTeamDown(${i})" ${i === e.target.value - 1 ? 'disabled' : ''}>
-            ↓
+            ⬇️
           </button>
         </div>
       </div>
