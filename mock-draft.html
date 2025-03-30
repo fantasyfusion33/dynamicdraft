@@ -199,14 +199,24 @@ h1 {
   background: rgba(255, 255, 255, 0.15);
   box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
 }
-    .team-item {
+    .user-team {
+  background: rgba(210, 4, 45, 0.1);
+  border-left: 3px solid #D2042D;
+}
+
+.user-team .team-name-input input {
+  color: #FF4F4F;
+  font-weight: 600;
+}
+
+.team-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px;
+  margin-bottom: 10px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  margin-bottom: 12px;
+  border-radius: 6px;
 }
 
 .draft-order {
@@ -372,51 +382,93 @@ async function createLeague(leagueData) {
 document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Explicitly update draftOrder from current inputs
-  const inputs = document.querySelectorAll('[id^="team"][id$="Name"]');
-  draftOrder = Array.from(inputs).map(input => input.value);
-
-  // Generate league ID
-const leagueId = uuidv4();
-console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
-
-  // Set default owner ID
-  const ownerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5';
-  console.log(ownerId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
-
-  // Collect team names
-  const teamNames = [];
-  for (let i = 1; i <= leagueSizeSlider.value; i++) {
-    const teamName = document.getElementById(`team${i}Name`).value.trim();
-    if (teamName) {
-      teamNames.push(teamName);
+  // 1. Get all team names while preserving the "(Your Team)" marker
+  const teamInputs = document.querySelectorAll('.team-name-input input');
+  const teamNames = Array.from(teamInputs).map(input => input.value);
+  
+  // 2. Get league settings
+  const leagueName = document.getElementById('leagueName').value.trim();
+  const leagueSize = parseInt(document.getElementById('leagueSize').value);
+  const wildcardEnabled = document.getElementById('wildcard').checked;
+  const waiversEnabled = document.getElementById('waiverSystem').checked;
+  const bonusPointsEnabled = document.getElementById('bonusPoints').checked;
+  
+  // 3. Generate the draft order array based on current positions
+  const draftOrder = [];
+  const teamItems = document.querySelectorAll('.team-item');
+  
+  teamItems.forEach((item, index) => {
+    if (item.classList.contains('user-team')) {
+      // The user team's position in the order
+      userTeamPosition = index;
     }
-  }
-
-  // Save league data to localStorage
+    draftOrder.push(index); // This creates [0,1,2,3...] which we'll adjust
+  });
+  
+  // 4. Prepare the league data for Supabase
   const leagueData = {
-    id: leagueId,
-    leagueName: document.getElementById('leagueName').value,
-    owner_id: ownerId,
-    teamCount: leagueSizeSlider.value,
-    teamNames: teamNames, // Include teamNames array
-    wildcardRound: document.getElementById('wildcard').checked,
-    waivers: document.getElementById('waiverSystem').checked,
-    bonusPoints: document.getElementById('bonusPoints').checked,
-    isPrivate: false, // Set based on your logic
-    hasPassword: false, // Set based on your logic
-    hasBuyIn: false, // Set based on your logic
+    id: uuidv4(),
+    league_name: leagueName,
+    team_count: leagueSize,
+    team_names: teamNames,
+    draft_order: draftOrder,
+    user_team_position: userTeamPosition,
+    wildcard_round: wildcardEnabled,
+    waiver_system: waiversEnabled,
+    bonus_points: bonusPointsEnabled,
+    is_private: false,
+    has_password: false,
+    has_buy_in: false,
     created_at: new Date().toISOString(),
+    status: 'pre_draft'
   };
 
-  // Save league to Supabase
-  const createdLeagueId = await createLeague(leagueData);
-  console.log('Created League ID:', leagueData.id); // Debugging
+  try {
+    // 5. Save to Supabase
+    const { data, error } = await supabase
+      .from('leagues')
+      .insert([leagueData])
+      .select()
+      .single();
 
-  const redirectUrl = `draft_supabase.html?leagueId=${leagueData.id}`;
-  console.log('Redirect URL:', redirectUrl); // Debugging
-  window.location.href = redirectUrl;
+    if (error) throw error;
 
+    // 6. Prepare draft state
+    const draftStateData = {
+      draft_id: uuidv4(),
+      league_id: data.id,
+      current_pick: 0,
+      draft_order: draftOrder, // The actual order [0,1,2,3...]
+      user_team_position: userTeamPosition,
+      player_rosters: {},
+      settings: {
+        wildcard: wildcardEnabled,
+        team_count: leagueSize
+      },
+      created_at: new Date().toISOString()
+    };
+
+    // 7. Save draft state
+    const { error: draftStateError } = await supabase
+      .from('draft_state')
+      .insert([draftStateData]);
+
+    if (draftStateError) throw draftStateError;
+
+    // 8. Redirect to draft page with necessary parameters
+    const redirectUrl = `draft_supabase.html?leagueId=${data.id}&userTeamPos=${userTeamPosition}`;
+    window.location.href = redirectUrl;
+
+  } catch (err) {
+    console.error('Error creating league:', err);
+    
+    // Show user-friendly error message
+    const submitBtn = document.querySelector('#leagueForm button[type="submit"]');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create League & Start Draft';
+    
+    alert('Failed to create league. Please check your connection and try again.');
+  }
 });
 
 // Dynamically add team name inputs based on league size
@@ -427,87 +479,70 @@ leagueSizeSlider.addEventListener('input', (e) => {
   const teamNamesContainer = document.getElementById('teamNamesContainer');
   teamNamesContainer.innerHTML = '';
   
-  for (let i = 0; i < e.target.value; i++) {
+for (let i = 0; i < e.target.value; i++) {
+    const isUserTeam = i === 0;
     teamNamesContainer.innerHTML += `
-      <div class="team-item">
+      <div class="team-item ${isUserTeam ? 'user-team' : ''}">
         <span class="draft-order">${i + 1}</span>
         <div class="team-name-input">
           <input type="text" 
                  id="team${i + 1}Name" 
-                 value="Team ${i + 1}" 
-                 placeholder="Enter team name"
+                 value="${isUserTeam ? 'Team 1 (Your Team)' : 'Team ' + (i + 1)}" 
+                 ${isUserTeam ? 'readonly' : ''}
                  required>
         </div>
         <div class="arrow-buttons">
-          <button class="arrow-btn" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>
-            <span class="arrow-icon">↑</span>
-          </button>
-          <button class="arrow-btn" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>
-            <span class="arrow-icon">↓</span>
-          </button>
+          ${isUserTeam ? `
+            <button class="arrow-btn" onclick="moveUserTeamUp(event)">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+            <button class="arrow-btn" onclick="moveUserTeamDown(event)">
+              <i class="fas fa-chevron-down"></i>
+            </button>
+          ` : ''}
         </div>
       </div>
     `;
   }
 });
-let draftOrder = [];
+let userTeamPosition = 0; // Tracks user team position
 
-function updateDraftOrder() {
-  const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
-    .filter(input => input.id.includes('Name'))
-    .map(input => input.value);
+function moveUserTeamUp(e) {
+  e.preventDefault();
+  if (userTeamPosition <= 0) return;
   
-  draftOrder = inputs;
-}
-
-function moveTeamUp(index, event) {
-  event.preventDefault(); // Stop form submission
-  event.stopPropagation(); // Prevent event bubbling
-  
-  if (index <= 0) return;
-  
-  // Get current values
   const container = document.getElementById('teamNamesContainer');
-  const inputs = container.querySelectorAll('input');
-  const currentValue = inputs[index].value;
-  const prevValue = inputs[index - 1].value;
+  const items = container.querySelectorAll('.team-item');
   
-  // Swap values
-  inputs[index].value = prevValue;
-  inputs[index - 1].value = currentValue;
+  // Swap positions in DOM
+  container.insertBefore(items[userTeamPosition], items[userTeamPosition - 1]);
   
-  // Update draft order array
-  draftOrder[index] = prevValue;
-  draftOrder[index - 1] = currentValue;
+  userTeamPosition--;
+  updateDraftNumbers();
 }
 
-function moveTeamDown(index, event) {
-  event.preventDefault(); // Stop form submission
-  event.stopPropagation(); // Prevent event bubbling
-  
-  if (index >= draftOrder.length - 1) return;
-  
-  // Get current values
+function moveUserTeamDown(e) {
+  e.preventDefault();
   const container = document.getElementById('teamNamesContainer');
-  const inputs = container.querySelectorAll('input');
-  const currentValue = inputs[index].value;
-  const nextValue = inputs[index + 1].value;
+  const items = container.querySelectorAll('.team-item');
   
-  // Swap values
-  inputs[index].value = nextValue;
-  inputs[index + 1].value = currentValue;
+  if (userTeamPosition >= items.length - 1) return;
   
-  // Update draft order array
-  draftOrder[index] = nextValue;
-  draftOrder[index + 1] = currentValue;
+  // Swap positions in DOM
+  container.insertBefore(items[userTeamPosition + 1], items[userTeamPosition]);
+  
+  userTeamPosition++;
+  updateDraftNumbers();
 }
 
-function updateDraftOrder() {
-  const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
-    .filter(input => input.id.includes('Name'))
-    .map(input => input.value);
-  
-  draftOrder = inputs;
+function updateDraftNumbers() {
+  const items = document.querySelectorAll('.team-item');
+  items.forEach((item, index) => {
+    item.querySelector('.draft-order').textContent = index + 1;
+    if (item.classList.contains('user-team')) {
+      userTeamPosition = index;
+    }
+  });
 }
   </script>
 </body>
