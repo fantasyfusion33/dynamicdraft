@@ -388,14 +388,12 @@ if (team1Name) {
     }
   }
   const ownerId = '561bd4b1-c0a1-455f-86b6-3c785fbebfe5';
-  const managerId = teamIDs[0]; // First team's owner ID
-
+  
   // Save league data to localStorage
   const leagueData = {
     id: leagueId,
     leagueName: document.getElementById('leagueName').value,
     owner_id: ownerId,
-    league_manager: managerId,
     teamCount: leagueSizeSlider.value,
     teamNames: teamNames, // Include teamNames array
     teamIDs: teamIDs, // Add teamIDs to the league data
