@@ -95,28 +95,51 @@ h1 {
       transition: background 0.2s ease;
     }
 
-    .team-order-controls {
+.team-item {
   display: flex;
-  gap: 8px;
-  margin-left: 10px;
+  align-items: center;
+  gap: 15px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
 }
 
-.order-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.1);
+.draft-order {
+  width: 30px;
+  font-weight: 600;
+  color: #D2042D;
+}
+
+.team-name-input {
+  flex: 1;
+}
+
+.arrow-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.arrow-buttons button {
+  background: none;
   border: 1px solid rgba(255,255,255,0.2);
-  color: #FFF;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.order-btn:hover {
-  background: #D2042D;
+.arrow-buttons button:hover {
   border-color: #D2042D;
+  color: #D2042D;
 }
 
+.arrow-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
     .slider-value {
       font-weight: 600;
       font-size: 18px;
@@ -391,51 +414,64 @@ leagueSizeSlider.addEventListener('input', (e) => {
   const teamNamesContainer = document.getElementById('teamNamesContainer');
   teamNamesContainer.innerHTML = '';
   
-  for (let i = 1; i <= e.target.value; i++) {
+  for (let i = 0; i < e.target.value; i++) {
     teamNamesContainer.innerHTML += `
-      <div class="team-name-input">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <div class="team-order-controls">
-            <button class="order-btn" onclick="moveTeamUp(${i})" ${i === 1 ? 'disabled' : ''}>↑</button>
-            <button class="order-btn" onclick="moveTeamDown(${i})" ${i === parseInt(e.target.value) ? 'disabled' : ''}>↓</button>
-          </div>
-          <input type="text" id="team${i}Name" value="Team ${i}" required>
+      <div class="team-item">
+        <span class="draft-order">${i + 1}</span>
+        <div class="team-name-input">
+          <input type="text" 
+                 id="team${i + 1}Name" 
+                 value="Team ${i + 1}" 
+                 required>
+        </div>
+        <div class="arrow-buttons">
+          <button onclick="moveTeamUp(${i})" ${i === 0 ? 'disabled' : ''}>
+            ↑
+          </button>
+          <button onclick="moveTeamDown(${i})" ${i === e.target.value - 1 ? 'disabled' : ''}>
+            ↓
+          </button>
         </div>
       </div>
     `;
   }
 });
-
-  let draftOrder = [];
+let draftOrder = [];
 
 function updateDraftOrder() {
   const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
-    .filter(input => input.id.includes('Name'));
-  draftOrder = inputs.map(input => input.value);
+    .filter(input => input.id.includes('Name'))
+    .map(input => input.value);
+  
+  draftOrder = inputs;
 }
 
 function moveTeamUp(index) {
-  if (index <= 1) return;
-  const temp = draftOrder[index - 1];
-  draftOrder[index - 1] = draftOrder[index - 2];
-  draftOrder[index - 2] = temp;
-  updateTeamInputs();
+  if (index <= 0) return;
+  
+  // Swap values
+  [draftOrder[index], draftOrder[index - 1]] = 
+  [draftOrder[index - 1], draftOrder[index]];
+  
+  // Update UI
+  const container = document.getElementById('teamNamesContainer');
+  const inputs = container.querySelectorAll('input');
+  inputs[index].value = draftOrder[index];
+  inputs[index - 1].value = draftOrder[index - 1];
 }
 
 function moveTeamDown(index) {
-  if (index >= draftOrder.length) return;
-  const temp = draftOrder[index - 1];
-  draftOrder[index - 1] = draftOrder[index];
-  draftOrder[index] = temp;
-  updateTeamInputs();
-}
-
-function updateTeamInputs() {
+  if (index >= draftOrder.length - 1) return;
+  
+  // Swap values
+  [draftOrder[index], draftOrder[index + 1]] = 
+  [draftOrder[index + 1], draftOrder[index]];
+  
+  // Update UI
   const container = document.getElementById('teamNamesContainer');
-  draftOrder.forEach((name, index) => {
-    const input = container.querySelector(`#team${index + 1}Name`);
-    if (input) input.value = name;
-  });
+  const inputs = container.querySelectorAll('input');
+  inputs[index].value = draftOrder[index];
+  inputs[index + 1].value = draftOrder[index + 1];
 }
   </script>
 </body>
