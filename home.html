@@ -1160,8 +1160,6 @@ section {
         .select('*', { count: 'exact', head: true });
       
       document.getElementById('waitlistCounter').textContent = count;
-      const fillHeight = Math.min(100, Math.floor(count / 100) * 10);
-      document.getElementById('ballsInJar').style.height = `${fillHeight}%`;
     }
 
     // Handle form submission
