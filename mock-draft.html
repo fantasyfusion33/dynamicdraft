@@ -355,7 +355,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Update
 async function createLeague(leagueData) {
   try {
     const { data, error } = await supabase
-      .from('leagues')
+      .from('mock_leagues')
       .insert([leagueData])
       .select('id')
       .single();
@@ -418,7 +418,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   try {
     // Save to Supabase
     const { data, error } = await supabase
-      .from('leagues')
+      .from('mock_leagues')
       .insert([leagueData])
       .select('id, teamNames, teamIDs')
       .single();
@@ -437,7 +437,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
 
     // Save draft state
     const { error: draftError } = await supabase
-      .from('draft_state')
+      .from('mock_draft_state')
       .insert([draftState]);
 
     if (draftError) throw draftError;
