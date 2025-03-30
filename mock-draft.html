@@ -115,22 +115,31 @@ h1 {
   flex: 1;
 }
 
- .arrow-buttons {
-      display: flex;
-      gap: 8px;
-    }
+.arrow-buttons {
+  display: flex;
+  gap: 8px;
+}
 
-    .arrow-buttons button {
-      background: none;
-      border: none;
-      color: var(--light);
-      cursor: pointer;
-      font-size: 18px;
-    }
+.arrow-buttons button {
+  background: none;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-    .arrow-buttons button:hover {
-      color: var(--primary);
-    }
+.arrow-buttons button:hover {
+  border-color: #D2042D;
+  color: #D2042D;
+}
+
+.arrow-buttons button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
     
     .slider-value {
       font-weight: 600;
@@ -357,6 +366,10 @@ async function createLeague(leagueData) {
     // Form submission
 document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  
+  // Explicitly update draftOrder from current inputs
+  const inputs = document.querySelectorAll('[id^="team"][id$="Name"]');
+  draftOrder = Array.from(inputs).map(input => input.value);
 
   // Generate league ID
 const leagueId = uuidv4();
@@ -403,6 +416,9 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 
 // Dynamically add team name inputs based on league size
 leagueSizeSlider.addEventListener('input', (e) => {
+  const teamCount = parseInt(e.target.value);
+  draftOrder = Array.from({length: teamCount}, (_, i) => `Team ${i + 1}`);
+  
   const teamNamesContainer = document.getElementById('teamNamesContainer');
   teamNamesContainer.innerHTML = '';
   
@@ -416,32 +432,15 @@ leagueSizeSlider.addEventListener('input', (e) => {
                  value="Team ${i + 1}" 
                  required>
         </div>
-          <div class="arrow-buttons">
-            <button onclick="moveTeamUp(${i})">⬆️</button>
-            <button onclick="moveTeamDown(${i})">⬇️</button>
-          </div>
+        <div class="arrow-buttons">
+            <button type="button" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>⬆️</button>
+            <button type="button" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>⬇️    </button>
         </div>
       </div>
     `;
   }
 });
 let draftOrder = [];
-     // Move team up in draft order
-    function moveTeamUp(i) {
-      if (i > 0) {
-        [draftOrder[i], draftOrder[i - 1]] = [draftOrder[i - 1], draftOrder[i]];
-        [teamNames[i], teamNames[i - 1]] = [teamNames[i - 1], teamNames[i]];
-        renderTeamList();
-      }
-    }
-    // Move team down in draft order
-    function moveTeamDown(i) {
-      if (i < draftOrder.length - 1) {
-        [draftOrder[i], draftOrder[i + 1]] = [draftOrder[i + 1], draftOrder[i]];
-        [teamNames[i], teamNames[i + 1]] = [teamNames[i + 1], teamNames[i]];
-        renderTeamList();
-      }
-    }
 
 function updateDraftOrder() {
   const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
@@ -451,32 +450,54 @@ function updateDraftOrder() {
   draftOrder = inputs;
 }
 
-function moveTeamUp(index) {
+function moveTeamUp(index, event) {
+  event.preventDefault(); // Stop form submission
+  event.stopPropagation(); // Prevent event bubbling
+  
   if (index <= 0) return;
   
-  // Swap values
-  [draftOrder[index], draftOrder[index - 1]] = 
-  [draftOrder[index - 1], draftOrder[index]];
-  
-  // Update UI
+  // Get current values
   const container = document.getElementById('teamNamesContainer');
   const inputs = container.querySelectorAll('input');
-  inputs[index].value = draftOrder[index];
-  inputs[index - 1].value = draftOrder[index - 1];
+  const currentValue = inputs[index].value;
+  const prevValue = inputs[index - 1].value;
+  
+  // Swap values
+  inputs[index].value = prevValue;
+  inputs[index - 1].value = currentValue;
+  
+  // Update draft order array
+  draftOrder[index] = prevValue;
+  draftOrder[index - 1] = currentValue;
 }
 
-function moveTeamDown(index) {
+function moveTeamDown(index, event) {
+  event.preventDefault(); // Stop form submission
+  event.stopPropagation(); // Prevent event bubbling
+  
   if (index >= draftOrder.length - 1) return;
   
-  // Swap values
-  [draftOrder[index], draftOrder[index + 1]] = 
-  [draftOrder[index + 1], draftOrder[index]];
-  
-  // Update UI
+  // Get current values
   const container = document.getElementById('teamNamesContainer');
   const inputs = container.querySelectorAll('input');
-  inputs[index].value = draftOrder[index];
-  inputs[index + 1].value = draftOrder[index + 1];
+  const currentValue = inputs[index].value;
+  const nextValue = inputs[index + 1].value;
+  
+  // Swap values
+  inputs[index].value = nextValue;
+  inputs[index + 1].value = currentValue;
+  
+  // Update draft order array
+  draftOrder[index] = nextValue;
+  draftOrder[index + 1] = currentValue;
+}
+
+function updateDraftOrder() {
+  const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
+    .filter(input => input.id.includes('Name'))
+    .map(input => input.value);
+  
+  draftOrder = inputs;
 }
   </script>
 </body>
