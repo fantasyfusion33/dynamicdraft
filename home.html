@@ -1056,7 +1056,22 @@ section {
     const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    // Set global ScrollTrigger defaults
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
 
+// Refresh ScrollTrigger after images load
+window.addEventListener('load', () => {
+  ScrollTrigger.refresh();
+});
+    // Mobile-specific adjustments
+if (window.innerWidth < 768) {
+  gsap.utils.toArray("section").forEach(section => {
+    ScrollTrigger.getById(section).vars.start = "top 95%";
+  });
+}
     // Create floating sport balls
     function createFloatingBalls() {
       const container = document.getElementById('floatingBalls');
@@ -1090,22 +1105,7 @@ section {
         container.appendChild(ball);
       }
     }
-    // Set global ScrollTrigger defaults
-ScrollTrigger.config({
-  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
-  ignoreMobileResize: true
-});
 
-// Refresh ScrollTrigger after images load
-window.addEventListener('load', () => {
-  ScrollTrigger.refresh();
-});
-    // Mobile-specific adjustments
-if (window.innerWidth < 768) {
-  gsap.utils.toArray("section").forEach(section => {
-    ScrollTrigger.getById(section).vars.start = "top 95%";
-  });
-}
     // Animate header underline on scroll
   document.addEventListener('DOMContentLoaded', () => {
     gsap.to(".header-underline", {
