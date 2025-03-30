@@ -95,6 +95,28 @@ h1 {
       transition: background 0.2s ease;
     }
 
+    .team-order-controls {
+  display: flex;
+  gap: 8px;
+  margin-left: 10px;
+}
+
+.order-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #FFF;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.order-btn:hover {
+  background: #D2042D;
+  border-color: #D2042D;
+}
+
     .slider-value {
       font-weight: 600;
       font-size: 18px;
@@ -367,17 +389,54 @@ console.log(leagueId); // Example: "1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed"
 // Dynamically add team name inputs based on league size
 leagueSizeSlider.addEventListener('input', (e) => {
   const teamNamesContainer = document.getElementById('teamNamesContainer');
-  teamNamesContainer.innerHTML = ''; // Clear existing inputs
-
+  teamNamesContainer.innerHTML = '';
+  
   for (let i = 1; i <= e.target.value; i++) {
     teamNamesContainer.innerHTML += `
       <div class="team-name-input">
-        <label>Team ${i} Name</label>
-        <input type="text" id="team${i}Name" value="Team ${i}" required>
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="team-order-controls">
+            <button class="order-btn" onclick="moveTeamUp(${i})" ${i === 1 ? 'disabled' : ''}>↑</button>
+            <button class="order-btn" onclick="moveTeamDown(${i})" ${i === parseInt(e.target.value) ? 'disabled' : ''}>↓</button>
+          </div>
+          <input type="text" id="team${i}Name" value="Team ${i}" required>
+        </div>
       </div>
     `;
   }
 });
+
+  let draftOrder = [];
+
+function updateDraftOrder() {
+  const inputs = Array.from(document.querySelectorAll('[id^="team"]'))
+    .filter(input => input.id.includes('Name'));
+  draftOrder = inputs.map(input => input.value);
+}
+
+function moveTeamUp(index) {
+  if (index <= 1) return;
+  const temp = draftOrder[index - 1];
+  draftOrder[index - 1] = draftOrder[index - 2];
+  draftOrder[index - 2] = temp;
+  updateTeamInputs();
+}
+
+function moveTeamDown(index) {
+  if (index >= draftOrder.length) return;
+  const temp = draftOrder[index - 1];
+  draftOrder[index - 1] = draftOrder[index];
+  draftOrder[index] = temp;
+  updateTeamInputs();
+}
+
+function updateTeamInputs() {
+  const container = document.getElementById('teamNamesContainer');
+  draftOrder.forEach((name, index) => {
+    const input = container.querySelector(`#team${index + 1}Name`);
+    if (input) input.value = name;
+  });
+}
   </script>
 </body>
 </html>
