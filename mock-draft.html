@@ -381,95 +381,88 @@ async function createLeague(leagueData) {
     // Form submission
 document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  // Generate UUIDs for all teams first
+  const teamCount = parseInt(document.getElementById('leagueSize').value);
+  const teamIDs = Array.from({length: teamCount}, () => uuidv4());
+  const teamNames = Array.from(document.querySelectorAll('[id^="team"][id$="Name"]')).map(input => input.value);
   
-  // 1. Get all team names while preserving the "(Your Team)" marker
-  const teamInputs = document.querySelectorAll('.team-name-input input');
-  const teamNames = Array.from(teamInputs).map(input => input.value);
-  
-  // 2. Get league settings
-  const leagueName = document.getElementById('leagueName').value.trim();
-  const leagueSize = parseInt(document.getElementById('leagueSize').value);
-  const wildcardEnabled = document.getElementById('wildcard').checked;
-  const waiversEnabled = document.getElementById('waiverSystem').checked;
-  const bonusPointsEnabled = document.getElementById('bonusPoints').checked;
-  
-  // 3. Generate the draft order array based on current positions
-  const draftOrder = [];
-  const teamItems = document.querySelectorAll('.team-item');
-  
-  teamItems.forEach((item, index) => {
-    if (item.classList.contains('user-team')) {
-      // The user team's position in the order
-      userTeamPosition = index;
-    }
-    draftOrder.push(index); // This creates [0,1,2,3...] which we'll adjust
-  });
-  
-  // 4. Prepare the league data for Supabase
+  // Prepare league data to match exact schema
   const leagueData = {
-    id: uuidv4(),
-    league_name: leagueName,
-    team_count: leagueSize,
-    team_names: teamNames,
-    draft_order: draftOrder,
-    user_team_position: userTeamPosition,
-    wildcard_round: wildcardEnabled,
-    waiver_system: waiversEnabled,
-    bonus_points: bonusPointsEnabled,
-    is_private: false,
-    has_password: false,
-    has_buy_in: false,
+    leagueName: document.getElementById('leagueName').value.trim(),
+    owner_id: '561bd4b1-c0a1-455f-86b6-3c785fbebfe5', // Your owner ID
+    teamCount: teamCount,
+    wildcardRound: document.getElementById('wildcard').checked,
+    waivers: document.getElementById('waiverSystem').checked,
+    bonusPoints: document.getElementById('bonusPoints').checked,
+    isPrivate: false, // Default value
+    hasPassword: false, // Default value
+    hasBuyIn: false, // Default value
+    teamNames: teamNames,
+    teamIDs: teamIDs,
+    invite_codes: generateInviteCodes(teamCount), // Helper function
     created_at: new Date().toISOString(),
-    status: 'pre_draft'
+    // Optional fields with defaults
+    buyInAmount: null,
+    draftDate: null,
+    draftTime: null,
+    emblem: null,
+    payoutChampion: 100,
+    payoutRunnerUp: 0,
+    payoutThirdPlace: 0,
+    totalPrizePool: 0,
+    calculatePayout: null,
+    league_manager: '561bd4b1-c0a1-455f-86b6-3c785fbebfe5' // Your owner ID
   };
 
   try {
-    // 5. Save to Supabase
+    // Save to Supabase
     const { data, error } = await supabase
       .from('leagues')
       .insert([leagueData])
-      .select()
+      .select('id, teamNames, teamIDs')
       .single();
 
     if (error) throw error;
 
-    // 6. Prepare draft state
-    const draftStateData = {
+    // Create initial draft state
+    const draftState = {
       draft_id: uuidv4(),
       league_id: data.id,
       current_pick: 0,
-      draft_order: draftOrder, // The actual order [0,1,2,3...]
-      user_team_position: userTeamPosition,
+      draft_order: Array.from({length: teamCount}, (_, i) => i), // [0,1,2,...]
+      user_team_position: 0, // Will be updated after moves
       player_rosters: {},
       settings: {
-        wildcard: wildcardEnabled,
-        team_count: leagueSize
-      },
-      created_at: new Date().toISOString()
+        wildcard: leagueData.wildcardRound,
+        team_count: teamCount
+      }
     };
 
-    // 7. Save draft state
-    const { error: draftStateError } = await supabase
+    // Save draft state
+    const { error: draftError } = await supabase
       .from('draft_state')
-      .insert([draftStateData]);
+      .insert([draftState]);
 
-    if (draftStateError) throw draftStateError;
+    if (draftError) throw draftError;
 
-    // 8. Redirect to draft page with necessary parameters
-    const redirectUrl = `draft_supabase.html?leagueId=${data.id}&userTeamPos=${userTeamPosition}`;
-    window.location.href = redirectUrl;
+    // Redirect to draft page
+    window.location.href = `draft_supabase.html?leagueId=${data.id}&userTeamPos=0`;
 
   } catch (err) {
     console.error('Error creating league:', err);
-    
-    // Show user-friendly error message
-    const submitBtn = document.querySelector('#leagueForm button[type="submit"]');
-    submitBtn.disabled = false;
-    submitBtn.textContent = 'Create League & Start Draft';
-    
-    alert('Failed to create league. Please check your connection and try again.');
+    alert('League creation failed. Please try again.');
+    document.querySelector('button[type="submit"]').disabled = false;
   }
 });
+
+// Helper function to generate invite codes
+function generateInviteCodes(count) {
+  return Array.from({length: count}, () => ({
+    code: uuidv4().slice(0, 8),
+    used: false
+  }));
+}
 
 // Dynamically add team name inputs based on league size
 leagueSizeSlider.addEventListener('input', (e) => {
