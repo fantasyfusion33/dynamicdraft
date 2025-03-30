@@ -1090,13 +1090,29 @@ section {
         container.appendChild(ball);
       }
     }
+    // Set global ScrollTrigger defaults
+ScrollTrigger.config({
+  autoRefreshEvents: "visibilitychange,DOMContentLoaded,load",
+  ignoreMobileResize: true
+});
+
+// Refresh ScrollTrigger after images load
+window.addEventListener('load', () => {
+  ScrollTrigger.refresh();
+});
+    // Mobile-specific adjustments
+if (window.innerWidth < 768) {
+  gsap.utils.toArray("section").forEach(section => {
+    ScrollTrigger.getById(section).vars.start = "top 95%";
+  });
+}
     // Animate header underline on scroll
   document.addEventListener('DOMContentLoaded', () => {
     gsap.to(".header-underline", {
       width: "200px",
       scrollTrigger: {
         trigger: ".timeline-header",
-        start: "top 80%",
+        start: "top 99%",
         toggleActions: "play none none none"
       }
     });
@@ -1110,7 +1126,7 @@ section {
         delay: i * 0.1,
         scrollTrigger: {
           trigger: segment,
-          start: "top 90%",
+          start: "top 99%",
           toggleActions: "play none none none"
         }
       });
