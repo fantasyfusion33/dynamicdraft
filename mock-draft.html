@@ -433,8 +433,8 @@ leagueSizeSlider.addEventListener('input', (e) => {
                  required>
         </div>
         <div class="arrow-buttons">
-            <button type="button" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>⬆️</button>
-            <button type="button" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>⬇️    </button>
+            <button type="button" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>↑</button>
+            <button type="button" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>↓</button>
         </div>
       </div>
     `;
