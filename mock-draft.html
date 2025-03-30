@@ -94,52 +94,6 @@ h1 {
       cursor: pointer;
       transition: background 0.2s ease;
     }
-
-.team-item {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 12px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 8px;
-  margin-bottom: 12px;
-}
-
-.draft-order {
-  width: 30px;
-  font-weight: 600;
-  color: #D2042D;
-}
-
-.team-name-input {
-  flex: 1;
-}
-
-.arrow-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.arrow-buttons button {
-  background: none;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: white;
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.arrow-buttons button:hover {
-  border-color: #D2042D;
-  color: #D2042D;
-}
-
-.arrow-buttons button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
     
     .slider-value {
       font-weight: 600;
@@ -231,9 +185,6 @@ h1 {
       background: #B00326;
     }
 
-.team-name-input {
-  margin-bottom: 15px;
-}
 
 .team-name-input label {
   font-size: 16px;
@@ -243,23 +194,77 @@ h1 {
   margin-bottom: 6px;
 }
 
-.team-name-input input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
 .team-name-input input:focus {
   border-color: #D2042D;
   background: rgba(255, 255, 255, 0.15);
   box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+}
+    .team-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+
+.draft-order {
+  width: 30px;
+  font-weight: 600;
+  color: #D2042D;
+  text-align: center;
+}
+
+.team-name-input {
+  flex: 1;
+  min-width: 0; /* Allows the input to shrink */
+}
+
+.team-name-input input {
+  width: 100%;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: white;
+  font-size: 14px;
+}
+
+.arrow-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.arrow-btn:hover {
+  background: rgba(210, 4, 45, 0.3);
+  border-color: #D2042D;
+}
+
+.arrow-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.arrow-icon {
+  font-size: 18px;
+  font-weight: bold;
+  width: 100%;
+  text-align: center;
 }
 
   </style>
@@ -430,11 +435,16 @@ leagueSizeSlider.addEventListener('input', (e) => {
           <input type="text" 
                  id="team${i + 1}Name" 
                  value="Team ${i + 1}" 
+                 placeholder="Enter team name"
                  required>
         </div>
         <div class="arrow-buttons">
-            <button type="button" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>↑</button>
-            <button type="button" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>↓</button>
+          <button class="arrow-btn" onclick="moveTeamUp(${i}, event)" ${i === 0 ? 'disabled' : ''}>
+            <span class="arrow-icon">↑</span>
+          </button>
+          <button class="arrow-btn" onclick="moveTeamDown(${i}, event)" ${i === e.target.value - 1 ? 'disabled' : ''}>
+            <span class="arrow-icon">↓</span>
+          </button>
         </div>
       </div>
     `;
