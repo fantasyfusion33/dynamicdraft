@@ -476,8 +476,8 @@ for (let i = 0; i < e.target.value; i++) {
         <div class="team-name-input">
           <input type="text" 
                  id="team${i + 1}Name" 
-                 value="${isUserTeam ? 'Team 1 (Your Team)' : 'Team ' + (i + 1)}" 
-                 ${isUserTeam ? 'readonly' : ''}
+                 value="${isUserTeam ? 'My Team' : 'Team ' + (i + 1)}" 
+                 ${''}
                  required>
         </div>
         <div class="arrow-buttons">
