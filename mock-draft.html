@@ -460,24 +460,24 @@ function generateInviteCodes(count) {
   }));
 }
 
-// Dynamically add team name inputs based on league size
+// Store user team name separately
+let userTeamName = "My Team (Your Team)";
+
 leagueSizeSlider.addEventListener('input', (e) => {
   const teamCount = parseInt(e.target.value);
-  draftOrder = Array.from({length: teamCount}, (_, i) => `Team ${i + 1}`);
-  
   const teamNamesContainer = document.getElementById('teamNamesContainer');
   teamNamesContainer.innerHTML = '';
   
-for (let i = 0; i < e.target.value; i++) {
-    const isUserTeam = i === 0;
+  for (let i = 0; i < teamCount; i++) {
+    const isUserTeam = i === userTeamPosition;
     teamNamesContainer.innerHTML += `
-      <div class="team-item ${isUserTeam ? 'user-team' : ''}">
+      <div class="team-item ${isUserTeam ? 'user-team' : ''}" data-position="${i}">
         <span class="draft-order">${i + 1}</span>
         <div class="team-name-input">
           <input type="text" 
-                 id="team${i + 1}Name" 
-                 value="${isUserTeam ? 'My Team' : 'Team ' + (i + 1)}" 
-                 ${isUserTeam ? '': 'readonly'}
+                 id="team${i}Name" 
+                 value="${isUserTeam ? userTeamName : 'Team ' + (i + 1)}" 
+                 ${isUserTeam ? '' : 'readonly'}
                  required>
         </div>
         <div class="arrow-buttons">
@@ -492,6 +492,14 @@ for (let i = 0; i < e.target.value; i++) {
         </div>
       </div>
     `;
+  }
+  
+  // Add event listener for user team name changes
+  const userTeamInput = document.querySelector('.user-team input');
+  if (userTeamInput) {
+    userTeamInput.addEventListener('input', (e) => {
+      userTeamName = e.target.value;
+    });
   }
 });
 let userTeamPosition = 0; // Tracks user team position
