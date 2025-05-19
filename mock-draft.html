@@ -461,7 +461,7 @@ function generateInviteCodes(count) {
 }
 
 // Store user team name separately
-let userTeamName = "My Team (Your Team)";
+let userTeamName = "My Team";
 
 leagueSizeSlider.addEventListener('input', (e) => {
   const teamCount = parseInt(e.target.value);
@@ -502,36 +502,61 @@ leagueSizeSlider.addEventListener('input', (e) => {
     });
   }
 });
-let userTeamPosition = 0; // Tracks user team position
+let userTeamPosition = 0; // Track user team position
 
 function moveUserTeamUp(e) {
   e.preventDefault();
   if (userTeamPosition <= 0) return;
   
   const container = document.getElementById('teamNamesContainer');
-  const items = container.querySelectorAll('.team-item');
+  const items = Array.from(container.querySelectorAll('.team-item'));
   
-  // Swap positions in DOM
+  // Swap positions
   container.insertBefore(items[userTeamPosition], items[userTeamPosition - 1]);
   
   userTeamPosition--;
-  updateDraftNumbers();
+  refreshTeamDisplay();
 }
 
 function moveUserTeamDown(e) {
   e.preventDefault();
   const container = document.getElementById('teamNamesContainer');
-  const items = container.querySelectorAll('.team-item');
+  const items = Array.from(container.querySelectorAll('.team-item'));
   
   if (userTeamPosition >= items.length - 1) return;
   
-  // Swap positions in DOM
+  // Swap positions
   container.insertBefore(items[userTeamPosition + 1], items[userTeamPosition]);
   
   userTeamPosition++;
-  updateDraftNumbers();
+  refreshTeamDisplay();
 }
-
+  function refreshTeamDisplay() {
+  const container = document.getElementById('teamNamesContainer');
+  const items = Array.from(container.querySelectorAll('.team-item'));
+  
+  items.forEach((item, index) => {
+    // Update position numbers
+    item.querySelector('.draft-order').textContent = index + 1;
+    item.dataset.position = index;
+    
+    // Update non-user team names
+    if (!item.classList.contains('user-team')) {
+      const input = item.querySelector('input');
+      input.value = `Team ${index + 1}`;
+    }
+    
+    // Update arrow button states
+    const arrows = item.querySelectorAll('.arrow-btn');
+    if (arrows.length > 0) {
+      arrows[0].disabled = index === 0; // Disable up at top
+      arrows[1].disabled = index === items.length - 1; // Disable down at bottom
+    }
+  });
+  
+  // Ensure user team position is tracked correctly
+  userTeamPosition = items.findIndex(item => item.classList.contains('user-team'));
+}
 function updateDraftNumbers() {
   const items = document.querySelectorAll('.team-item');
   items.forEach((item, index) => {
