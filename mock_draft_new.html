@@ -366,10 +366,10 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   
   // Prepare league data to match exact schema
   const leagueData = {
-    leagueName: document.getElementById('leagueName').value.trim(),
-    teamCount: teamCount,
-    wildcardRound: document.getElementById('wildcard').checked,
-    teamNames: teamNames,
+    league_name: document.getElementById('leagueName').value.trim(),
+    team_count: teamCount,
+    wildcard_round: document.getElementById('wildcard').checked,
+    team_names: teamNames,
     draft_order: Array.from({length: teamCount}, (_, i) => i), // [0,1,2,...]
     created_at: new Date().toISOString(),
     // Optional fields with defaults
@@ -382,7 +382,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     const { data, error } = await supabase
       .from('mock_drafts')
       .insert([leagueData])
-      .select('id, teamNames')
+      .select('id, team_names')
       .single();
 
     if (error) throw error;
