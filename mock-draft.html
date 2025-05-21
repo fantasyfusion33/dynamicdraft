@@ -362,7 +362,6 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
 
   // Generate UUIDs for all teams first
   const teamCount = parseInt(document.getElementById('leagueSize').value);
-  const teamIDs = Array.from({length: teamCount}, () => uuidv4());
   const teamNames = Array.from(document.querySelectorAll('[id^="team"][id$="Name"]')).map(input => input.value);
   
   // Prepare league data to match exact schema
@@ -382,7 +381,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     const { data, error } = await supabase
       .from('mock_leagues')
       .insert([leagueData])
-      .select('id, teamNames, teamIDs')
+      .select('id, teamNames')
       .single();
 
     if (error) throw error;
