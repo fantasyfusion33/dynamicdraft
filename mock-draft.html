@@ -371,23 +371,9 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     owner_id: '561bd4b1-c0a1-455f-86b6-3c785fbebfe5', // Your owner ID
     teamCount: teamCount,
     wildcardRound: document.getElementById('wildcard').checked,
-    isPrivate: false, // Default value
-    hasPassword: false, // Default value
-    hasBuyIn: false, // Default value
     teamNames: teamNames,
-    teamIDs: teamIDs,
-    invite_codes: generateInviteCodes(teamCount), // Helper function
     created_at: new Date().toISOString(),
     // Optional fields with defaults
-    buyInAmount: null,
-    draftDate: null,
-    draftTime: null,
-    emblem: null,
-    payoutChampion: 100,
-    payoutRunnerUp: 0,
-    payoutThirdPlace: 0,
-    totalPrizePool: 0,
-    calculatePayout: null,
     league_manager: '561bd4b1-c0a1-455f-86b6-3c785fbebfe5' // Your owner ID
   };
 
