@@ -906,7 +906,7 @@
     <option value="championship_odds">Odds</option>
     <option value="adp">ADP</option>
     <option value="lastYearPoints">Prev. Pts</option>
-    <option value="championshipPct">% Odds</option> //calculated in database
+    <option value="championshipPct">% Odds</option>
   </select>
   <!-- Fliter By -->
       <label>Filter:</label>
@@ -976,7 +976,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv4.min.js"></script>
 <script>
 
-
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
@@ -1042,7 +1041,7 @@ function subscribeToDraftUpdates() {
 async function initializeDraft() {
   const params = new URLSearchParams(window.location.search);
   leagueId = params.get('league'); // Assign leagueId globally
-
+  
   if (!leagueId) {
     console.error('Missing required parameters in URL:', { leagueId });
     alert('Invalid draft link. Please check the URL.');
@@ -1165,6 +1164,7 @@ if (draftData.is_paused) {
   pauseButton.textContent = 'Pause Draft';
   pauseButton.onclick = pauseDraft;
 }
+  }
 
   function subscribeToLobby() {
   return supabase
