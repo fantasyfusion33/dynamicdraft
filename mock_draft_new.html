@@ -388,7 +388,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     
     // Redirect to draft page
-    window.location.href = `draft_supabase.html?leagueId=${data.id}&userTeamPos=0`;
+    window.location.href = `draft_supabase.html?leagueId=${data.id}&userTeamPos=${user_team_position}`;
 
   } catch (err) {
     console.error('Error creating league:', err);
