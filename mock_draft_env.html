@@ -976,55 +976,49 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv4.min.js"></script>
 <script>
 
+
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
 
-// Global variables
-let draftState = null; // Initialize as null
-let draftId = null;
-let teamId = null;
-let leagueId = null;
-let isAdmin = false;
-let teamNames = [];
-let teamCount = 0;
-let leagueData = {};
-
-// Fetch draft state from Supabase
-async function fetchDraftState(draftId) {
-  try {
+  // --- DRAFT STATE VARIABLES ---
+  let draftData = null;
+  let userTeamPosition = 0;
+  let currentPick = 1;
+  let teamNames = [];
+  let draftOrder = [];
+  let teamCount = 0;
+  let wildcardRound = false;
+  let isPaused = false;
+  let leagueName = "";
+  let playerRosters = {};
+  
+  // --- FETCH DRAFT DATA ---
+  async function fetchDraftData() {
     const { data, error } = await supabase
-      .from('draft_state')
+      .from('mock_drafts')
       .select('*')
-      .eq('draft_id', draftId)
+      .eq('id', leagueId)
       .single();
 
-    if (error) throw error;
-    return data;
-  } catch (err) {
-    console.error('Error fetching draft state:', err);
-    return null;
-  }
-}
+    if (error) {
+      alert("Could not load draft data: " + error.message);
+      return;
+    }
 
-// Fetch team data from Supabase
-async function fetchTeamData(teamId) {
-  try {
-    const { data, error } = await supabase
-      .from('teams')
-      .select('*')
-      .eq('id', teamId)
-      .single();
-
-    if (error) throw error;
-    return data;
-  } catch (err) {
-    console.error('Error fetching team data:', err);
-    return null;
-  }
-}
-
+    // Populate state variables
+    draftData = data;
+    leagueName = data.league_name;
+    teamNames = data.team_names; // Should be an array or object, adjust below as needed
+    draftOrder = data.draft_order;
+    currentPick = data.current_pick;
+    teamCount = data.team_count;
+    wildcardRound = !!data.wildcard_round;
+    isPaused = !!data.is_paused;
+    userTeamPosition = data.user_team_position;
+    playerRosters = data.player_rosters || {};
+    
 // Subscribe to real-time updates for draft state
 function subscribeToDraftUpdates() {
   return supabase
@@ -1032,7 +1026,7 @@ function subscribeToDraftUpdates() {
     .on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
-      table: 'draft_state'
+      table: 'mock_drafts'
     }, (payload) => {
       // Update the global draftState with the new data
       draftState = payload.new;
@@ -1043,33 +1037,21 @@ function subscribeToDraftUpdates() {
     .subscribe();
 }
 
-// Initialize admin controls
-function initializeAdminControls() {
-  if (isAdmin) {
-    document.getElementById('admin-controls').style.display = 'block';
-    document.querySelectorAll('.admin-only').forEach(el => {
-      el.style.display = 'inline-block';
-    });
-  }
-}
 
 // Main function to initialize the draft
 async function initializeDraft() {
   const params = new URLSearchParams(window.location.search);
-  draftId = params.get('draft'); // Assign draftId globally
-  teamId = params.get('team'); // Assign teamId globally
   leagueId = params.get('league'); // Assign leagueId globally
-  isAdmin = params.has('admin'); // Assign isAdmin globally
 
-  if (!draftId || !teamId || !leagueId) {
-    console.error('Missing required parameters in URL:', { draftId, teamId, leagueId });
+  if (!leagueId) {
+    console.error('Missing required parameters in URL:', { leagueId });
     alert('Invalid draft link. Please check the URL.');
     return;
   }
 
   try {
     // Fetch draft state and assign it to the global variable
-    draftState = await fetchDraftState(draftId);
+    draftState = await fetchDraftState(leagueId);
 
     if (!draftState) {
       console.error('Failed to fetch draft state.');
@@ -1079,24 +1061,13 @@ async function initializeDraft() {
 
     console.log('Draft state fetched successfully:', draftState);
 
-    // Fetch team data
-    const team = await fetchTeamData(teamId);
-
-    if (!team) {
-      console.error('Failed to fetch team data.');
-      alert('Failed to fetch team data. Please try again.');
-      return;
-    }
-
-    console.log('Team data fetched successfully:', team);
-
     // Subscribe to real-time updates
     subscribeToDraftUpdates();
 
     // Initialize admin controls
     initializeAdminControls();
 
-    console.log('Draft initialized successfully:', { draftId, teamId, leagueId, isAdmin });
+    console.log('Draft initialized successfully:', {leagueId});
   } catch (err) {
     console.error('Error initializing draft:', err);
     alert('Failed to initialize draft. Please try again.');
@@ -1114,48 +1085,48 @@ document.addEventListener('DOMContentLoaded', async () => {
   
 async function pauseDraft() {
   await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .update({ 
       is_paused: true,
       status: 'paused'
     })
-    .eq('draft_id', draftId);
+    .eq('id', leagueId);
 }
 
 async function resumeDraft() {
   await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .update({ 
       is_paused: false,
       status: 'active'
     })
-    .eq('draft_id', draftId);
+    .eq('id', leagueId);
 }
 
 async function redoPick() {
   const { data: state } = await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .select('current_pick')
-    .eq('draft_id', draftId)
+    .eq('id', leagueId)
     .single();
 
   await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .update({ current_pick: state.current_pick - 1 })
-    .eq('draft_id', draftId);
+    .eq('id', leagueId);
 }
 
 async function advancePick() {
   const { data: state } = await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .select('current_pick')
-    .eq('draft_id', draftId)
+    .eq('id', leagueId)
     .single();
 
   await supabase
-    .from('draft_state')
+    .from('mock_drafts')
     .update({ current_pick: state.current_pick + 1 })
-    .eq('draft_id', draftId);
+    .eq('id', leagueId);
 }
 
 // ========================
@@ -1163,36 +1134,37 @@ async function advancePick() {
 // ========================
   function updateDraftUI(state) {
   // Update current pick
-  document.getElementById('current-pick').textContent = state.current_pick;
+  document.getElementById('current-pick').textContent = draftData.current_pick;
 
   // Update draft status
-  document.getElementById('draft-status').textContent = state.status;
+  document.getElementById('draft-status').textContent = draftData.status || "";
 
   // Update player rosters
   const rostersContainer = document.getElementById('rosters');
-  rostersContainer.innerHTML = Object.entries(state.player_rosters)
-    .map(([teamId, roster]) => {
-      const team = teams.find(t => t.id === teamId);
+  const teamNames = Array.isArray(draftData.team_names) ? draftData.team_names : [];
+  const playerRosters = draftData.player_rosters || {};
+  rostersContainer.innerHTML = teamNames
+    .map((teamName, idx) => {
+      const roster = playerRosters[idx] || [];
       return `
         <div class="roster">
-          <h3>${team.name}</h3>
+          <h3>${teamName}</h3>
           <ul>
-            ${roster.map(player => `<li>${player.name}</li>`).join('')}
+            ${roster.map(player => `<li>${player.name || player}</li>`).join('')}
           </ul>
         </div>
       `;
     })
     .join('');
 
-  // Update pause/resume button
-  const pauseButton = document.getElementById('pause-button');
-  if (state.is_paused) {
-    pauseButton.textContent = 'Resume Draft';
-    pauseButton.onclick = resumeDraft;
-  } else {
-    pauseButton.textContent = 'Pause Draft';
-    pauseButton.onclick = pauseDraft;
-  }
+// Update pause/resume button
+const pauseButton = document.getElementById('pause-button');
+if (draftData.is_paused) {
+  pauseButton.textContent = 'Resume Draft';
+  pauseButton.onclick = resumeDraft;
+} else {
+  pauseButton.textContent = 'Pause Draft';
+  pauseButton.onclick = pauseDraft;
 }
 
   function subscribeToLobby() {
@@ -1201,7 +1173,7 @@ async function advancePick() {
     .on('postgres_changes', {
       event: 'UPDATE',
       schema: 'public',
-      table: 'draft_state'
+      table: 'mock_drafts'
     }, (payload) => {
       updateDraftUI(payload.new);
     })
@@ -1217,7 +1189,7 @@ console.log('Extracted leagueId from URL:', leagueId);
 async function fetchLeagueData(leagueId) {
   try {
     const { data, error } = await supabase
-      .from('leagues')
+      .from('mock_drafts')
       .select('*')
       .eq('id', leagueId)
       .single();
@@ -1227,16 +1199,16 @@ async function fetchLeagueData(leagueId) {
     console.log('League data fetched successfully:', data);
 
     // Ensure teamNames is assigned and is always an array
-    teamNames = data.teamNames || []; 
-    teamCount = data.teamCount; // Ensure teamCount is properly assigned
-    wildcard = data.wildcardRound;
-    leagueName = data.leagueName;
+    teamNames = data.team_names || []; 
+    teamCount = data.team_count; // Ensure teamCount is properly assigned
+    wildcard = data.wildcard_round;
+    leagueName = data.league_name;
     
     draftState.settings = {
-      leagueName: data.leagueName,
+      leagueName: data.league_name,
       teamNames,
       teamCount,
-      wildcard: data.wildcardRound,
+      wildcard: data.wildcard_round,
       waiverSystem: data.waiverSystem,
       bonusPoints: data.bonusPoints,
     };
@@ -1258,8 +1230,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize draft state
     draftState.draft_order = leagueData.draft_order;
     draftState.settings = {
-      leagueName: leagueData.leagueName,
-      wildcard: leagueData.wildcardRound,
+      leagueName: leagueData.league_name,
+      wildcard: leagueData.wildcard_round,
     };
 
     // Initialize player rosters
@@ -1289,7 +1261,7 @@ function initializePlayerRosters(teamCount) {
     // Subscribe to draft state changes
     const draftChannel = supabase
       .channel('draft')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'draft_state' }, (payload) => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mock_drafts' }, (payload) => {
         draftState = payload.new;
         renderTeams();
         updateClock();
@@ -1317,7 +1289,7 @@ function initializePlayerRosters(teamCount) {
 async function startDraft() {
   try {
     const { error } = await supabase
-      .from('draft_state')
+      .from('mock_drafts')
       .insert([{
         league_id: leagueId,
         current_pick: 0,
@@ -1446,7 +1418,7 @@ for (let i = 1; i <= teamCount; i++) {
 async function saveDraftState() {
   try {
     const { data, error } = await supabase
-      .from('draft_state')
+      .from('mock_drafts')
       .upsert([{
         draft_id: draftState.draft_id,
         current_pick: draftState.current_pick,
