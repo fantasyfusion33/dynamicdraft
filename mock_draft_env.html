@@ -1142,7 +1142,6 @@ async function advancePick() {
   // Update player rosters
   const rostersContainer = document.getElementById('rosters');
   const teamNames = Array.isArray(draftData.team_names) ? draftData.team_names : [];
-  const playerRosters = draftData.player_rosters || {};
   rostersContainer.innerHTML = teamNames
     .map((teamName, idx) => {
       const roster = playerRosters[idx] || [];
@@ -1243,7 +1242,6 @@ draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * tea
 
     // Initialize playerRosters
 function initializePlayerRosters(teamCount) {
-  const playerRosters = {};
   for (let i = 1; i <= teamCount; i++) {
     playerRosters[i] = {
       NFL: [],
@@ -1846,7 +1844,6 @@ let current_pick = 1;
 let totalPicks = 0; // Track total picks
 
 // Initialize playerRosters
-const playerRosters = {};
 for (let i = 1; i <= teamCount; i++) {
   playerRosters[i] = {
     NFL: [],
