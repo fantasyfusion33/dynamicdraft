@@ -373,7 +373,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     draft_order: Array.from({length: teamCount}, (_, i) => i), // [0,1,2,...]
     created_at: new Date().toISOString(),
     // Optional fields with defaults
-    user_team_position: 0, // Will be updated after moves
+    user_team_position, // Will be updated after moves
     player_rosters: {}  
   };
 
