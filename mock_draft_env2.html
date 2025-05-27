@@ -1038,7 +1038,7 @@ async function initializeDraft() {
   if (draftState.current_pick !== data.current_pick) {
     await supabase
       .from('mock_drafts')
-      .update({ current_pick: 1 })
+      .update({ current_pick: 0 })
       .eq('id', leagueId);
   }
 
