@@ -1542,8 +1542,11 @@ function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
   const arrow = document.querySelector('#toggleMyTeam .arrow');
-  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '◀' : '▶';
-  myTeamBox.setAttribute('aria-expanded', !myTeamBox.classList.contains('collapsed'));
+ if (MyTeamBox.classList.contains("collapsed")) {
+    arrow.innerHTML = "&#9664;"; // Right arrow
+  } else {
+    arrow.innerHTML = "&#9654;"; // Left arrow
+  }
 }
 
 // Toggle sidebar collapse/expand
