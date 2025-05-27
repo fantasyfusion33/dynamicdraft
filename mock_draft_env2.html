@@ -1453,8 +1453,6 @@ document.getElementById('sportFilter').addEventListener('change', renderDraftBoa
 document.getElementById('sortBy').addEventListener('change', renderDraftBoard);
 document.getElementById('teamSearch').addEventListener('input', 
   debounce(renderDraftBoard, 300));
-document.getElementById('toggleMyTeam').addEventListener('click', toggleMyTeam);
-document.querySelector('.sidebar-toggle').addEventListener('click', toggleSidebar);
 
 // ========================
 // Helper Functions
@@ -1548,13 +1546,23 @@ function toggleMyTeam() {
   myTeamBox.setAttribute('aria-expanded', !myTeamBox.classList.contains('collapsed'));
 }
 
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('collapsed');
-  const arrow = document.querySelector('.sidebar-toggle .arrow');
-  arrow.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
-  sidebar.setAttribute('aria-expanded', !sidebar.classList.contains('collapsed'));
-}
+// Toggle sidebar collapse/expand
+const toggleSidebar = () => {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("collapsed");
+
+  // Adjust main content width
+  const mainContent = document.querySelector(".main-content");
+  mainContent.style.marginLeft = sidebar.classList.contains("collapsed") ? "0" : "350px";
+
+  // Change arrow direction
+  const arrow = document.querySelector(".sidebar-toggle .arrow");
+  if (sidebar.classList.contains("collapsed")) {
+    arrow.innerHTML = "&#9654;"; // Right arrow
+  } else {
+    arrow.innerHTML = "&#9664;"; // Left arrow
+  }
+};
 
 </script>
 </body>
