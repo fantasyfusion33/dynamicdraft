@@ -1425,7 +1425,8 @@ function toggleMyTeam() {
   myTeamBox.classList.toggle('collapsed');
 }
 
-function toggleSidebar() {
+// Toggle sidebar collapse/expand
+const toggleSidebar = () => {
   const sidebar = document.getElementById("sidebar");
   sidebar.classList.toggle("collapsed");
 
@@ -1440,7 +1441,7 @@ function toggleSidebar() {
   } else {
     arrow.innerHTML = "&#9664;"; // Left arrow
   }
-}
+};
 
 // ========================
 // Supabase Sync
