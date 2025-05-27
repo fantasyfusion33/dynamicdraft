@@ -975,218 +975,50 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv4.min.js"></script>
 <script>
-
-// Initialize Supabase client
+// ========================
+// Supabase Client Setup
+// ========================
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Updated to call window.supabase.createClient
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // --- DRAFT STATE VARIABLES ---
-  let draftData = null;
-  let userTeamPosition = 0;
-  let currentPick = 1;
-  let teamNames = [];
-  let draftOrder = [];
-  let teamCount = 0;
-  let wildcardRound = false;
-  let isPaused = false;
-  let leagueName = "";
-  let playerRosters = {};
+// ========================
+// Global State
+// ========================
+let draftState = {
+  // From Supabase
+  id: null,
+  league_name: "",
+  team_names: [],
+  draft_order: [],
+  current_pick: 0,
+  is_paused: false,
+  player_rosters: {},
+  status: "pre_draft",
+  user_team_position: 0,
+  wildcard_round: false,
+  team_count: 0,
   
-  // --- FETCH DRAFT DATA ---
-  async function fetchDraftData() {
-    const { data, error } = await supabase
-      .from('mock_drafts')
-      .select('*')
-      .eq('id', leagueId)
-      .single();
+  // Derived values
+  total_picks: 0,
+  timer: null,
+  channel: null
+};
 
-    if (error) {
-      alert("Could not load draft data: " + error.message);
-      return;
-    }}
+let DraftableTeams = [];
+let leagueId = new URLSearchParams(window.location.search).get('league');
 
-    // Populate state variables
-    draftData = data;
-    leagueName = data.league_name;
-    teamNames = data.team_names; // Should be an array or object, adjust below as needed
-    draftOrder = data.draft_order;
-    currentPick = data.current_pick;
-    teamCount = data.team_count;
-    wildcardRound = !!data.wildcard_round;
-    isPaused = !!data.is_paused;
-    userTeamPosition = data.user_team_position;
-    playerRosters = data.player_rosters || {};
-    
-// Subscribe to real-time updates for draft state
-function subscribeToDraftUpdates() {
-  return supabase
-    .channel('draft-channel')
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'mock_drafts'
-    }, (payload) => {
-      // Update the global draftState with the new data
-      draftState = payload.new;
-
-      // Update the UI
-      updateDraftUI(draftState);
-    })
-    .subscribe();
-}
-
-
-// Main function to initialize the draft
+// ========================
+// Initialization
+// ========================
 async function initializeDraft() {
-  const params = new URLSearchParams(window.location.search);
-  leagueId = params.get('league'); // Assign leagueId globally
-  
   if (!leagueId) {
-    console.error('Missing required parameters in URL:', { leagueId });
-    alert('Invalid draft link. Please check the URL.');
+    alert('Missing league ID in URL');
     return;
   }
 
   try {
-    // Fetch draft state and assign it to the global variable
-    draftState = await fetchDraftState(leagueId);
-
-    if (!draftState) {
-      console.error('Failed to fetch draft state.');
-      alert('Failed to fetch draft state. Please try again.');
-      return;
-    }
-
-    console.log('Draft state fetched successfully:', draftState);
-
-    // Subscribe to real-time updates
-    subscribeToDraftUpdates();
-
-    // Initialize admin controls
-    initializeAdminControls();
-
-    console.log('Draft initialized successfully:', {leagueId});
-  } catch (err) {
-    console.error('Error initializing draft:', err);
-    alert('Failed to initialize draft. Please try again.');
-  }
-}
-
-// Initialize the draft on page load
-document.addEventListener('DOMContentLoaded', async () => {
-  await initializeDraft();
-});
-
-// ========================
-// Admin Controls
-// ========================
-  
-async function pauseDraft() {
-  await supabase
-    .from('mock_drafts')
-    .update({ 
-      is_paused: true,
-      status: 'paused'
-    })
-    .eq('id', leagueId);
-}
-
-async function resumeDraft() {
-  await supabase
-    .from('mock_drafts')
-    .update({ 
-      is_paused: false,
-      status: 'active'
-    })
-    .eq('id', leagueId);
-}
-
-async function redoPick() {
-  const { data: state } = await supabase
-    .from('mock_drafts')
-    .select('current_pick')
-    .eq('id', leagueId)
-    .single();
-
-  await supabase
-    .from('mock_drafts')
-    .update({ current_pick: state.current_pick - 1 })
-    .eq('id', leagueId);
-}
-
-async function advancePick() {
-  const { data: state } = await supabase
-    .from('mock_drafts')
-    .select('current_pick')
-    .eq('id', leagueId)
-    .single();
-
-  await supabase
-    .from('mock_drafts')
-    .update({ current_pick: state.current_pick + 1 })
-    .eq('id', leagueId);
-}
-
-// ========================
-// updateDraftUI 
-// ========================
-  function updateDraftUI(state) {
-  // Update current pick
-  document.getElementById('current-pick').textContent = draftData.current_pick;
-
-  // Update draft status
-  document.getElementById('draft-status').textContent = draftData.status || "";
-
-  // Update player rosters
-  const rostersContainer = document.getElementById('rosters');
-  const teamNames = Array.isArray(draftData.team_names) ? draftData.team_names : [];
-  rostersContainer.innerHTML = teamNames
-    .map((teamName, idx) => {
-      const roster = playerRosters[idx] || [];
-      return `
-        <div class="roster">
-          <h3>${teamName}</h3>
-          <ul>
-            ${roster.map(player => `<li>${player.name || player}</li>`).join('')}
-          </ul>
-        </div>
-      `;
-    })
-    .join('');
-
-// Update pause/resume button
-const pauseButton = document.getElementById('pause-button');
-if (draftData.is_paused) {
-  pauseButton.textContent = 'Resume Draft';
-  pauseButton.onclick = resumeDraft;
-} else {
-  pauseButton.textContent = 'Pause Draft';
-  pauseButton.onclick = pauseDraft;
-}
-  }
-
-  function subscribeToLobby() {
-  return supabase
-    .channel('draft-channel')
-    .on('postgres_changes', {
-      event: 'UPDATE',
-      schema: 'public',
-      table: 'mock_drafts'
-    }, (payload) => {
-      updateDraftUI(payload.new);
-    })
-    .subscribe();
-}
-// ========================
-// Dynamic League Initialization
-// ========================
-
-console.log('Extracted leagueId from URL:', leagueId);
-
-// Fetch league data from Supabase
-async function fetchLeagueData(leagueId) {
-  try {
+    // 1. Load draft data
     const { data, error } = await supabase
       .from('mock_drafts')
       .select('*')
@@ -1195,1032 +1027,266 @@ async function fetchLeagueData(leagueId) {
 
     if (error) throw error;
 
-    console.log('League data fetched successfully:', data);
-
-    // Ensure teamNames is assigned and is always an array
-    teamNames = data.team_names || []; 
-    teamCount = data.team_count; // Ensure teamCount is properly assigned
-    wildcard = data.wildcard_round;
-    leagueName = data.league_name;
-    
-    draftState.settings = {
-      leagueName: data.league_name,
-      teamNames,
-      teamCount,
-      wildcard: data.wildcard_round,
-      waiverSystem: data.waiverSystem,
-      bonusPoints: data.bonusPoints,
+    // 2. Initialize state
+    draftState = {
+      ...draftState,
+      ...data,
+      total_picks: (data.wildcard_round ? 13 : 12) * data.team_count,
     };
 
-    return data;
+    // 3. Initialize empty rosters if needed
+    if (!draftState.player_rosters || Object.keys(draftState.player_rosters).length === 0) {
+      draftState.player_rosters = {};
+      for (let i = 0; i < draftState.team_count; i++) {
+        draftState.player_rosters[i] = {
+          NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], wildcard: []
+        };
+      }
+    }
+
+    // 4. Load team data
+    await loadTeamData();
+
+    // 5. Set up real-time updates
+    draftState.channel = subscribeToUpdates();
+
+    // 6. Initial render
+    renderDraftBoard();
+    startCountdown();
+
   } catch (err) {
-    console.error('Error fetching league data:', err);
-    alert('Failed to fetch league data. Please try again.');
-    return null;
+    console.error("Initialization failed:", err);
+    alert("Failed to load draft. Please refresh.");
   }
 }
 
-// Fetch league data and initialize draft
-document.addEventListener('DOMContentLoaded', async () => {
-  try {
-    const leagueData = await fetchLeagueData(leagueId);
-    if (!leagueData) return;
+async function loadTeamData() {
+  return new Promise((resolve) => {
+    Papa.parse("SportTeamDatabase_rows.csv", {
+      download: true,
+      header: true,
+      complete: (results) => {
+        DraftableTeams = results.data || [];
+        resolve();
+      },
+      error: (error) => {
+        console.error("CSV load failed:", error);
+        resolve();
+      }
+    });
+  });
+}
 
-    // Initialize draft state
-    draftState.draft_order = leagueData.draft_order;
-    draftState.settings = {
-      leagueName: leagueData.league_name,
-      wildcard: leagueData.wildcard_round,
-    };
+// ========================
+// Real-Time Updates
+// ========================
+function subscribeToUpdates() {
+  return supabase
+    .channel('draft_updates')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'mock_drafts',
+      filter: `id=eq.${draftState.id}`
+    }, (payload) => {
+      draftState = payload.new;
+      renderDraftBoard();
+    })
+    .subscribe();
+}
 
-    // Initialize player rosters
-    draftState.playerRosters = initializePlayerRosters(leagueData.teamCount);
+// ========================
+// Core Draft Logic
+// ========================
+async function draftTeam(teamId) {
+  if (draftState.is_paused) return;
+  
+  const team = DraftableTeams.find(t => t.team_id === teamId);
+  if (!team) return alert("Team not found");
 
-    // Calculate totalPicks based on wildcard setting
-draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * teamCount;
+  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
+  const roster = draftState.player_rosters[currentPlayerNum];
+  const isWildcardRound = draftState.current_pick >= 12 * draftState.team_count;
 
-
-    // Initialize playerRosters
-function initializePlayerRosters(teamCount) {
-  for (let i = 1; i <= teamCount; i++) {
-    playerRosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: []
-    };
+  // Validate pick
+  if (!isWildcardRound && roster[team.sport].length >= 2) {
+    return alert(`Max 2 ${team.sport} teams allowed!`);
   }
-  return playerRosters;
-}
 
-    // Subscribe to draft state changes
-    const draftChannel = supabase
-      .channel('draft')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'mock_drafts' }, (payload) => {
-        draftState = payload.new;
-        renderTeams();
-        updateClock();
-      })
-      .subscribe();
+  // Update state
+  const pickData = {
+    ...team,
+    round: Math.floor(draftState.current_pick / draftState.team_count) + 1,
+    pick: (draftState.current_pick % draftState.team_count) + 1
+  };
 
-    // Start the draft
-    await startDraft();
-
-    // Update UI
-    createTeamSidebar(leagueData.teamNames, leagueData.teamCount); // Pass teamNames and teamCount
-    updateDraftHeader();
-    createDraft();
-
-    // Update draft board title
-    document.querySelector('h1').textContent = 
-      `${leagueData.leagueName} Draft - ${leagueData.teamCount} Teams`;
-  } catch (err) {
-    console.error('Error initializing draft:', err);
-    alert('Failed to initialize draft. Please try again.');
+  if (isWildcardRound) {
+    roster.wildcard.push(pickData);
+  } else {
+    roster[team.sport].push(pickData);
   }
-});
 
-// Start the draft
-async function startDraft() {
-  try {
-    const { error } = await supabase
-      .from('mock_drafts')
-      .insert([{
-        league_id: leagueId,
-        current_pick: 0,
-        draft_order: draftState.draft_order,
-        player_rosters: draftState.playerRosters,
-        status: 'active',
-      }]);
-
-    if (error) throw error;
-  } catch (err) {
-    console.error('Error starting draft:', err);
-    throw err; // Re-throw the error to be handled by the caller
-  }
-}
-// ========================
-// Create Draft in Supabase
-// ========================
-
-async function createDraft() {
-  try {
-    const { data, error } = await supabase
-      .from('drafts')
-      .insert([{
-        id: draftState.draftId, // Use the generated draft_id
-        league_name: leagueName, // Required: league_name
-        team_names: teamNames, // Required: team_names (jsonb)
-        draft_order: draftState.draft_order, // Required: draft_order (jsonb)
-        league_id: draftState.leagueId, // Required: league_id (uuid)
-        created_at: new Date().toISOString(), // Optional: created_at
-      }])
-      .select();
-
-    if (error) throw error;
-
-    console.log('Draft created successfully:', data);
-  } catch (err) {
-    console.error('Error creating draft:', err);
-    alert('Failed to create draft. Please try again.');
-  }
-}
-
-// ========================
-// Fixed Switch Roster Function
-// ========================
-function switchRosterToCurrentPlayer() {
-  const currentPlayerNumber = draftState.draft_order[draftState.current_pick];
-  const teamSelector = document.getElementById('teamSelector');
-  
-  // Update the selector
-  teamSelector.value = `player${currentPlayerNumber}`;
-  
-  // Switch the displayed roster
-  switchRoster(`player${currentPlayerNumber}`);
-}
-
-// ========================
-// Updated UI Components
-// ========================
-
-function updateDraftHeader() {
-  const currentPlayer = draftState.draft_order[draftState.current_pick];
-  const round = Math.floor(draftState.current_Pick / teamCount) + 1;
-  const isWildcardRound = round === 13 && wildcard !== 'off';
-  const pick = (draftState.current_Pick % teamCount) + 1;
-  const teamName = teamNames[currentPlayer - 1];
-
-  document.getElementById('currentPlayerBox').innerHTML = `
-    <span>On The Clock:</span>
-    <strong>${teamName} - ${isWildcardRound ? 
-      'Wildcard Round' : `Round ${Math.min(round, 13)}.${(draftState.current_pick % teamCount) + 1}`}
-    </strong>
-  `;
-}
-
-function createTeamSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const rosterContainer = document.querySelector('.roster-container');
-  
-  // Clear existing content
-  rosterContainer.innerHTML = '';
-
-// Populate team selector
-const teamSelector = document.getElementById('teamSelector');
-teamSelector.innerHTML = teamNames
-  .map((name, index) => `<option value="player${index + 1}">${name}</option>`)
-  .join('');
-  
-// Generate team sections
-for (let i = 1; i <= teamCount; i++) {
-  const roster = document.createElement('div');
-  roster.className = `roster ${i === 1 ? 'active' : ''}`;
-  roster.id = `player${i}Roster`;
-  const teamName = teamNames[i - 1]; // Arrays are 0-indexed
-  const wildcardEnabled = wildcard; // Get boolean value
-  
-  // Generate roster HTML
-  let rosterHTML = `
-    <h2>${teamName}</h2>
-    <ul id="player${i}Teams">
-  `;
-  
-  // Add slots for each sport
-  roster.innerHTML = `
-    <h2>${teamName}</h2>
-    <ul id="player${i}Teams">
-      ${Object.keys(draftState.playerRosters[i])
-        .filter(k => k !== 'wildcard')
-        .map(sport => `
-          <strong>${sport}</strong>
-          ${Array(2).fill('<li class="empty">Empty</li>').join('')}
-        `).join('')}
-      ${wildcardEnabled ? `
-        <strong>Wildcard</strong>
-        <li class="empty">Empty</li>
-      ` : ''}
-    </ul>
-  `;
-  rosterContainer.appendChild(roster);
-}
-}
-
-// ========================
-// Updated Draft Logic
-// ========================
-
-async function saveDraftState() {
-  try {
-    const { data, error } = await supabase
-      .from('mock_drafts')
-      .upsert([{
-        draft_id: draftState.draft_id,
-        current_pick: draftState.current_pick,
-        draft_order: draftState.draft_order,
-        player_rosters: draftState.playerRosters,
-        league_id: draftState.leagueId,
-        created_at: new Date().toISOString(),
-      }])
-      .eq('draft_id', draftState.draft_id);
-
-    if (error) throw error;
-
-    console.log('Draft state saved successfully:', data);
-  } catch (err) {
-    console.error('Error saving draft state:', err);
-    alert('Failed to save draft state. Please try again.');
-  }
-}
-
-function updateDraftProgress() {
-  const progress = (draftState.current_pick / draftState.totalPicks) * 100;
-  document.querySelector('.draft-progress').style.width = `${progress}%`;
+  // Update UI and advance
+  DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
+  await saveDraftState();
+  advanceDraft();
 }
 
 function advanceDraft() {
   draftState.current_pick++;
 
-  // Save draft progress to Supabase
-  saveDraftState();
-  
-  // End draft condition
-  if (draftState.current_pick >= draftState.totalPicks) {
+  // Wildcard round alert
+  if (draftState.current_pick === 12 * draftState.team_count && draftState.wildcard_round) {
+    alert("Wildcard Round: Draft any team!");
+  }
+
+  // End condition
+  if (draftState.current_pick >= draftState.total_picks) {
     endDraft();
     return;
   }
 
- // If wildcard is enabled, show special message at start of round 13
-  if (draftState.current_pick === 12 * teamCount && 
-     wildcard) {
-  alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
-  }
-
-  updateDraftHeader();
-  updateDraftProgress();
+  renderDraftBoard();
   resetCountdown();
-  switchRosterToCurrentPlayer();
-}
-
-function startWildcard() {
-  alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport. Choose wisely or take a gamble!");
-  // Render teams for the wildcard round
-  renderTeams();
 }
 
 // ========================
-// Timer Updates
+// UI Rendering
 // ========================
-
-function startCountdown() {
-  let timeLeft = 120;
-  const timerElement = document.getElementById('countdownClock');
-  
-  const timer = setInterval(() => {
-    timeLeft--;
-    timerElement.textContent = `${String(Math.floor(timeLeft/60)).padStart(2,'0')}:${String(timeLeft%60).padStart(2,'0')}`;
-    
-    if (timeLeft <= 0) {
-      clearInterval(timer);
-      autoDraftTeam();
-    }
-  }, 1000);
-  // Save the timer ID to clear it later
-  draftState.timer = timer;
-}
-
-// Reset the timer after each pick
-function resetCountdown() {
-  if (draftState.timer) {
-    clearInterval(draftState.timer);
-  }
-  startCountdown();
-}
-// ========================
-// save draft in Supabase
-// ========================
-
-async function saveRosterData(rosterData) {
-  try {
-    const { data, error } = await supabase
-      .from('roster')
-      .insert(rosterData)
-      .select();
-
-    if (error) throw error;
-
-    console.log('Roster data saved successfully:', data);
-  } catch (err) {
-    console.error('Error saving roster data:', err);
-    alert('Failed to save roster data. Please try again.');
-  }
-}
-
-// Initialize dynamic draft
-document.addEventListener('DOMContentLoaded', () => {
-  // Set up UI
-  createTeamSidebar();
+function renderDraftBoard() {
+  // 1. Update header
   updateDraftHeader();
-  startCountdown();
+
+  // 2. Render team list
+  renderTeamList();
+
+  // 3. Update rosters
+  renderAllRosters();
+
+  // 4. Update progress
+  updateDraftProgress();
+
+  // 5. Update My Team box
+  updateMyTeamBox();
+}
+
+function renderTeamList() {
+  const filteredTeams = filterTeams();
+  const sortedTeams = sortTeams(filteredTeams);
   
-  // Update draft board title
-  document.querySelector('h1').textContent = 
-    `${leagueData.leagueName} Draft - ${teamCount} Teams`;
-  
-  // Update team selector
-const teamSelector = document.getElementById('teamSelector');
-teamSelector.innerHTML = Array.from({ length: teamCount }, (_, i) => {
-  const teamName = teamNames[i]; // Access team name using the callback's i
-  return `<option value="player${i + 1}">${teamName}</option>`;
-}).join('');
-});
-let DraftableTeams = []; // Global variable to hold teams data
+  teamList.innerHTML = sortedTeams.map(team => `
+    <div class="team-card ${team.sport}" data-team-id="${team.team_id}">
+      <div class="flag ${String(team.season_year).startsWith("2024") ? 'in-season' : 'off-season'}">
+        ${String(team.season_year).startsWith("2024") ? 'In Season' : 'Off Season'}
+      </div>
+      <div class="team-card-header">
+        <div class="team-icon ${team.sport}" 
+             style="--primaryColor: ${team.primaryColor}; 
+                    --secondaryColor: ${team.secondaryColor};"> 
+          ${getSportIcon(team)}
+        </div>
+        <h3>${team.name}</h3>
+      </div>
+      <p>${team.sport} (${team.season_year})</p>
+      <p>${team.conference || team.league} ${team.division ? `${team.division}` : ''}</p>
+      <p>${formatTeamInfo(team, document.getElementById('sortBy').value)}</p>
+      <button onclick="draftTeam('${team.team_id}')">Draft</button>
+    </div>
+  `).join('');
+}
 
-const getSportIcon = (team) => {
-  switch (team.sport) {
-    case "NBA":
-    case "NCAAB":
-      return `<i class="fa-solid fa-basketball" style="color: ${team.secondaryColor};"></i>`;
-    case "NFL":
-    case "NCAAF":
-      return `<i class="fa-solid fa-football" style="color: ${team.secondaryColor};"></i>`;
-    case "MLB":
-      return `<i class="fa-solid fa-baseball" style="color: ${team.secondaryColor};"></i>`;
-    case "NHL":
-      return `<i class="fa-solid fa-hockey-puck" style="color: ${team.secondaryColor};"></i>`;
-    default:
-      return "";
-  }
-};
-
-// Load and parse the CSV file
-Papa.parse("SportTeamDatabase_rows.csv", {
-  download: true,
-  header: true, // Use the first row as headers
-  dynamicTyping: true, // Automatically convert numbers and booleans
-  complete: function (results) {
-    // Update the global DraftableTeams variable
-    DraftableTeams = results.data || [];
-    console.log('Teams loaded from CSV:', DraftableTeams);
-
-    // Initial render
-    renderTeams();
-
-    // Add event listeners for filters
-    seasonFilter.addEventListener("change", renderTeams);
-    sportFilter.addEventListener("change", renderTeams);
-    teamSearch.addEventListener("input", () => {
-      searchQuery = teamSearch.value.trim().toLowerCase();
-      renderTeams();
-    });
-  },
-  error: function (error) {
-    console.error('Error loading CSV file:', error);
-  }
-});
-
-// Conference data
-const conferenceData = {
-  NFL: ["AFC", "NFC"],
-  NBA: ["Eastern", "Western"],
-  MLB: ["AL", "NL"],
-  NHL: ["Eastern", "Western"],
-  NCAAF: ["AAC", "ACC", "B12", "B10", "USA", "MAC", "MWC", "P12", "SEC", "Sun Belt", "Independents"],
-  NCAAB: ["AAC", "ACC", "B12", "B10", "USA", "MAC", "MWC", "P12", "SEC", "Sun Belt", "Independents", "A10", "Big East", "Big Sky", "Big South", "Big West", "Horizon", "Ivy", "MAAC", "Missouri Valley", "Northeast", "OVC", "Patriot", "SoCon", "Southland", "SWAC", "Summit", "WCC", "WAC"]
-};
-
-// DOM Elements
-const teamSearch = document.getElementById("teamSearch");
-const seasonFilter = document.getElementById("seasonFilter");
-const conferenceFilter = document.getElementById("conferenceFilter");
-const clearSearch = document.getElementById("clearSearch");
-const sportFilter = document.getElementById("sportFilter");
-const teamList = document.getElementById("teamList");
-const teamPopup = document.getElementById("teamPopup");
-
-// Initialize filters
-let searchQuery = "";
-let selectedConference = "all";
-
-// Search input handler with debouncing
-let searchTimeout;
-teamSearch.addEventListener("input", (e) => {
-  searchQuery = e.target.value.trim().toLowerCase();
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(renderTeams, 300);
-});
-
-// Clear search handler
-clearSearch.addEventListener("click", () => {
-  teamSearch.value = "";
-  searchQuery = "";
-  renderTeams();
-});
-
-// Sort teams function
-const sortTeams = (DraftableTeams, sortKey) => {
-  return DraftableTeams.sort((a, b) => {
- // Handle "No Odds" or championshipPct = 0
-    const aHasOdds = a.championshipPct > 0;
-    const bHasOdds = b.championshipPct > 0;
-
-    // If one team has odds and the other doesn't, prioritize the one with odds
-    if (aHasOdds && !bHasOdds) return -1; // a comes first
-    if (!aHasOdds && bHasOdds) return 1; // b comes first   
- // Map dropdown values to actual property names
-    const propMap = {
-      "championship_odds": "championship_odds",
-      "adp": "adp",
-      "lastYearPoints": "lastYearPoints",
-      "championshipPct": "championshipPct"
-    };
-    
-    const property = propMap[sortKey] || "championship_odds";
-    
-    // Handle undefined values by sorting them last
-    if (typeof a[property] === "undefined") return 1;
-    if (typeof b[property] === "undefined") return -1;
-
-    // Determine sort direction
-    const direction = property === "lastYearPoints" || property === "championshipPct" ? -1 : 1;
-    
-    return (a[property] - b[property]) * direction;
+function renderAllRosters() {
+  Object.entries(draftState.player_rosters).forEach(([playerNum, roster]) => {
+    const rosterEl = document.getElementById(`player${playerNum}Roster`);
+    if (rosterEl) {
+      rosterEl.innerHTML = generateRosterHTML(playerNum, roster);
+    }
   });
-};
+}
 
-const renderTeams = () => {
-  // Guard clause: Ensure DraftableTeams is an array
-  if (!Array.isArray(DraftableTeams)) {
-    console.error("DraftableTeams is not an array");
-    return;
-  }
+// ========================
+// Utility Functions
+// ========================
+function filterTeams() {
+  const seasonFilter = document.getElementById('seasonFilter').value;
+  const sportFilter = document.getElementById('sportFilter').value;
+  const searchQuery = document.getElementById('teamSearch').value.toLowerCase();
 
-  const filter = seasonFilter.value;
-  const sport = sportFilter.value;
-  const seasonYear = 2025; // Example draft year
-  const sortKey = sortBy.value || "championship_odds"; // Default to "Championship Odds"
-
-// Filter DraftableTeams based on the selected criteria
-const filteredTeams = DraftableTeams.filter(team => {
-  // Season filter
-  const currentSeasonStart = `${seasonYear - 1}-`; // "2024-"
-  const nextSeasonStart = `${seasonYear}-`; // "2025-"
-  const isCurrentSeason = String(team.season_year || "").startsWith(currentSeasonStart);
-  const isNextSeason = String(team.season_year || "").startsWith(nextSeasonStart);
+  return DraftableTeams.filter(team => {
+    const isCurrentSeason = String(team.season_year).startsWith("2024");
+    const matchesSeason = seasonFilter === "all" || 
+                         (seasonFilter === "in-season" && isCurrentSeason) || 
+                         (seasonFilter === "off-season" && !isCurrentSeason);
     
-    let seasonMatch = true;
-    if (filter === "in-season") seasonMatch = isCurrentSeason;
-    if (filter === "off-season") seasonMatch = isNextSeason;
-
-    // Sport filter
-    const matchesSport = sport === "all" || team.sport === sport;
-    
-    // Conference filter
-    const matchesConference = selectedConference === "all" || 
-      (team.conference || team.league) === selectedConference;
-    
-    // Search filter
+    const matchesSport = sportFilter === "all" || team.sport === sportFilter;
     const matchesSearch = team.name.toLowerCase().includes(searchQuery);
 
-    return seasonMatch && matchesSport && matchesConference && matchesSearch;
+    return matchesSeason && matchesSport && matchesSearch;
   });
+}
 
-  // Sort and render teams
-  const sortedTeams = sortTeams(filteredTeams, sortKey);
-  renderTeamList(sortedTeams, sortKey);
-};
+function sortTeams(teams) {
+  const sortKey = document.getElementById('sortBy').value;
+  const propMap = {
+    "championship_odds": "championship_odds",
+    "adp": "adp",
+    "lastYearPoints": "lastYearPoints",
+    "championshipPct": "championshipPct"
+  };
 
-// Sport filter change handler (for conference filter)
-sportFilter.addEventListener("change", () => {
-  const sport = sportFilter.value;
-  conferenceFilter.innerHTML = '<option value="all">All Conferences</option>';
+  const property = propMap[sortKey] || "championship_odds";
   
-  if (sport !== "all") {
-    conferenceFilter.disabled = false;
-    conferenceData[sport].forEach(conf => {
-      const option = document.createElement("option");
-      option.value = conf;
-      option.textContent = conf;
-      conferenceFilter.appendChild(option);
-    });
-  } else {
-    conferenceFilter.disabled = true;
-    conferenceFilter.value = "all";
-  }
-  
-  selectedConference = "all";
-  renderTeams();
-});
-
-// Conference filter change handler
-conferenceFilter.addEventListener("change", () => {
-  selectedConference = conferenceFilter.value;
-  renderTeams();
-});
-
-
-
-// Render team list
-const renderTeamList = (DraftableTeams, sortKey) => {
-  const fragment = document.createDocumentFragment();
-  
-  DraftableTeams.forEach(team => {
-    const teamCard = createTeamCard(team, sortKey);
-    fragment.appendChild(teamCard);
+  return [...teams].sort((a, b) => {
+    const aVal = a[property] || 0;
+    const bVal = b[property] || 0;
+    return (sortKey === "lastYearPoints" || sortKey === "championshipPct") ? 
+      bVal - aVal : aVal - bVal;
   });
+}
 
-  teamList.innerHTML = "";
-  teamList.appendChild(fragment);
-};
-
-// Create team card
-const createTeamCard = (team, sortKey) => {
-  const teamCard = document.createElement("div");
-  teamCard.className = `team-card ${team.sport}`;
-  teamCard.dataset.teamId = team.team_id;
-  
-  teamCard.innerHTML = `
-    <div class="flag ${String(team.season_year || "").startsWith("2024") ? 'in-season' : 'off-season'}">
-  ${String(team.season_year || "").startsWith("2024") ? 'In Season' : 'Off Season'}
-    </div>
-    <div class="team-card-header">
-      <div class="team-icon ${team.sport}" 
-           style="--primaryColor: ${team.primaryColor}; 
-                  --secondaryColor: ${team.secondaryColor};"> 
-        ${getSportIcon(team)}
-      </div>
-      <h3>${team.name}</h3>
-    </div>
-    <p>${team.sport} (${team.season_year})</p>
-    <p>${team.conference || team.league} ${team.division ? `${team.division}` : ''}</p>
-    <p>${getDynamicInfo(team, sortKey)}</p>
-    <button onclick="draftTeam('${team.team_id}')">Draft</button>
-  `;
-
-  // Add event listeners for popups
-  teamCard.addEventListener("mouseenter", handleTeamHover);
-  teamCard.addEventListener("mouseleave", handleTeamLeave);
-  
-  return teamCard;
-};
-
-// Get dynamic info for team card
-const getDynamicInfo = (team, sortKey) => {
+function formatTeamInfo(team, sortKey) {
   const formats = {
     championship_odds: v => `Odds: +${v}`,
     adp: v => `ADP: ${v}`,
     lastYearPoints: v => `Prev: ${v} Pts`,
-    championshipPct: v => `% Odds: ${v.toFixed(1)}%`
+    championshipPct: v => `% Odds: ${v?.toFixed(1) || 0}%`
   };
-  
-  const value = team[sortKey] ?? 0;
-  const formatter = formats[sortKey] || formats.championship_odds;
-  return formatter(value);
-};
+  return formats[sortKey]?.(team[sortKey]) || formats.championship_odds(team.championship_odds);
+}
 
-// Team popup handlers
-let popupTimeout;
-const handleTeamHover = (e) => {
-  clearTimeout(popupTimeout);
-  const teamCard = e.currentTarget;
-  const teamId = teamCard.dataset.teamId;
-  const team = DraftableTeams.find(t => t.team_id === teamId);
-  
-  if (team) {
-    positionPopup(e, team);
-    teamPopup.style.display = "block";
-  }
-};
+// ========================
+// Event Listeners
+// ========================
+document.addEventListener('DOMContentLoaded', initializeDraft);
 
-const handleTeamLeave = () => {
-  popupTimeout = setTimeout(() => {
-    teamPopup.style.display = "none";
-  }, 200);
-};
+document.getElementById('seasonFilter').addEventListener('change', renderDraftBoard);
+document.getElementById('sportFilter').addEventListener('change', renderDraftBoard);
+document.getElementById('sortBy').addEventListener('change', renderDraftBoard);
+document.getElementById('teamSearch').addEventListener('input', 
+  debounce(renderDraftBoard, 300));
 
-// Position popup
-const positionPopup = (e, team) => {
-  const { clientX, clientY } = e;
-  const popupWidth = teamPopup.offsetWidth;
-  const popupHeight = teamPopup.offsetHeight;
-  
-  // Prevent overflow
-  let left = clientX + 20;
-  let top = clientY - 50;
-  
-  if (left + popupWidth > window.innerWidth) {
-    left = window.innerWidth - popupWidth - 10;
-  }
-  
-  if (top + popupHeight > window.innerHeight) {
-    top = window.innerHeight - popupHeight - 10;
-  }
-  
-  teamPopup.style.left = `${left}px`;
-  teamPopup.style.top = `${top}px`;
-
-  // Populate popup data
-  document.getElementById("popupTeamADP").textContent = team.adp;
-  document.getElementById("popupTeamOdds").textContent = team.championship_odds;
-  document.getElementById("popupTeamPoints").textContent = team.lastYearPoints;
-  document.getElementById("popupTeamChampionshipPct").textContent = team.championshipPct;
-};
-
-// Add event listener for sortBy dropdown
-const sortBy = document.getElementById("sortBy");
-sortBy.addEventListener("change", renderTeams);
-
-
-// Initial render
-renderTeams();
-
-// Draft state
-let currentPlayer = 1; // 1 or 2
-let currentRound = 1;
-let current_pick = 1;
-let totalPicks = 0; // Track total picks
-
-// Initialize playerRosters
-for (let i = 1; i <= teamCount; i++) {
-  playerRosters[i] = {
-    NFL: [],
-    NBA: [],
-    MLB: [],
-    NHL: [],
-    NCAAF: [],
-    NCAAB: [],
-    wildcard: []
+// ========================
+// Helper Functions
+// ========================
+function debounce(func, wait) {
+  let timeout;
+  return function() {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, arguments), wait);
   };
 }
 
-// Auto-draft the team with the lowest odds
-function autoDraftTeam() {
-  const currentPlayerNumber = draftState.draft_order[draftState.current_pick];
-  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = Math.floor(draftState.current_pick / teamCount) + 1 === 13;
-
-  // 1. Filter eligible teams
-  const eligibleTeams = DraftableTeams.filter(team => {
-    // Exclude teams with invalid/non-numeric odds
-    const odds = parseFloat(team.championship_odds);
-    if (isNaN(odds) || odds <= 0) return false;
-
-    // Wildcard: All teams allowed | Non-wildcard: Sport limit
-    return (isWildcardRound && draftState.settings.wildcard) || currentPlayer[team.sport]?.length < 2;
-  });
-
-  // 2. Sort by numeric odds
-  const sortedTeams = eligibleTeams.sort((a, b) => {
-    const aOdds = parseFloat(a.championship_odds);
-    const bOdds = parseFloat(b.championship_odds);
-    return aOdds - bOdds || a.name.localeCompare(b.name); // Tiebreaker: team name
-  });
-
-  // 3. Draft the team with the lowest odds
-  if (sortedTeams.length === 0) {
-    console.error("No draftable teams left");
-    advanceDraft();
-    return;
-  }
-
-  const teamToDraft = sortedTeams[0];
-  console.log("Auto-drafting:", teamToDraft.name, "with odds", teamToDraft.championship_odds);
-  draftTeam(teamToDraft.team_id);
+function getSportIcon(team) {
+  const icons = {
+    "NBA": "fa-basketball",
+    "NCAAB": "fa-basketball",
+    "NFL": "fa-football",
+    "NCAAF": "fa-football",
+    "MLB": "fa-baseball",
+    "NHL": "fa-hockey-puck"
+  };
+  return `<i class="fa-solid ${icons[team.sport]}" style="color: ${team.secondaryColor};"></i>`;
 }
-  
-// Draft a team 
-function draftTeam(teamId) {
-  const currentPlayerNumber = draftState.draft_order[draftState.current_Pick];
-  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = Math.floor(draftState.current_pick / teamCount) + 1 === 13;
-
-  // Find team in DraftableTeams
-  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
-  if (teamIndex === -1) {
-    alert('Team not found. Please try again.');
-    return;
-  }
-  const team = DraftableTeams[teamIndex];
-
-  if (isWildcardRound && wildcard) {
-    // Wildcard round rules
-    currentPlayer.wildcard.push({ 
-      ...team, 
-      wildcard: true,
-      round: 13,
-      pick: draftState.current_pick - (12 * teamCount) + 1
-    });
-  } else {
-    // Regular round rules (max 2 per sport)
-    if (currentPlayer[team.sport].length >= 2) {
-      alert(`Maximum 2 ${team.sport} teams allowed!`);
-      return;
-    }
-    currentPlayer[team.sport].push({
-      ...team,
-      round: Math.floor(draftState.current_pick / teamCount) + 1,
-      pick: (draftState.current_pick % teamCount) + 1
-    });
-  }
-
-  // Remove team from available pool
-  DraftableTeams.splice(teamIndex, 1);
-
-  // Update UI
-  updateRosterDisplay(currentPlayerNumber);
-  updateMyTeamBox(team);
-  renderTeams();
-  advanceDraft();
-}
-
-  // Remove team from the draft pool
-  DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
-
-  // Render updated teams
-  renderTeams(DraftableTeams);
-
-// Update the sidebar to show the current drafting team
-const updateSidebar = (currentPlayer) => {
-  const teamSelector = document.getElementById("teamSelector");
-  teamSelector.value = `player${currentPlayer}`;
-  switchRoster(`player${currentPlayer}`);
-};
-
-// Toggle sidebar collapse/expand
-const toggleSidebar = () => {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("collapsed");
-
-  // Adjust main content width
-  const mainContent = document.querySelector(".main-content");
-  mainContent.style.marginLeft = sidebar.classList.contains("collapsed") ? "0" : "350px";
-
-  // Change arrow direction
-  const arrow = document.querySelector(".sidebar-toggle .arrow");
-  if (sidebar.classList.contains("collapsed")) {
-    arrow.innerHTML = "&#9654;"; // Right arrow
-  } else {
-    arrow.innerHTML = "&#9664;"; // Left arrow
-  }
-};
-
-// Switch between rosters
-const switchRoster = (team) => {
-  const rosters = document.querySelectorAll(".roster");
-  rosters.forEach(roster => roster.style.display = "none");
-
-  const activeRoster = document.getElementById(`${team}Roster`);
-  if (activeRoster) {
-    activeRoster.style.display = "block";
-  }
-};
-
-// Render rosters
-function updateRosterDisplay(playerNumber) {
-  const roster = draftState.playerRosters[playerNumber];
-  const rosterList = document.getElementById(`player${playerNumber}Teams`);
-  
-  let rosterHTML = Object.entries(roster)
-    .filter(([sport]) => sport !== 'wildcard')
-    .map(([sport, teams]) => `
-      <strong>${sport}</strong>
-      ${teams.map(team => `
-        <li class="${team.sport}">
-          ${team.name}
-          <div class="draft-pick-circle ${team.sport}">
-            ${team.round}.${team.pick}
-          </div>
-        </li>
-      `).join('')}
-      ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
-    `).join('');
-
-  // Add wildcard slot if enabled
-  if (wildcard) {
-    rosterHTML += `
-      <strong>Wildcard</strong>
-      ${roster.wildcard.map(team => `
-        <li class="${team.sport}">
-          ${team.name}
-          <div class="draft-pick-circle ${team.sport}">
-            ${team.round}.${team.pick}
-          </div>
-        </li>
-      `).join('')}
-      ${Array(1 - roster.wildcard.length).fill('<li class="empty">Empty</li>').join('')}
-    `;
-  }
-
-  rosterList.innerHTML = rosterHTML;
-}
-
-// Update My Team Box
-function updateMyTeamBox(team) {
-  const currentPlayerNumber = draftState.draftOrder[draftState.current_pick];
-  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-
-  // Find the sport container using data attributes
-  const sportContainer = document.querySelector(`.sport-slot[data-sport="${team.sport}"]`);
-  const wildcardContainer = document.querySelector(`.sport-slot[data-sport="Wildcard"]`);
-  const container = draftState.current_pick >= (12 * teamCount) ? wildcardContainer : sportContainer;
-
-  if (!container) return;
-
-  // Find the first empty slot
-  const emptySlot = container.querySelector('.slot:not(.filled)');
-  if (!emptySlot) return;
-
-  // Create team icon element
-  const teamIcon = document.createElement('div');
-  teamIcon.className = `team-icon ${team.sport}`;
-  teamIcon.style.setProperty('--primaryColor', team.primaryColor);
-  teamIcon.style.setProperty('--secondaryColor', team.secondaryColor);
-  teamIcon.innerHTML = getSportIcon(team);
-
-  // Replace empty slot content
-  emptySlot.innerHTML = '';
-  emptySlot.classList.add('filled');
-  emptySlot.appendChild(teamIcon);
-}
-
-// Toggle "My Team" box collapse/expand
-function toggleMyTeam() {
-  const myTeamBox = document.getElementById('myTeamBox');
-  myTeamBox.classList.toggle('collapsed');
-}
-
-// End the draft
-function endDraft() {
-  if (draftState.current_pick < draftState.totalPicks) return;
-    // Clear the timer
-  if (draftState.timerId) {
-    clearInterval(draftState.timerId);
-  }
-// Generate a unique owner ID for each team ONCE
-  const playerOwnerIDs = {};
-  teamNames.forEach(teamName => {
-    playerOwnerIDs[teamName] = uuidv4();
-  });
-  
-  // Prepare roster data
-  const rosterData = [];
-  for (const [playerNumber, roster] of Object.entries(draftState.playerRosters)) {
-    const teamName = teamNames[playerNumber - 1]; // Match team to player number
-    const ownerID = playerOwnerIDs[teamName]; // Assign the same owner ID for all picks
-    for (const [sport, teams] of Object.entries(roster)) {
-      teams.forEach(team => {
-        rosterData.push({
-          team_id: team.team_id,
-          round: team.round,
-          pick: team.pick,
-          league_id: leagueId,
-          owner_id: ownerID 
-        });
-      });
-    }
-  }
-
-  // Save roster data to Supabase
-  saveRosterData(rosterData);
-  clearInterval(draftState.timer);
-  alert("Draft Complete! Click OK to view results.");
-
-  // Remove UI elements related to the draft
-  document.getElementById("sidebar").remove();
-  document.querySelector(".sidebar-toggle").remove();
-  document.querySelector(".draft-header").remove();
-  document.querySelector(".countdown-clock").remove();
-  document.querySelector(".draft-status-bar").remove(); // Remove progress bar
-  document.querySelector(".team-popup").remove(); // Remove popups 
-  document.querySelector(".team-list").remove(); // Remove popups 
-
-
-
-  // Remove the My Team Box and toggle button
-  const myTeamBox = document.getElementById("myTeamBox");
-  if (myTeamBox) myTeamBox.remove();
-
-  const toggleMyTeamButton = document.getElementById("toggleMyTeam");
-  if (toggleMyTeamButton) toggleMyTeamButton.remove();
-
-  // Adjust main content width to be centered
-  const mainContent = document.querySelector(".main-content");
-  mainContent.style.marginLeft = "auto";
-  mainContent.style.marginRight = "auto";
-
-  // Build roster HTML for all players
-  const rostersHTML = Array.from({ length: teamCount }, (_, i) => {
-    const playerNumber = i + 1;
-    const roster = draftState.playerRosters[playerNumber];
-    const teamName = teamNames[playerNumber - 1];
-    return `
-    <div class="roster">
-        <h2>${teamName}</h2>
-        <ul>
-          ${Object.entries(roster)
-            .filter(([sport]) => sport !== 'wildcard') // Exclude wildcard from main list
-            .map(([sport, teams]) => `
-              <strong>${sport}</strong>
-              ${teams.map(team => `
-                <li class="${team.sport}">
-                  <div class="team-icon ${team.sport}" 
-                       style="--primaryColor: ${team.primaryColor}; 
-                              --secondaryColor: ${team.secondaryColor};"> 
-                    ${getSportIcon(team)}
-                  </div>
-                  ${team.name}
-                  <div class="draft-pick-circle ${team.sport}">
-                    ${team.round}.${team.pick}
-                  </div>
-                </li>
-              `).join('')}
-              ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
-            `).join('')}
-          ${roster.wildcard?.length > 0 ? `
-            <strong>Wildcard</strong>
-            ${roster.wildcard.map(team => `
-              <li class="${team.sport}">
-                <div class="team-icon ${team.sport}" 
-                     style="--primaryColor: ${team.primaryColor}; 
-                            --secondaryColor: ${team.secondaryColor};"> 
-                  ${getSportIcon(team)}
-                </div>
-                ${team.name}
-                <div class="draft-pick-circle ${team.sport}">
-                  ${team.round}.${team.pick}
-                </div>
-              </li>
-            `).join('')}
-          ` : ''}
-        </ul>
-      </div>
-    `;
-  }).join('');
-
-  // Update app content
-  document.getElementById("app").innerHTML = `
-    <div class="draft-complete" style="padding: 20px;">
-      <h2 style="text-align: center; margin-bottom: 30px;">
-        Draft Complete! Here are your league's final rosters below:
-      </h2>
-      <div class="final-rosters" style="
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-      ">
-        ${rostersHTML}
-      </div>
-    </div>
-  `;
- // Add CSS for final rosters
-  const style = document.createElement('style');
-  style.textContent = `
-    .final-rosters {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, 350px);
-      gap: 20px;
-      padding: 10px;
-      justify-content: left; /* Center the grid */
-      padding-left: 10px;
-    }
-    .roster {
-      background: rgba(26, 26, 26, 0.8);
-      border-radius: 12px;
-      width: 350px;
-      padding: 20px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .roster h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .roster ul {
-      list-style: none;
-      padding: 0;
-    }
-    .roster li {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    .empty {
-      opacity: 0.5;
-    }
-  `;
-  document.head.appendChild(style);
-};
-
-
-// Initial render
-renderTeams();
-switchRoster('player1');
-seasonFilter.addEventListener("change", renderTeams);
-  
 </script>
 </body>
 </html>
