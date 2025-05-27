@@ -421,7 +421,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
   // Generate UUIDs for all teams first
   const teamCount = parseInt(document.getElementById('leagueSize').value);
   const teamNames = Array.from(document.querySelectorAll('[id^="team"][id$="Name"]')).map(input => input.value);
-  const wildcardValue = parseInt(document.getElementById('wildcard').value, 10);
+  const wildcardValue = parseInt(document.querySelector('input[name="wildcard"]:checked').value, 10);
   
   // Prepare league data to match exact schema
   const leagueData = {
