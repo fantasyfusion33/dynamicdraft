@@ -1052,12 +1052,18 @@ async function initializeDraft() {
 
     // 6. Initial render
     renderDraftBoard();
+    initializeSidebar();
+    initializeMyTeamBox();
     startCountdown();
 
   } catch (err) {
     console.error("Initialization failed:", err);
     alert("Failed to load draft. Please refresh.");
   }
+  
+  // Set up event listeners
+  document.getElementById('toggleMyTeam').addEventListener('click', toggleMyTeam);
+  document.querySelector('.sidebar-toggle').addEventListener('click', toggleSidebar);
 }
 
 async function loadTeamData() {
@@ -1409,6 +1415,85 @@ function getSportIcon(team) {
     "NHL": "fa-hockey-puck"
   };
   return `<i class="fa-solid ${icons[team.sport]}" style="color: ${team.secondaryColor};"></i>`;
+}
+  // ========================
+// UI Toggle Functions
+// ========================
+
+function toggleMyTeam() {
+  const myTeamBox = document.getElementById('myTeamBox');
+  myTeamBox.classList.toggle('collapsed');
+  
+  // Update arrow direction
+  const arrow = document.querySelector('#toggleMyTeam .arrow');
+  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  
+  // Update arrow direction
+  const arrow = document.querySelector('.sidebar-toggle .arrow');
+  arrow.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+}
+
+// ========================
+// Supabase Sync
+// ========================
+
+async function saveDraftState() {
+  try {
+    const { error } = await supabase
+      .from('mock_drafts')
+      .update({
+        current_pick: draftState.current_pick,
+        player_rosters: draftState.player_rosters,
+        status: draftState.status,
+        is_paused: draftState.is_paused,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', draftState.id);
+
+    if (error) throw error;
+  } catch (err) {
+    console.error("Save failed:", err);
+  }
+}
+
+// ========================
+// Sidebar Initialization
+// ========================
+
+function initializeSidebar() {
+  const teamSelector = document.getElementById('teamSelector');
+  
+  // Populate team selector
+  teamSelector.innerHTML = draftState.team_names
+    .map((name, i) => `<option value="player${i+1}">${name}</option>`)
+    .join('');
+  
+  // Initialize rosters
+  const rosterContainer = document.querySelector('.roster-container');
+  rosterContainer.innerHTML = draftState.team_names
+    .map((name, i) => `
+      <div class="roster ${i === 0 ? 'active' : ''}" id="player${i+1}Roster">
+        <h2>${name}</h2>
+        <ul id="player${i+1}Teams"></ul>
+      </div>`
+    ).join('');
+}
+
+// ========================
+// My Team Box Initialization
+// ========================
+
+function initializeMyTeamBox() {
+  const currentPlayerNum = draftState.user_team_position || 0;
+  const teamName = draftState.team_names[currentPlayerNum] || 'Your Team';
+  
+  document.querySelector('#myTeamContent h3').textContent = `${teamName}'s Picks`;
+  updateMyTeamBox(); // Populate with initial data
 }
 </script>
 </body>
