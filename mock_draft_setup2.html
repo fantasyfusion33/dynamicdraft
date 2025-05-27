@@ -285,6 +285,45 @@ select#wildcard {
   border: 1px solid rgba(255,255,255,0.2);
   font-size: 16px;
 }
+    #wildcardRadios input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  margin-right: 6px;
+  vertical-align: middle;
+  transition: border-color 0.2s;
+  cursor: pointer;
+}
+
+#wildcardRadios input[type="radio"]:checked {
+  border: 2px solid #D2042D;
+  background: #D2042D;
+}
+
+#wildcardRadios input[type="radio"]:checked::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 3px auto;
+  border-radius: 50%;
+  background: #fff;
+}
+
+#wildcardRadios label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+  cursor: pointer;
+}
 
   </style>
 </head>
@@ -316,12 +355,21 @@ select#wildcard {
       </div>
 
 <div class="form-group">
-  <label for="wildcard">Wildcard Rounds</label>
-  <select id="wildcard" required>
-    <option value="0">None</option>
-    <option value="1" selected>1 Round</option>
-    <option value="2">2 Rounds</option>
-  </select>
+  <label>Wildcard Rounds</label>
+  <div id="wildcardRadios" style="display: flex; gap: 16px;">
+    <label>
+      <input type="radio" name="wildcard" value="0" checked>
+      None
+    </label>
+    <label>
+      <input type="radio" name="wildcard" value="1">
+      1 Round
+    </label>
+    <label>
+      <input type="radio" name="wildcard" value="2">
+      2 Rounds
+    </label>
+  </div>
   <p class="subheading">
     Choose the number of wildcard rounds (extra roster spots to draft teams from any sport)
   </p>
