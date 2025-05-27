@@ -1151,6 +1151,61 @@ function advanceDraft() {
 }
 
 // ========================
+// Timer Functions
+// ========================
+function startCountdown() {
+  let timeLeft = 120; // 2 minutes
+  
+  draftState.timer = setInterval(() => {
+    timeLeft--;
+    
+    const minutes = Math.floor(timeLeft / 60);
+    const seconds = timeLeft % 60;
+    document.getElementById('countdownClock').textContent = 
+      `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    
+    updateDraftProgress(); // Update progress bar urgency
+    
+    if (timeLeft <= 0) {
+      clearInterval(draftState.timer);
+      autoDraftTeam();
+    }
+  }, 1000);
+}
+
+function resetCountdown() {
+  clearInterval(draftState.timer);
+  startCountdown();
+}
+
+// ========================
+// Auto-Draft Logic
+// ========================
+function autoDraftTeam() {
+  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
+  const roster = draftState.player_rosters[currentPlayerNum];
+  const isWildcardRound = draftState.current_pick >= 12 * draftState.team_count;
+
+  // Filter available teams
+  const eligibleTeams = DraftableTeams.filter(team => {
+    if (isWildcardRound) return true;
+    return roster[team.sport].length < 2;
+  });
+
+  // Sort by best available (using championship odds)
+  const bestTeam = eligibleTeams.sort((a, b) => 
+    a.championship_odds - b.championship_odds
+  )[0];
+
+  if (bestTeam) {
+    draftTeam(bestTeam.team_id);
+  } else {
+    console.warn("No teams available for auto-draft");
+    advanceDraft();
+  }
+}
+
+// ========================
 // UI Rendering
 // ========================
 function renderDraftBoard() {
@@ -1170,6 +1225,23 @@ function renderDraftBoard() {
   updateMyTeamBox();
 }
 
+function updateDraftHeader() {
+  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
+  const round = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+  const pickInRound = (draftState.current_pick % draftState.team_count) + 1;
+  const isWildcardRound = round === 13 && draftState.wildcard_round;
+  const teamName = draftState.team_names[currentPlayerNum - 1] || `Team ${currentPlayerNum}`;
+
+  const headerText = isWildcardRound ? 
+    `${teamName} - Wildcard Round` : 
+    `${teamName} - Round ${round}.${pickInRound}`;
+
+  document.getElementById('currentPlayerBox').innerHTML = `
+    <span>On The Clock:</span>
+    <strong>${headerText}</strong>
+  `;
+}
+  
 function renderTeamList() {
   const filteredTeams = filterTeams();
   const sortedTeams = sortTeams(filteredTeams);
@@ -1200,6 +1272,57 @@ function renderAllRosters() {
     const rosterEl = document.getElementById(`player${playerNum}Roster`);
     if (rosterEl) {
       rosterEl.innerHTML = generateRosterHTML(playerNum, roster);
+    }
+  });
+}
+
+function updateDraftProgress() {
+  const progressPercent = (draftState.current_pick / draftState.total_picks) * 100;
+  document.querySelector('.draft-progress').style.width = `${progressPercent}%`;
+  
+  // Add urgent class when time is running low
+  const clock = document.getElementById('countdownClock');
+  if (clock && clock.textContent.includes('0:30')) {
+    clock.classList.add('urgent');
+  } else {
+    clock?.classList.remove('urgent');
+  }
+}
+
+function updateMyTeamBox() {
+  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
+  const roster = draftState.player_rosters[currentPlayerNum];
+  
+  // Update the team name in the box
+  const teamName = draftState.team_names[currentPlayerNum - 1] || `Team ${currentPlayerNum}`;
+  const titleElement = document.querySelector('#myTeamContent h3');
+  if (titleElement) {
+    titleElement.textContent = `${teamName}'s Team`;
+  }
+
+  // Update each sport slot
+  Object.entries(roster).forEach(([sport, teams]) => {
+    const slotContainer = document.querySelector(`.sport-slot[data-sport="${sport}"]`);
+    if (!slotContainer) return;
+
+    const slots = slotContainer.querySelectorAll('.slot');
+    teams.forEach((team, index) => {
+      if (slots[index]) {
+        slots[index].innerHTML = `
+          <div class="team-icon ${team.sport}" 
+               style="--primaryColor: ${team.primaryColor}; 
+                      --secondaryColor: ${team.secondaryColor}">
+            ${getSportIcon(team)}
+          </div>
+        `;
+        slots[index].classList.add('filled');
+      }
+    });
+
+    // Clear any empty slots
+    for (let i = teams.length; i < slots.length; i++) {
+      slots[i].innerHTML = '';
+      slots[i].classList.remove('filled');
     }
   });
 }
