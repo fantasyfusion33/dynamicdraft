@@ -1031,9 +1031,16 @@ async function initializeDraft() {
     draftState = {
       ...draftState,
       ...data,
-      current_pick: data.current_pick || 1, // Force start at 1 if undefined
+    current_pick: data.current_pick < 1 ? 1 : data.current_pick, // Force minimum 1
       total_picks: (data.wildcard_round ? 13 : 12) * data.team_count,
     };
+      // Explicitly set pick 1 in database if missing
+  if (draftState.current_pick !== data.current_pick) {
+    await supabase
+      .from('mock_drafts')
+      .update({ current_pick: 1 })
+      .eq('id', leagueId);
+  }
 
     // 3. Initialize empty rosters if needed and toggles
     if (!draftState.player_rosters || Object.keys(draftState.player_rosters).length === 0) {
@@ -1155,7 +1162,6 @@ async function draftTeam(teamId) {
 }
 
 function advanceDraft() {
-  if (draftState.current_pick === 0) draftState.current_pick = 1; // Fix starting at pick 1
   
   // Update team selector
   const currentTeamIndex = draftState.draft_order[draftState.current_pick - 1];
