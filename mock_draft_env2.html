@@ -1542,7 +1542,7 @@ function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
   const arrow = document.querySelector('#toggleMyTeam .arrow');
-  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '▶' : '◀';
+  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '◀' : '▶';
   myTeamBox.setAttribute('aria-expanded', !myTeamBox.classList.contains('collapsed'));
 }
 
