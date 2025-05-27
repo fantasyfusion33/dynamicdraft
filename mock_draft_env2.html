@@ -681,6 +681,39 @@
   margin-left: 8px;
 }
 
+    .sidebar-team-list {
+  padding: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-team-list h3 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.sidebar-team-list ul {
+  list-style: none;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sidebar-team-list li {
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+.sidebar-team-list li.active {
+  background: rgba(210, 4, 45, 0.2);
+  border-left: 3px solid var(--primary);
+}
+
+.sidebar-team-list li:hover {
+  background: rgba(255,255,255,0.05);
+}
+
 /* Mobile Styles (applied when screen width is less than 768px) */
 @media (max-width: 768px) {
   /* Shrink clock */
@@ -1054,6 +1087,10 @@ async function initializeDraft() {
     renderDraftBoard();
     initializeSidebar();
     initializeMyTeamBox();
+    if (draftState.current_pick === 0) {
+    draftState.current_pick = 1;
+    await saveDraftState();
+    }
     startCountdown();
 
   } catch (err) {
@@ -1139,6 +1176,16 @@ async function draftTeam(teamId) {
 }
 
 function advanceDraft() {
+  if (draftState.current_pick === 0) draftState.current_pick = 1; // Fix starting at pick 1
+  
+  // Update team selector
+  const currentTeamIndex = draftState.draft_order[draftState.current_pick - 1];
+  document.getElementById('teamSelector').value = `player${currentTeamIndex + 1}`;
+  document.querySelectorAll('.sidebar-team-list li').forEach(li => {
+    li.classList.toggle('active', 
+      parseInt(li.dataset.teamIndex) === currentTeamIndex
+    );
+  });
   draftState.current_pick++;
 
   // Wildcard round alert
@@ -1273,11 +1320,45 @@ function renderTeamList() {
   `).join('');
 }
 
+function generateRosterHTML(playerNum, roster) {
+  return `
+    <h2>${draftState.team_names[playerNum - 1]}</h2>
+    <ul>
+      ${Object.entries(roster)
+        .filter(([sport]) => sport !== 'wildcard')
+        .map(([sport, teams]) => `
+          <strong>${sport}</strong>
+          ${teams.map(team => `
+            <li class="${team.sport}">
+              ${team.name}
+              <div class="draft-pick-circle ${team.sport}">
+                ${team.round}.${team.pick}
+              </div>
+            </li>
+          `).join('')}
+          ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
+        `).join('')}
+      ${roster.wildcard?.length ? `
+        <strong>Wildcard</strong>
+        <li class="${roster.wildcard[0].sport}">
+          ${roster.wildcard[0].name}
+          <div class="draft-pick-circle">
+            13.${roster.wildcard[0].pick}
+          </div>
+        </li>
+      ` : '<li class="empty">Empty</li>'}
+    </ul>
+  `;
+}
+
 function renderAllRosters() {
-  Object.entries(draftState.player_rosters).forEach(([playerNum, roster]) => {
+  Object.keys(draftState.player_rosters).forEach(playerNum => {
     const rosterEl = document.getElementById(`player${playerNum}Roster`);
     if (rosterEl) {
-      rosterEl.innerHTML = generateRosterHTML(playerNum, roster);
+      rosterEl.innerHTML = generateRosterHTML(
+        parseInt(playerNum), 
+        draftState.player_rosters[playerNum]
+      );
     }
   });
 }
@@ -1461,6 +1542,21 @@ function initializeSidebar() {
         <ul id="player${i+1}Teams"></ul>
       </div>`
     ).join('');
+
+   const teamListContainer = document.createElement('div');
+  teamListContainer.className = 'sidebar-team-list';
+  teamListContainer.innerHTML = `
+    <h3>Teams</h3>
+    <ul>
+      ${draftState.team_names.map((name, i) => `
+        <li class="${i === 0 ? 'active' : ''}" 
+            data-team-index="${i}">
+          ${name}
+        </li>
+      `).join('')}
+    </ul>
+  `;
+  document.querySelector('.roster-container').prepend(teamListContainer);
 }
 
 // ========================
@@ -1478,29 +1574,20 @@ function initializeMyTeamBox() {
 // ========================
 // UI Toggle Functions
 // ========================
-
 function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
+  const arrow = document.querySelector('#toggleMyTeam .arrow');
+  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '◀' : '▶';
 }
 
-// Toggle sidebar collapse/expand
-const toggleSidebar = () => {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("collapsed");
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('collapsed');
+  const arrow = document.querySelector('.sidebar-toggle .arrow');
+  arrow.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+}
 
-  // Adjust main content width
-  const mainContent = document.querySelector(".main-content");
-  mainContent.style.marginLeft = sidebar.classList.contains("collapsed") ? "0" : "350px";
-
-  // Change arrow direction
-  const arrow = document.querySelector(".sidebar-toggle .arrow");
-  if (sidebar.classList.contains("collapsed")) {
-    arrow.innerHTML = "&#9654;"; // Right arrow
-  } else {
-    arrow.innerHTML = "&#9664;"; // Left arrow
-  }
-};
 </script>
 </body>
 </html>
