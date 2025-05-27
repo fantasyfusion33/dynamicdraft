@@ -1031,10 +1031,11 @@ async function initializeDraft() {
     draftState = {
       ...draftState,
       ...data,
+      current_pick: data.current_pick || 1, // Force start at 1 if undefined
       total_picks: (data.wildcard_round ? 13 : 12) * data.team_count,
     };
 
-    // 3. Initialize empty rosters if needed
+    // 3. Initialize empty rosters if needed and toggles
     if (!draftState.player_rosters || Object.keys(draftState.player_rosters).length === 0) {
       draftState.player_rosters = {};
       for (let i = 0; i < draftState.team_count; i++) {
@@ -1043,6 +1044,20 @@ async function initializeDraft() {
         };
       }
     }
+
+  function initializeToggles() {
+  // My Team toggle
+  document.getElementById('toggleMyTeam').addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleMyTeam();
+  });
+
+  // Sidebar toggle
+  document.querySelector('.sidebar-toggle').addEventListener('click', function(e) {
+    e.stopPropagation();
+    toggleSidebar();
+  });
+}
 
     // 4. Load team data
     await loadTeamData();
@@ -1529,7 +1544,8 @@ function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
   const arrow = document.querySelector('#toggleMyTeam .arrow');
-  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '◀' : '▶';
+  arrow.textContent = myTeamBox.classList.contains('collapsed') ? '▶' : '◀';
+  myTeamBox.setAttribute('aria-expanded', !myTeamBox.classList.contains('collapsed'));
 }
 
 function toggleSidebar() {
@@ -1537,6 +1553,7 @@ function toggleSidebar() {
   sidebar.classList.toggle('collapsed');
   const arrow = document.querySelector('.sidebar-toggle .arrow');
   arrow.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+  sidebar.setAttribute('aria-expanded', !sidebar.classList.contains('collapsed'));
 }
 
 </script>
