@@ -1416,32 +1416,6 @@ function getSportIcon(team) {
   };
   return `<i class="fa-solid ${icons[team.sport]}" style="color: ${team.secondaryColor};"></i>`;
 }
-  // ========================
-// UI Toggle Functions
-// ========================
-
-function toggleMyTeam() {
-  const myTeamBox = document.getElementById('myTeamBox');
-  myTeamBox.classList.toggle('collapsed');
-}
-
-// Toggle sidebar collapse/expand
-const toggleSidebar = () => {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.classList.toggle("collapsed");
-
-  // Adjust main content width
-  const mainContent = document.querySelector(".main-content");
-  mainContent.style.marginLeft = sidebar.classList.contains("collapsed") ? "0" : "350px";
-
-  // Change arrow direction
-  const arrow = document.querySelector(".sidebar-toggle .arrow");
-  if (sidebar.classList.contains("collapsed")) {
-    arrow.innerHTML = "&#9654;"; // Right arrow
-  } else {
-    arrow.innerHTML = "&#9664;"; // Left arrow
-  }
-};
 
 // ========================
 // Supabase Sync
@@ -1500,6 +1474,33 @@ function initializeMyTeamBox() {
   document.querySelector('#myTeamContent h3').textContent = `${teamName}'s Picks`;
   updateMyTeamBox(); // Populate with initial data
 }
+
+// ========================
+// UI Toggle Functions
+// ========================
+
+function toggleMyTeam() {
+  const myTeamBox = document.getElementById('myTeamBox');
+  myTeamBox.classList.toggle('collapsed');
+}
+
+// Toggle sidebar collapse/expand
+const toggleSidebar = () => {
+  const sidebar = document.getElementById("sidebar");
+  sidebar.classList.toggle("collapsed");
+
+  // Adjust main content width
+  const mainContent = document.querySelector(".main-content");
+  mainContent.style.marginLeft = sidebar.classList.contains("collapsed") ? "0" : "350px";
+
+  // Change arrow direction
+  const arrow = document.querySelector(".sidebar-toggle .arrow");
+  if (sidebar.classList.contains("collapsed")) {
+    arrow.innerHTML = "&#9654;"; // Right arrow
+  } else {
+    arrow.innerHTML = "&#9664;"; // Left arrow
+  }
+};
 </script>
 </body>
 </html>
