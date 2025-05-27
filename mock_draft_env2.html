@@ -1065,9 +1065,6 @@ async function initializeDraft() {
     alert("Failed to load draft. Please refresh.");
   }
   
-  // Set up event listeners
-  document.getElementById('toggleMyTeam').addEventListener('click', toggleMyTeam);
-  document.querySelector('.sidebar-toggle').addEventListener('click', toggleSidebar);
 }
 
 async function loadTeamData() {
@@ -1441,6 +1438,8 @@ document.getElementById('sportFilter').addEventListener('change', renderDraftBoa
 document.getElementById('sortBy').addEventListener('change', renderDraftBoard);
 document.getElementById('teamSearch').addEventListener('input', 
   debounce(renderDraftBoard, 300));
+document.getElementById('toggleMyTeam').addEventListener('click', toggleMyTeam);
+document.querySelector('.sidebar-toggle').addEventListener('click', toggleSidebar);
 
 // ========================
 // Helper Functions
