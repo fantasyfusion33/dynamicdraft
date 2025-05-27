@@ -1164,7 +1164,7 @@ async function draftTeam(teamId) {
 function advanceDraft() {
   
   // Update team selector
-  const currentTeamIndex = draftState.draft_order[draftState.current_pick - 1];
+  const currentTeamIndex = draftState.draft_order[draftState.current_pick];
   document.getElementById('teamSelector').value = `player${currentTeamIndex + 1}`;
   document.querySelectorAll('.sidebar-team-list li').forEach(li => {
     li.classList.toggle('active', 
