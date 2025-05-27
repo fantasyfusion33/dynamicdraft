@@ -681,39 +681,6 @@
   margin-left: 8px;
 }
 
-    .sidebar-team-list {
-  padding: 15px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.sidebar-team-list h3 {
-  margin-top: 0;
-  color: var(--primary);
-}
-
-.sidebar-team-list ul {
-  list-style: none;
-  padding: 0;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.sidebar-team-list li {
-  padding: 8px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  margin: 2px 0;
-}
-
-.sidebar-team-list li.active {
-  background: rgba(210, 4, 45, 0.2);
-  border-left: 3px solid var(--primary);
-}
-
-.sidebar-team-list li:hover {
-  background: rgba(255,255,255,0.05);
-}
-
 /* Mobile Styles (applied when screen width is less than 768px) */
 @media (max-width: 768px) {
   /* Shrink clock */
@@ -1542,21 +1509,6 @@ function initializeSidebar() {
         <ul id="player${i+1}Teams"></ul>
       </div>`
     ).join('');
-
-   const teamListContainer = document.createElement('div');
-  teamListContainer.className = 'sidebar-team-list';
-  teamListContainer.innerHTML = `
-    <h3>Teams</h3>
-    <ul>
-      ${draftState.team_names.map((name, i) => `
-        <li class="${i === 0 ? 'active' : ''}" 
-            data-team-index="${i}">
-          ${name}
-        </li>
-      `).join('')}
-    </ul>
-  `;
-  document.querySelector('.roster-container').prepend(teamListContainer);
 }
 
 // ========================
