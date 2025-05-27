@@ -1264,19 +1264,24 @@ function renderDraftBoard() {
 }
 
 function updateDraftHeader() {
-  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
-  const round = Math.floor(draftState.current_pick / draftState.team_count) + 1;
-  const pickInRound = (draftState.current_pick % draftState.team_count) + 1;
-  const isWildcardRound = round === 13 && draftState.wildcard_round;
-  const teamName = draftState.team_names[currentPlayerNum - 1] || `Team ${currentPlayerNum}`;
+  // Use pick-1 for calculations (fixes off-by-one error)
+  const displayPick = Math.max(draftState.current_pick, 1);
+  const currentTeamIndex = (displayPick - 1) % draftState.team_count;
+  const teamName = draftState.team_names[currentTeamIndex] || `Team ${currentTeamIndex + 1}`;
+  
+  // Calculate round (1-12) and pick-in-round (1-12)
+  const round = Math.floor((displayPick - 1) / draftState.team_count) + 1;
+  const pickInRound = (displayPick - 1) % draftState.team_count + 1;
 
-  const headerText = isWildcardRound ? 
-    `${teamName} - Wildcard Round` : 
-    `${teamName} - Round ${round}.${pickInRound}`;
+  // Handle wildcard round
+  const isWildcardRound = draftState.wildcard_round && round > 12;
 
   document.getElementById('currentPlayerBox').innerHTML = `
     <span>On The Clock:</span>
-    <strong>${headerText}</strong>
+    <strong>${teamName} - ${isWildcardRound ? 
+      'Wildcard Round' : 
+      `Round ${round}.${pickInRound}`}
+    </strong>
   `;
 }
   
