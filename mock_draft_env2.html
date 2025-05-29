@@ -1515,7 +1515,6 @@ async function saveDraftState() {
         player_rosters: backendRosters,
         status: draftState.status,
         is_paused: draftState.is_paused,
-        updated_at: new Date().toISOString()
       })
       .eq('id', draftState.id);
 
