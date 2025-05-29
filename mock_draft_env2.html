@@ -1494,11 +1494,25 @@ function getSportIcon(team) {
 
 async function saveDraftState() {
   try {
+// Transform player_rosters to match backend schema
+    const backendRosters = {};
+    Object.entries(draftState.player_rosters).forEach(([teamIndex, roster]) => {
+      backendRosters[teamIndex] = {
+        NFL: roster.NFL.map(t => t.team_id || t.id),
+        NBA: roster.NBA.map(t => t.team_id || t.id),
+        NHL: roster.NHL.map(t => t.team_id || t.id),
+        MLB: roster.MLB.map(t => t.team_id || t.id),
+        NCAAF: roster.NCAAF.map(t => t.team_id || t.id),
+        NCAAB: roster.NCAAB.map(t => t.team_id || t.id),
+  wildcard: roster.wildcard.map(t => t.team_id || t.id),
+        last_updated: new Date().toISOString()
+      };
+    });
     const { error } = await supabase
       .from('mock_drafts')
       .update({
         current_pick: draftState.current_pick,
-        player_rosters: draftState.player_rosters,
+        player_rosters: backendRosters,
         status: draftState.status,
         is_paused: draftState.is_paused,
         updated_at: new Date().toISOString()
@@ -1506,6 +1520,7 @@ async function saveDraftState() {
       .eq('id', draftState.id);
 
     if (error) throw error;
+        console.log('Save successful');
   } catch (err) {
     console.error("Save failed:", err);
   }
