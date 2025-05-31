@@ -1011,6 +1011,42 @@ let leagueId = new URLSearchParams(window.location.search).get('leagueId');
 // ========================
 // Initialization
 // ========================
+  function initializeRosters() {
+  try {
+    // 1. Validate team_count exists
+    if (typeof draftState.team_count === 'undefined' || draftState.team_count < 1) {
+      throw new Error("Invalid team_count: " + draftState.team_count);
+    }
+    
+    // 2. Create empty roster template
+    const emptyRoster = {
+      NFL: [],
+      NBA: [],
+      MLB: [],
+      NHL: [],
+      NCAAF: [],
+      NCAAB: [],
+      wildcard: []
+    };
+    
+    // 3. Initialize player_rosters object
+    draftState.player_rosters = {};
+    
+    // 4. Create rosters for each team
+    for (let i = 0; i < draftState.team_count; i++) {
+      draftState.player_rosters[i] = JSON.parse(JSON.stringify(emptyRoster));
+    }
+    
+    console.log("Rosters initialized for", draftState.team_count, "teams");
+  } catch (err) {
+    console.error("Roster initialization failed:", err);
+    
+    // Fallback to default 12 teams if count is missing
+    draftState.team_count = draftState.team_count || 12;
+    initializeRosters(); // Retry with fallback value
+  }
+}
+  
 async function initializeDraft() {
   if (!leagueId) {
     alert('Missing league ID in URL');
@@ -1042,15 +1078,7 @@ async function initializeDraft() {
       .eq('id', leagueId);
   }
 
-        // 3. Initialize empty rosters if needed and toggles
-function initializeRosters() {
-  for (let i = 1; i <= data.team_count; i++) {
-    draftState.player_rosters[i] = {
-      NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [],
-      wildcard: [] // Explicit wildcard array
-    };
-  }
-}
+    initializeRosters();
 
   function initializeToggles() {
   // My Team toggle
@@ -1076,7 +1104,6 @@ function initializeRosters() {
     renderDraftBoard();
     initializeSidebar();
     initializeMyTeamBox();
-    initializeRosters();
     if (draftState.current_pick === 0) {
     draftState.current_pick = 1;
     await saveDraftState();
