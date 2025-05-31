@@ -1042,15 +1042,23 @@ async function initializeDraft() {
       .eq('id', leagueId);
   }
 
-    // 3. Initialize empty rosters if needed and toggles
-    if (!draftState.player_rosters || Object.keys(draftState.player_rosters).length === 0) {
-      draftState.player_rosters = {};
-      for (let i = 0; i < draftState.team_count; i++) {
-        draftState.player_rosters[i] = {
-          NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], wildcard: []
-        };
-      }
-    }
+        // 3. Initialize empty rosters if needed and toggles
+    function initializeRosters() {
+  draftState.player_rosters = {};
+  const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+  
+  for (let i = 0; i < draftState.team_count; i++) {
+    draftState.player_rosters[i] = {
+      NFL: [],
+      NBA: [],
+      MLB: [],
+      NHL: [],
+      NCAAF: [],
+      NCAAB: [],
+      wildcard: []
+    };
+  }
+}
 
   function initializeToggles() {
   // My Team toggle
@@ -1076,6 +1084,7 @@ async function initializeDraft() {
     renderDraftBoard();
     initializeSidebar();
     initializeMyTeamBox();
+    initializeRosters(); // Add this
     if (draftState.current_pick === 0) {
     draftState.current_pick = 1;
     await saveDraftState();
@@ -1127,34 +1136,36 @@ function subscribeToUpdates() {
 // ========================
 // Core Draft Logic
 // ========================
-async function draftTeam(teamId) {
-  if (draftState.is_paused) return;
+function draftTeam(teamId) {
+  const currentTeamIndex = (draftState.current_pick - 1) % draftState.team_count;
+  const roster = draftState.player_rosters[currentTeamIndex]; // Fixed indexing
   
-  const team = DraftableTeams.find(t => t.team_id === teamId);
-  if (!team) return alert("Team not found");
-
-  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
-  const roster = draftState.player_rosters[currentPlayerNum];
-  const isWildcardRound = draftState.current_pick >= 12 * draftState.team_count;
+  // Create DEEP COPY of team object
+  const team = JSON.parse(JSON.stringify(
+    DraftableTeams.find(t => t.team_id === teamId)
+  ));
+  
+  // Add pick metadata
+  team.round = Math.floor((draftState.current_pick - 1) / draftState.team_count) + 1;
+  team.pick = ((draftState.current_pick - 1) % draftState.team_count) + 1;
+  
+  // Add to roster
+  if (isWildcardRound) {
+    roster.wildcard.push(team);
+  } else {
+    roster[team.sport].push(team); // Now safe
+  }
 
   // Validate pick
   if (!isWildcardRound && roster[team.sport].length >= 2) {
     return alert(`Max 2 ${team.sport} teams allowed!`);
   }
 
-  // Update state
-  const pickData = {
-    ...team,
-    round: Math.floor(draftState.current_pick / draftState.team_count) + 1,
-    pick: (draftState.current_pick % draftState.team_count) + 1
-  };
-
-  if (isWildcardRound) {
-    roster.wildcard.push(pickData);
-  } else {
-    roster[team.sport].push(pickData);
-  }
-
+  //debugging step
+console.log("Drafting team:", teamId, 
+  "for index:", currentTeamIndex,
+  "Roster:", JSON.parse(JSON.stringify(roster)));
+  
   // Update UI and advance
   DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
   await saveDraftState();
@@ -1367,43 +1378,38 @@ function updateDraftProgress() {
 }
 
 function updateMyTeamBox() {
-  const currentPlayerNum = draftState.draft_order[draftState.current_pick];
-  const roster = draftState.player_rosters[currentPlayerNum];
+  const userTeamIndex = draftState.user_team_position;
+  const roster = draftState.player_rosters[userTeamIndex];
+  const teamName = draftState.team_names[userTeamIndex];
   
-  // Update the team name in the box
-  const teamName = draftState.team_names[currentPlayerNum - 1] || `Team ${currentPlayerNum}`;
-  const titleElement = document.querySelector('#myTeamContent h3');
-  if (titleElement) {
-    titleElement.textContent = `${teamName}'s Team`;
-  }
-
-  // Update each sport slot
+  // Update title
+  document.querySelector('#myTeamContent h3').textContent = `${teamName}'s Team`;
+  
+  // Update slots
   Object.entries(roster).forEach(([sport, teams]) => {
-    const slotContainer = document.querySelector(`.sport-slot[data-sport="${sport}"]`);
-    if (!slotContainer) return;
-
-    const slots = slotContainer.querySelectorAll('.slot');
-    teams.forEach((team, index) => {
-      if (slots[index]) {
-        slots[index].innerHTML = `
+    const container = document.querySelector(`.sport-slot[data-sport="${sport}"]`);
+    if (!container) return;
+    
+    const slots = container.querySelectorAll('.slot');
+    slots.forEach((slot, index) => {
+      slot.innerHTML = '';
+      slot.classList.remove('filled');
+      
+      if (teams[index]) {
+        const team = teams[index];
+        slot.innerHTML = `
           <div class="team-icon ${team.sport}" 
                style="--primaryColor: ${team.primaryColor}; 
                       --secondaryColor: ${team.secondaryColor}">
             ${getSportIcon(team)}
           </div>
         `;
-        slots[index].classList.add('filled');
+        slot.classList.add('filled');
       }
     });
-
-    // Clear any empty slots
-    for (let i = teams.length; i < slots.length; i++) {
-      slots[i].innerHTML = '';
-      slots[i].classList.remove('filled');
-    }
   });
 }
-
+  
 // ========================
 // Utility Functions
 // ========================
