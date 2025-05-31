@@ -1136,7 +1136,7 @@ function subscribeToUpdates() {
 // ========================
 // Core Draft Logic
 // ========================
-function draftTeam(teamId) {
+async function draftTeam(teamId) {
   const currentTeamIndex = (draftState.current_pick - 1) % draftState.team_count;
   const roster = draftState.player_rosters[currentTeamIndex]; // Fixed indexing
   
