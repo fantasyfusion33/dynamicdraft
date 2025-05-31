@@ -1156,6 +1156,8 @@ function subscribeToUpdates() {
 // Core Draft Logic
 // ========================
 async function draftTeam(teamId) {
+  const round = Math.floor((draftState.current_pick - 1) / draftState.team_count) + 1;
+  const isWildcardRound = draftState.wildcard_round && round > 12;
   const currentTeamIndex = (draftState.current_pick - 1) % draftState.team_count;
   const roster = draftState.player_rosters[currentTeamIndex]; // Fixed indexing
   
