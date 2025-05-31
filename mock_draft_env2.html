@@ -1043,19 +1043,11 @@ async function initializeDraft() {
   }
 
         // 3. Initialize empty rosters if needed and toggles
-    function initializeRosters() {
-  draftState.player_rosters = {};
-  const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
-  
-  for (let i = 0; i < draftState.team_count; i++) {
+function initializeRosters() {
+  for (let i = 1; i <= data.team_count; i++) {
     draftState.player_rosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: []
+      NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [],
+      wildcard: [] // Explicit wildcard array
     };
   }
 }
@@ -1084,7 +1076,7 @@ async function initializeDraft() {
     renderDraftBoard();
     initializeSidebar();
     initializeMyTeamBox();
-    initializeRosters(); // Add this
+    initializeRosters();
     if (draftState.current_pick === 0) {
     draftState.current_pick = 1;
     await saveDraftState();
