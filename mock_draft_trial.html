@@ -1024,21 +1024,6 @@ async function initializeDraft() {
   };
 }
 
-// Initialize draft state using global leagueData
-function initializeDraftState(leagueData) {
-
-  const teamCount = leagueData.teamCount;
-
-// Initialize playerRosters
-  draftState.playerRosters = initializePlayerRosters(teamCount);
-
-  // Initialize draftOrder
-  draftState.draftOrder = generateDraftOrder(teamCount);
-
-// Calculate totalPicks based on wildcard setting
-draftState.totalPicks = wildcard ? 13 * teamCount : 12 * teamCount;
-}
-
 // Initialize playerRosters
 function initializePlayerRosters(teamCount) {
   return Array.from({length: teamCount}, (_, i) => ({
