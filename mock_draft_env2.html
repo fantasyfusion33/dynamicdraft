@@ -1521,9 +1521,6 @@ function formatTeamInfo(team, sortKey) {
 
 // Switch between rosters
 function switchRoster(teamId) {
-  document.getElementById('teamSelector').value = teamId;
-      const teamIndex = parseInt(teamId.replace('player', '')) - 1;
-      const teamName = draftState.team_names[teamIndex];
   // Hide all rosters
   document.querySelectorAll('.roster').forEach(roster => {
     roster.style.display = 'none';
