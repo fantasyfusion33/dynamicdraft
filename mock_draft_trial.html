@@ -1018,9 +1018,9 @@ async function initializeDraft() {
   
   draftState = {
     currentPick: leagueData.current_pick || 0,
-    totalPicks: leagueData.team_count * (leagueData.wildcard_round ? 13 : 12),
-    playerRosters: leagueData.player_rosters || initializePlayerRosters(leagueData.team_count),
-    draftOrder: leagueData.draft_order || Array.from({length: leagueData.team_count}, (_, i) => i)
+    totalPicks: team_count * (wildcard ? 13 : 12),
+    playerRosters: leagueData.player_rosters || initializePlayerRosters(teamCount),
+    draftOrder: leagueData.draft_order || generateDraftOrder(teamCount)
   };
 }
 
@@ -1029,12 +1029,6 @@ function initializeDraftState(leagueData) {
 
   const teamCount = leagueData.teamCount;
 
-  // Populate draftState.settings
-  draftState.settings = {
-    leagueName: leagueData.leagueName,
-    wildcard: leagueData.wildcardRound,
-  };
-
 // Initialize playerRosters
   draftState.playerRosters = initializePlayerRosters(teamCount);
 
@@ -1042,7 +1036,7 @@ function initializeDraftState(leagueData) {
   draftState.draftOrder = generateDraftOrder(teamCount);
 
 // Calculate totalPicks based on wildcard setting
-draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * teamCount;
+draftState.totalPicks = wildcard ? 13 * teamCount : 12 * teamCount;
 }
 
 // Initialize playerRosters
@@ -1081,8 +1075,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (leagueData) {
     console.log('Global League Data:', leagueData); // Debugging
     // Assign global variables
+    leagueName = leagueData.league_name;
     teamCount = leagueData.teamCount;
     teamNames = leagueData.teamNames || []; 
+    wildcard = leagueData.wildcard_round;
+const userPosition = leagueData.user_team_position;
     // Initialize draft state using global leagueData
     initializeDraftState(leagueData);
     // Update UI
@@ -1598,7 +1595,7 @@ function autoDraftTeam() {
     if (isNaN(odds) || odds <= 0) return false;
 
     // Wildcard: All teams allowed | Non-wildcard: Sport limit
-    return (isWildcardRound && draftState.settings.wildcard) || currentPlayer[team.sport]?.length < 2;
+    return (isWildcardRound && wildcard) || currentPlayer[team.sport]?.length < 2;
   });
 
   // 2. Sort by numeric odds
