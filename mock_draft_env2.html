@@ -1513,7 +1513,7 @@ function formatTeamInfo(team, sortKey) {
 const switchRoster = (teamId) => {
   const rosters = document.querySelectorAll(".roster");
   rosters.forEach(roster => roster.style.display = "none");
-  document.getElementById(`${team}Roster`).style.display = "block";
+  document.getElementById(`${teamId}Roster`).style.display = "block";
 };
 
 // ========================
