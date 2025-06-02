@@ -432,7 +432,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     draft_order: Array.from({length: teamCount}, (_, i) => i), // [0,1,2,...]
     created_at: new Date().toISOString(),
     // Optional fields with defaults
-    user_team_position, // Will be updated after moves
+    user_team_position: user_team_position + 1, // Will be updated after moves
     player_rosters: {}  
   };
 
@@ -447,7 +447,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     
     // Redirect to draft page
-    window.location.href = `mock_draft_env2.html?leagueId=${data.id}&userTeamPos=${user_team_position}`;
+    window.location.href = `mock_draft_env2.html?leagueId=${data.id}&userTeamPos=${user_team_position + 1}`;
 
   } catch (err) {
     console.error('Error creating league:', err);
