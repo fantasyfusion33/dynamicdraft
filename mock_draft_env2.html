@@ -1175,6 +1175,13 @@ async function draftTeam(teamId) {
     return alert(`Maximum 2 ${sport} teams allowed!`);
   }
 
+  // Update the sidebar to show the current drafting team
+const updateSidebar = (currentPlayer) => {
+  const teamSelector = document.getElementById("teamSelector");
+  teamSelector.value = `player${currentPlayer}`;
+  switchRoster(`player${currentPlayer}`);
+};
+
   //debugging step
 console.log("Drafting team:", teamId, 
   "for index:", currentTeamIndex,
@@ -1630,7 +1637,6 @@ function initializeMyTeamBox() {
 // ========================
 // UI Toggle Functions
 // ========================
-  const myTeamBox = document.getElementById('myTeamBox');
 function toggleMyTeam(){
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
