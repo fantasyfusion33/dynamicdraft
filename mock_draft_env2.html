@@ -1011,15 +1011,12 @@ let leagueId = new URLSearchParams(window.location.search).get('leagueId');
 // ========================
 // Initialization
 // ========================
-  function initializeRosters() {
-  try {
-    // 1. Validate team_count exists
-    if (typeof draftState.team_count === 'undefined' || draftState.team_count < 1) {
-      throw new Error("Invalid team_count: " + draftState.team_count);
-    }
-    
-    // 2. Create empty roster template
-    const emptyRoster = {
+function initializeRosters() {
+  draftState.player_rosters = {};
+  const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+  
+  for (let i = 0; i < draftState.team_count; i++) {
+    draftState.player_rosters[i] = {
       NFL: [],
       NBA: [],
       MLB: [],
@@ -1028,22 +1025,6 @@ let leagueId = new URLSearchParams(window.location.search).get('leagueId');
       NCAAB: [],
       wildcard: []
     };
-    
-    // 3. Initialize player_rosters object
-    draftState.player_rosters = {};
-    
-    // 4. Create rosters for each team
-    for (let i = 0; i < draftState.team_count; i++) {
-      draftState.player_rosters[i] = JSON.parse(JSON.stringify(emptyRoster));
-    }
-    
-    console.log("Rosters initialized for", draftState.team_count, "teams");
-  } catch (err) {
-    console.error("Roster initialization failed:", err);
-    
-    // Fallback to default 12 teams if count is missing
-    draftState.team_count = draftState.team_count || 12;
-    initializeRosters(); // Retry with fallback value
   }
 }
   
@@ -1178,8 +1159,13 @@ async function draftTeam(teamId) {
   }
 
   // Validate pick
-  if (!isWildcardRound && roster[team.sport].length >= 2) {
-    return alert(`Max 2 ${team.sport} teams allowed!`);
+  // Get current count for this sport
+  const sport = team.sport;
+  const currentCount = roster[sport]?.length || 0;
+
+  // Validate only if not wildcard round
+  if (!isWildcardRound && currentCount >= 2) {
+    return alert(`Maximum 2 ${sport} teams allowed!`);
   }
 
   //debugging step
@@ -1405,12 +1391,20 @@ function updateMyTeamBox() {
   // Update title
   document.querySelector('#myTeamContent h3').textContent = `${teamName}'s Team`;
   
-  // Update slots
-  Object.entries(roster).forEach(([sport, teams]) => {
+  if (!roster) {
+    console.error("No roster found for user team:", userTeamIndex);
+    return;
+  }
+
+  // Update all sports
+  const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'wildcard'];
+  sports.forEach(sport => {
     const container = document.querySelector(`.sport-slot[data-sport="${sport}"]`);
     if (!container) return;
     
     const slots = container.querySelectorAll('.slot');
+    const teams = roster[sport] || [];
+    
     slots.forEach((slot, index) => {
       slot.innerHTML = '';
       slot.classList.remove('filled');
