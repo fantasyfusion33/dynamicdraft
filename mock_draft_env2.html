@@ -1510,11 +1510,24 @@ function formatTeamInfo(team, sortKey) {
 }
 
 // Switch between rosters
-const switchRoster = (teamId) => {
-  const rosters = document.querySelectorAll(".roster");
-  rosters.forEach(roster => roster.style.display = "none");
-  document.getElementById(`${teamId}Roster`).style.display = "block";
-};
+function switchRoster(teamId) {
+  // Hide all rosters
+  document.querySelectorAll('.roster').forEach(roster => {
+    roster.style.display = 'none';
+  });Add commentMore actions
+  
+  // Show selected roster
+  const activeRoster = document.getElementById(`${teamId}Roster`);
+  if (activeRoster) {
+    activeRoster.style.display = 'block';
+  }
+  
+  // Update team selector value
+  const selector = document.getElementById('teamSelector');
+  if (selector) {
+    selector.value = teamId;
+  }
+}
 
 // ========================
 // Event Listeners
