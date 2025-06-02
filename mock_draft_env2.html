@@ -1080,7 +1080,9 @@ async function initializeDraft() {
   });
   
   // Show first roster by default
-  switchRoster('player1'); 
+    const initialTeamId = getTeamIdByPick(draftState.current_pick - 1);
+    switchRoster(initialTeamId);
+    document.getElementById('teamSelector').value = initialTeamId;
     
     // 4. Load team data
     await loadTeamData();
@@ -1136,6 +1138,8 @@ function subscribeToUpdates() {
     }, (payload) => {
       draftState = payload.new;
       renderDraftBoard();
+  const currentTeamIndex = getTeamIdByPick(payload.new.current_pick - 1);
+  switchRoster(currentTeamIndex);
     })
     .subscribe();
 }
@@ -1196,8 +1200,14 @@ console.log("Drafting team:", teamId,
 function advanceDraft() {
   
   // Update team selector
-  const currentTeamIndex = draftState.draft_order[draftState.current_pick];
-  document.getElementById('teamSelector').value = `player${currentTeamIndex + 1}`;
+  const currentTeamIndex = draftState.draft_order[draftState.current_pick- 1];
+  document.getElementById('teamSelector').value = `player${currentTeamIndex}`;
+  switchRoster(currentTeamIndex);
+    
+    // Highlight active team in sidebar
+    document.querySelectorAll('.roster').forEach(el => {
+        el.classList.toggle('active', el.id === `${currentTeamIndex}Roster`);
+    });
   document.querySelectorAll('.sidebar-team-list li').forEach(li => {
     li.classList.toggle('active', 
       parseInt(li.dataset.teamIndex) === currentTeamIndex
@@ -1511,6 +1521,10 @@ function formatTeamInfo(team, sortKey) {
 
 // Switch between rosters
 function switchRoster(teamId) {
+  document.getElementById('teamSelector').value = teamId;
+      const teamIndex = parseInt(teamId.replace('player', '')) - 1;
+      const teamName = draftState.team_names[teamIndex];
+  document.querySelector('.roster-container h2').textContent = `${teamName}'s Roster`;
   // Hide all rosters
   document.querySelectorAll('.roster').forEach(roster => {
     roster.style.display = 'none';
@@ -1562,7 +1576,13 @@ function getSportIcon(team) {
   };
   return `<i class="fa-solid ${icons[team.sport]}" style="color: ${team.secondaryColor};"></i>`;
 }
-
+  
+// Convert 0-indexed position to 1-indexed team identifier
+function getTeamIdByPick(pickIndex) {
+    const teamIndex = draftState.draft_order[pickIndex];
+    return `player${teamIndex + 1}`;
+}
+  
 // ========================
 // Supabase Sync
 // ========================
