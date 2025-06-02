@@ -1018,16 +1018,18 @@ async function fetchLeagueData(leagueId) {
   }
 }
 
-// Initialize draft state
-draftState = {
-  draftId: uuidv4(),
-  leagueId: leagueId,
-  currentPick: 0,
-  draftOrder: [],
-  playerRosters: {},
-  settings: null,
-  timerId: null, // Add this to store the timer ID
-};
+let draftState = null;
+
+async function initializeDraft() {
+  const leagueData = await fetchLeagueData(leagueId);
+  
+  draftState = {
+    currentPick: leagueData.current_pick || 0,
+    totalPicks: leagueData.team_count * (leagueData.wildcard_round ? 13 : 12),
+    playerRosters: leagueData.player_rosters || initializePlayerRosters(leagueData.team_count),
+    draftOrder: leagueData.draft_order || Array.from({length: leagueData.team_count}, (_, i) => i)
+  };
+}
 
 // Initialize draft state using global leagueData
 function initializeDraftState(leagueData) {
@@ -1052,19 +1054,15 @@ draftState.totalPicks = draftState.settings.wildcard ? 13 * teamCount : 12 * tea
 
 // Initialize playerRosters
 function initializePlayerRosters(teamCount) {
-  const playerRosters = {};
-  for (let i = 1; i <= teamCount; i++) {
-    playerRosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: []
-    };
-  }
-  return playerRosters;
+  return Array.from({length: teamCount}, (_, i) => ({
+    NFL: [],
+    NBA: [],
+    MLB: [],
+    NHL: [],
+    NCAAF: [],
+    NCAAB: [],
+    wildcard: []
+  }));
 }
 
 // Generate draft order
@@ -1097,39 +1095,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update UI
     createTeamSidebar();
     updateDraftHeader();
-    createDraft();
     // Update draft board title
     document.querySelector('h1').textContent = 
       `${leagueData.leagueName} Draft - ${teamCount} Teams`;
   }
 });
-
-// ========================
-// Create Draft in Supabase
-// ========================
-
-async function createDraft() {
-  try {
-    const { data, error } = await supabase
-      .from('drafts')
-      .insert([{
-        id: draftState.draftId, // Use the generated draft_id
-        league_name: leagueName, // Required: league_name
-        team_names: teamNames, // Required: team_names (jsonb)
-        draft_order: draftState.draftOrder, // Required: draft_order (jsonb)
-        league_id: draftState.leagueId, // Required: league_id (uuid)
-        created_at: new Date().toISOString(), // Optional: created_at
-      }])
-      .select();
-
-    if (error) throw error;
-
-    console.log('Draft created successfully:', data);
-  } catch (err) {
-    console.error('Error creating draft:', err);
-    alert('Failed to create draft. Please try again.');
-  }
-}
 
 // ========================
 // Fixed Switch Roster Function
@@ -1165,78 +1135,37 @@ function updateDraftHeader() {
 }
 
 function createTeamSidebar() {
-  const sidebar = document.getElementById('sidebar');
   const rosterContainer = document.querySelector('.roster-container');
-  
-  // Clear existing content
   rosterContainer.innerHTML = '';
-
-// Populate team selector
-const teamSelector = document.getElementById('teamSelector');
-teamSelector.innerHTML = teamNames
-  .map((name, index) => `<option value="player${index + 1}">${name}</option>`)
-  .join('');
   
-// Generate team sections
-for (let i = 1; i <= teamCount; i++) {
-  const roster = document.createElement('div');
-  roster.className = `roster ${i === 1 ? 'active' : ''}`;
-  roster.id = `player${i}Roster`;
-  const teamName = teamNames[i - 1]; // Arrays are 0-indexed
-  const wildcardEnabled = wildcard; // Get boolean value
-  
-  // Generate roster HTML
-  let rosterHTML = `
-    <h2>${teamName}</h2>
-    <ul id="player${i}Teams">
-  `;
-  
-  // Add slots for each sport
-  roster.innerHTML = `
-    <h2>${teamName}</h2>
-    <ul id="player${i}Teams">
-      ${Object.keys(draftState.playerRosters[i])
-        .filter(k => k !== 'wildcard')
-        .map(sport => `
-          <strong>${sport}</strong>
-          ${Array(2).fill('<li class="empty">Empty</li>').join('')}
-        `).join('')}
-      ${wildcardEnabled ? `
-        <strong>Wildcard</strong>
-        <li class="empty">Empty</li>
-      ` : ''}
-    </ul>
-  `;
-  rosterContainer.appendChild(roster);
-}
+  draftState.playerRosters.forEach((roster, i) => {
+    const rosterEl = document.createElement('div');
+    rosterEl.className = `roster ${i === 0 ? 'active' : ''}`;
+    rosterEl.id = `player${i+1}Roster`;
+    rosterEl.innerHTML = `
+      <h2>${teamNames[i]}</h2>
+      <ul>
+        ${Object.entries(roster)
+          .filter(([sport]) => sport !== 'wildcard')
+          .map(([sport, teams]) => `
+            <strong>${sport}</strong>
+            ${teams.map(t => `<li>${t.name}</li>`).join('')}
+            ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
+          `).join('')}
+        ${wildcard ? `
+          <strong>Wildcard</strong>
+          ${roster.wildcard.map(t => `<li>${t.name}</li>`).join('')}
+          ${Array(1 - roster.wildcard.length).fill('<li class="empty">Empty</li>').join('')}
+        ` : ''}
+      </ul>
+    `;
+    rosterContainer.appendChild(rosterEl);
+  });
 }
 
 // ========================
 // Updated Draft Logic
 // ========================
-
-async function saveDraftState() {
-  try {
-    const { data, error } = await supabase
-      .from('draft_state')
-      .upsert([{
-        draft_id: draftState.draftId,
-        current_pick: draftState.currentPick,
-        draft_order: draftState.draftOrder,
-        player_rosters: draftState.playerRosters,
-        league_id: draftState.leagueId,
-        created_at: new Date().toISOString(),
-      }])
-      .eq('draft_id', draftState.draftId);
-
-    if (error) throw error;
-
-    console.log('Draft state saved successfully:', data);
-  } catch (err) {
-    console.error('Error saving draft state:', err);
-    alert('Failed to save draft state. Please try again.');
-  }
-}
 
 function updateDraftProgress() {
   const progress = (draftState.currentPick / draftState.totalPicks) * 100;
@@ -1245,9 +1174,7 @@ function updateDraftProgress() {
 
 function advanceDraft() {
   draftState.currentPick++;
-
-  // Save draft progress to Supabase
-  saveDraftState();
+  saveDraftProgress(); // Save to mock_drafts
   
   // End draft condition
   if (draftState.currentPick >= draftState.totalPicks) {
@@ -1322,7 +1249,9 @@ async function saveRosterData(rosterData) {
 }
 
 // Initialize dynamic draft
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  leagueData = await fetchLeagueData(leagueId);
+  await initializeDraft();
   // Set up UI
   createTeamSidebar();
   updateDraftHeader();
@@ -1331,6 +1260,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Update draft board title
   document.querySelector('h1').textContent = 
     `${leagueName} Draft - ${teamCount} Teams`;
+
+  const userPosition = leagueData.user_team_position;
+document.querySelector('#myTeamContent h3').textContent = 
+  `${teamNames[userPosition]}'s Team`;
   
   // Update team selector
 const teamSelector = document.getElementById('teamSelector');
@@ -1696,46 +1629,30 @@ function autoDraftTeam() {
   
 // Draft a team 
 function draftTeam(teamId) {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
-  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
-  const isWildcardRound = Math.floor(draftState.currentPick / teamCount) + 1 === 13;
+  const pickIndex = draftState.currentPick;
+  const playerIndex = draftState.draftOrder[pickIndex];
+  const isWildcardRound = Math.floor(pickIndex / teamCount) + 1 === 13;
 
-  // Find team in DraftableTeams
-  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
-  if (teamIndex === -1) {
-    alert('Team not found. Please try again.');
-    return;
-  }
-  const team = DraftableTeams[teamIndex];
-
-  if (isWildcardRound && wildcard) {
-    // Wildcard round rules
-    currentPlayer.wildcard.push({ 
-      ...team, 
-      wildcard: true,
-      round: 13,
-      pick: draftState.currentPick - (12 * teamCount) + 1
-    });
+  // Find team
+  const team = DraftableTeams.find(t => t.team_id === teamId);
+  
+  // Update roster
+  if (isWildcardRound) {
+    draftState.playerRosters[playerIndex].wildcard.push(team);
   } else {
-    // Regular round rules (max 2 per sport)
-    if (currentPlayer[team.sport].length >= 2) {
-      alert(`Maximum 2 ${team.sport} teams allowed!`);
-      return;
-    }
-    currentPlayer[team.sport].push({
-      ...team,
-      round: Math.floor(draftState.currentPick / teamCount) + 1,
-      pick: (draftState.currentPick % teamCount) + 1
-    });
+    draftState.playerRosters[playerIndex][team.sport].push(team);
   }
-
-  // Remove team from available pool
-  DraftableTeams.splice(teamIndex, 1);
-
-  // Update UI
-  updateRosterDisplay(currentPlayerNumber);
-  updateMyTeamBox(team);
-  renderTeams();
+  
+  // Remove from available teams
+  DraftableTeams = DraftableTeams.filter(t => t.team_id !== teamId);
+  
+  // Update UI and save
+  updateRosterDisplay(playerIndex);
+  if (playerIndex === leagueData.user_team_position) {
+    updateMyTeamBox(team);
+  }
+  saveDraftProgress();
+  RenderTeams();
   advanceDraft();
 }
 
@@ -1822,14 +1739,15 @@ function updateRosterDisplay(playerNumber) {
 
 // Update My Team Box
 function updateMyTeamBox(team) {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
-  const currentPlayer = draftState.playerRosters[currentPlayerNumber];
+  const userPosition = leagueData.user_team_position;
+  const roster = draftState.playerRosters[userPosition];
 
   // Find the sport container using data attributes
   const sportContainer = document.querySelector(`.sport-slot[data-sport="${team.sport}"]`);
   const wildcardContainer = document.querySelector(`.sport-slot[data-sport="Wildcard"]`);
-  const container = draftState.currentPick >= (12 * teamCount) ? wildcardContainer : sportContainer;
-
+  const container = document.querySelector(
+    `[data-sport="${team.sport}"] .slots`
+  );
   if (!container) return;
 
   // Find the first empty slot
@@ -1853,6 +1771,20 @@ function updateMyTeamBox(team) {
 function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
+}
+
+async function saveDraftProgress() {
+  await supabase
+    .from('mock_drafts')
+    .update({
+      current_pick: draftState.currentPick,
+      player_rosters: draftState.playerRosters,
+      status: draftState.currentPick >= draftState.totalPicks 
+              ? 'completed' : 'active',
+      completed_at: draftState.currentPick >= draftState.totalPicks 
+                   ? new Date().toISOString() : null
+    })
+    .eq('id', leagueId);
 }
 
 // End the draft
@@ -1887,7 +1819,7 @@ function endDraft() {
   }
 
   // Save roster data to Supabase
-  saveRosterData(rosterData);
+  saveDraftProgress();
   clearInterval(draftState.timer);
   alert("Draft Complete! Click OK to view results.");
 
