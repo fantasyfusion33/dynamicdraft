@@ -1319,8 +1319,7 @@ function updateDraftHeader() {
   
 function renderTeamList() {
   const filteredTeams = filterTeams();
-  const sortedTeams = sortTeams(filteredTeams);
-  
+  const sortedTeams = sortTeams(filteredTeams, document.getElementById('sortBy').value);  
   teamList.innerHTML = sortedTeams.map(team => `
     <div class="team-card ${team.sport}" data-team-id="${team.team_id}">
       <div class="flag ${String(team.season_year).startsWith("2024") ? 'in-season' : 'off-season'}">
@@ -1452,24 +1451,41 @@ function filterTeams() {
   });
 }
 
-function sortTeams(teams) {
-  const sortKey = document.getElementById('sortBy').value;
-  const propMap = {
-    "championship_odds": "championship_odds",
-    "adp": "adp",
-    "lastYearPoints": "lastYearPoints",
-    "championshipPct": "championshipPct"
-  };
+const sortTeams = (DraftableTeams, sortKey) => {
+  // Create a copy to avoid mutating the original array
+  return [...DraftableTeams].sort((a, b) => {
+    // Handle "No Odds" or championshipPct = 0
+    const aHasOdds = a.championshipPct > 0;
+    const bHasOdds = b.championshipPct > 0;
 
-  const property = propMap[sortKey] || "championship_odds";
-  
-  return [...teams].sort((a, b) => {
-    const aVal = a[property] || 0;
-    const bVal = b[property] || 0;
-    return (sortKey === "lastYearPoints" || sortKey === "championshipPct") ? 
-      bVal - aVal : aVal - bVal;
+    // If one team has odds and the other doesn't, prioritize the one with odds
+    if (aHasOdds && !bHasOdds) return -1; // a comes first
+    if (!aHasOdds && bHasOdds) return 1; // b comes first
+    
+    // Map dropdown values to actual property names
+    const propMap = {
+      "championship_odds": "championship_odds",
+      "adp": "adp",
+      "lastYearPoints": "lastYearPoints",
+      "championshipPct": "championshipPct"
+    };
+    
+    const property = propMap[sortKey] || "championship_odds";
+    
+    // Handle undefined/null values by sorting them last
+    if (a[property] == null) return 1;
+    if (b[property] == null) return -1;
+
+    // Convert to numbers for reliable comparison
+    const aValue = parseFloat(a[property]) || 0;
+    const bValue = parseFloat(b[property]) || 0;
+
+    // Determine sort direction
+    const direction = (property === "lastYearPoints" || property === "championshipPct") ? -1 : 1;
+    
+    return (aValue - bValue) * direction;
   });
-}
+};
 
 function formatTeamInfo(team, sortKey) {
   const formats = {
