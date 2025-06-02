@@ -1080,7 +1080,7 @@ async function initializeDraft() {
   });
   
   // Show first roster by default
-  switchRoster('player1'); 
+  switchRoster('player0'); 
     
     // 4. Load team data
     await loadTeamData();
@@ -1343,7 +1343,7 @@ function renderTeamList() {
 
 function generateRosterHTML(playerNum, roster) {
   return `
-    <h2>${draftState.team_names[playerNum - 1]}</h2>
+    <h2>${draftState.team_names[playerNum]}</h2>
     <ul>
       ${Object.entries(roster)
         .filter(([sport]) => sport !== 'wildcard')
