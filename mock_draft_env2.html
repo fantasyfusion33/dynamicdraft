@@ -1492,7 +1492,11 @@ function formatTeamInfo(team, sortKey) {
     championship_odds: v => `Odds: +${v}`,
     adp: v => `ADP: ${v}`,
     lastYearPoints: v => `Prev: ${v} Pts`,
-    championshipPct: v => `% Odds: ${v.toFixed(1)}%`
+    championshipPct: v => {
+      // Safely convert to number before using toFixed
+      const numValue = Number(v) || 0;
+      return `% Odds: ${numValue.toFixed(1)}%`;
+    }
   };
   return formats[sortKey]?.(team[sortKey]) || formats.championship_odds(team.championship_odds);
 }
