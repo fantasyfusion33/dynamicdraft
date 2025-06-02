@@ -1000,15 +1000,8 @@ async function fetchLeagueData(leagueId) {
      // Ensure teamNames is assigned and is always an array
     teamNames = data.team_names || []; 
     teamCount = data.team_count; // Ensure teamCount is properly assigned
-    wildcard = data.wildcard_round
-    leagueName = data.league_name
-    
-    draftState.settings = {
-      leagueName,
-      teamNames, // Assign globally
-      teamCount,
-      wildcard,
-    };
+    wildcard = data.wildcard_round;
+    leagueName = data.league_name;
 
     return data;
   } catch (err) {
