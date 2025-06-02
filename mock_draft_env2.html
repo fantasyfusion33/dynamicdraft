@@ -1509,24 +1509,12 @@ function formatTeamInfo(team, sortKey) {
   return formats[sortKey]?.(team[sortKey]) || formats.championship_odds(team.championship_odds);
 }
 
-function switchRoster(teamId) {
-  // Hide all rosters
-  document.querySelectorAll('.roster').forEach(roster => {
-    roster.style.display = 'none';
-  });
-  
-  // Show selected roster
-  const activeRoster = document.getElementById(`${teamId}Roster`);
-  if (activeRoster) {
-    activeRoster.style.display = 'block';
-  }
-  
-  // Update team selector value
-  const selector = document.getElementById('teamSelector');
-  if (selector) {
-    selector.value = teamId;
-  }
-}
+// Switch between rosters
+const switchRoster = (teamId) => {
+  const rosters = document.querySelectorAll(".roster");
+  rosters.forEach(roster => roster.style.display = "none");
+  document.getElementById(`${team}Roster`).style.display = "block";
+};
 
 // ========================
 // Event Listeners
