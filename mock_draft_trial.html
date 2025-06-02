@@ -1018,7 +1018,7 @@ async function initializeDraft() {
   
   draftState = {
     currentPick: leagueData.current_pick || 0,
-    totalPicks: team_count * (wildcard ? 13 : 12),
+    totalPicks: teamCount * (wildcard ? 13 : 12),
     playerRosters: leagueData.player_rosters || initializePlayerRosters(teamCount),
     draftOrder: leagueData.draft_order || generateDraftOrder(teamCount)
   };
@@ -1065,8 +1065,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     teamNames = leagueData.teamNames || []; 
     wildcard = leagueData.wildcard_round;
 const userPosition = leagueData.user_team_position;
-    // Initialize draft state using global leagueData
-    initializeDraftState(leagueData);
     // Update UI
     createTeamSidebar();
     updateDraftHeader();
