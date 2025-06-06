@@ -604,7 +604,6 @@ function endDraft() {
 
 function setupInitialUI() {
     document.querySelector('.draft-header h1').textContent = `${draftState.league_name} Draft`;
-    document.getElementById('myTeamName').textContent = `${draftState.user_team_name}'s Roster`;
     createTeamSidebar();
     renderTeams();
     updateDraftFlowTracker();
