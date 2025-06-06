@@ -1178,15 +1178,17 @@ async function processPick(team) {
 
         team.round = currentRound;
         team.pick = (draftState.current_pick % draftState.team_count) + 1;
-        
+
         draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
         DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
     }
 
     draftState.current_pick++;
     await saveDraftProgress();
-    
-    updateAfterPick();
+
+    // Pass the 'team' object directly to the update function
+    updateAfterPick(team); 
+
     checkForNextPick();
 }
 
@@ -1230,18 +1232,17 @@ function addEventListeners() {
     });
 }
 
-function updateAfterPick() {
+function updateAfterPick(pickedTeam) {
     updateDraftHeader();
     updateDraftProgress();
     renderTeams();
-    
+
     const lastDrafterName = draftState.draft_order[draftState.current_pick - 1];
     updateRosterDisplay(lastDrafterName);
 
-    if (lastDrafterName === draftState.user_team_name) {
-        const roster = draftState.player_rosters[lastDrafterName];
-        const lastPick = Object.values(roster).flat().sort((a, b) => b.pick - a.pick)[0];
-        if (lastPick) updateMyTeamBox(lastPick);
+    // If it was the user's turn and a team was successfully picked...
+    if (lastDrafterName === draftState.user_team_name && pickedTeam) {
+        updateMyTeamBox(pickedTeam); 
     }
 }
 
