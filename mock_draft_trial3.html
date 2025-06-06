@@ -404,13 +404,12 @@
     // UI & EVENT HANDLERS
     // =================================================================================
     function setupInitialUI() {
-        // FIX 7: Set league title
         document.querySelector('.league-title').textContent = `${draftState.league_name} Mock Draft`;
         updateDraftFlowTracker();
         createTeamSidebar();
         renderTeams();
         if (isMobile) {
-            renderMobileRosters(); // Initial render for mobile teams tab
+            renderMobileRosters();
         }
     }
     function addEventListeners() {
@@ -458,7 +457,6 @@
         document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
     }
     
-    // Desktop Sidebar Logic
     function createTeamSidebar() {
         const rosterContainer = document.getElementById('roster-container');
         const teamSelector = document.getElementById('teamSelector');
@@ -478,7 +476,6 @@
             rosterContainer.appendChild(rosterEl);
             updateRosterDisplay(name);
         });
-        // FIX 6: Activate the first roster by default
         if (rosterContainer.firstChild) rosterContainer.firstChild.classList.add('active');
     }
 
@@ -512,7 +509,6 @@
         rosterList.innerHTML = rosterHTML;
     }
     
-    // FIX 2 & 6: Re-integrated full-featured card and new mobile list view
     function renderTeams() {
         const teamList = document.getElementById("teamList");
         teamList.innerHTML = "";
@@ -532,7 +528,6 @@
         card.className = `team-card ${team.sport}`;
         
         if (isMobile) {
-            // FIX 2: Mobile List View
             card.innerHTML = `
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
                 <div class="team-info">
@@ -542,7 +537,6 @@
                 <button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button>
             `;
         } else {
-            // Desktop Card View
             card.dataset.teamId = team.team_id;
             card.innerHTML = `
                 <div class="flag ${String(team.season_year||"").startsWith("2024")?'in-season':'off-season'}">${String(team.season_year||"").startsWith("2024")?'In Season':'Off Season'}</div>
@@ -561,7 +555,6 @@
         return card;
     }
 
-    // FIX 5: Mobile Tab and Roster Logic
     function showMobileView(viewName) {
         document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
         document.querySelector(`.${viewName}-container`).classList.add('active');
@@ -583,10 +576,25 @@
     // =================================================================================
     // UTILITY & HELPER FUNCTIONS
     // =================================================================================
-    function sortTeams(teams, sortKey) { /* Unchanged */ }
-    function getDynamicInfo(team, sortKey) { /* Unchanged */ }
-    // ... all other unchanged helper functions (popups, toggles, etc.)
-    
+    function sortTeams(teams, sortKey) {
+        return teams.sort((a,b)=>{const valA=parseFloat(a[sortKey])||0;const valB=parseFloat(b[sortKey])||0;if(sortKey==='championship_odds'){if(valA===0)return 1;if(valB===0)return -1;return valA-valB;}return valB-valA;});
+    }
+    function getDynamicInfo(team, sortKey) {
+        const formats={championship_odds:v=>v>0?`Odds: +${v}`:'Odds: N/A',adp:v=>`ADP: ${v||'N/A'}`,lastYearPoints:v=>`Prev: ${v||0} Pts`,championshipPct:v=>`% Odds: ${(v||0).toFixed(1)}%`};
+        return(formats[sortKey]||formats.championship_odds)(team[sortKey]);
+    }
+    let popupTimeout;
+    function handleTeamHover(e){clearTimeout(popupTimeout);const team=DraftableTeams.find(t=>t.team_id===e.currentTarget.dataset.teamId);if(team){positionPopup(e,team);document.getElementById("teamPopup").style.display="block";}}
+    function handleTeamLeave(){popupTimeout=setTimeout(()=>{document.getElementById("teamPopup").style.display="none"},200);}
+    function positionPopup(e,team){const p=document.getElementById("teamPopup");p.style.left=`${e.clientX+20}px`;p.style.top=`${e.clientY-50}px`;document.getElementById("popupTeamADP").textContent=team.adp||'N/A';document.getElementById("popupTeamOdds").textContent=team.championship_odds||'N/A';document.getElementById("popupTeamPoints").textContent=team.lastYearPoints||'N/A';document.getElementById("popupTeamChampionshipPct").textContent=(team.championshipPct||0).toFixed(1);}
+    function switchRosterToCurrentPlayer(){if(draftState.current_pick>=draftState.total_picks)return;const name=draftState.draft_order[draftState.current_pick];if(typeof name!=='string')return;const id=name.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'');const sel=document.getElementById('teamSelector');if(sel)sel.value=id;switchRoster(id);}
+    function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
+    function enableDraftButtons(isEnabled){document.querySelectorAll('.team-card button, .draft-button').forEach(b=>b.disabled=!isEnabled);}
+    function showLoadingState(isLoading){document.body.style.cursor=isLoading?'wait':'default';document.body.style.opacity=isLoading?'0.5':'1';}
+    function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+    function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
+    function createFinalRosterView(){let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`;}
+    function getSportIcon(team){ const icons = {NBA:'fa-solid fa-basketball',NCAAB:'fa-solid fa-basketball',NFL:'fa-solid fa-football',NCAAF:'fa-solid fa-football',MLB:'fa-solid fa-baseball',NHL:'fa-solid fa-hockey-puck'}; return icons[team.sport] || '';}
 </script>
 </body>
 </html>
