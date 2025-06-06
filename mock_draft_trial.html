@@ -984,6 +984,17 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey) //Update
 const urlParams = new URLSearchParams(window.location.search);
 const leagueId = urlParams.get('leagueId');
 
+const draftState = {
+  currentPick: 0,
+  draftOrder: [],
+  playerRosters: {},
+  totalPicks: 0,
+  timer: null
+};
+
+// Initialize global league settings
+let leagueName, teamNames, teamCount, wildcard, userTeamPosition;
+
 // Fetch league data from Supabase
 async function fetchLeagueData(leagueId) {
   try {
@@ -997,12 +1008,6 @@ async function fetchLeagueData(leagueId) {
 
     console.log('League data fetched successfully:', data);
 
-     // Ensure teamNames is assigned and is always an array
-    teamNames = data.team_names || []; 
-    teamCount = data.team_count; // Ensure teamCount is properly assigned
-    wildcard = data.wildcard_round;
-    leagueName = data.league_name;
-
     return data;
   } catch (err) {
     console.error('Error fetching league data:', err);
@@ -1010,68 +1015,86 @@ async function fetchLeagueData(leagueId) {
     return null;
   }
 }
-
-let draftState = null;
-
+  
 async function initializeDraft() {
   const leagueData = await fetchLeagueData(leagueId);
   
-  draftState = {
-    currentPick: leagueData.current_pick || 0,
-    totalPicks: teamCount * (wildcard ? 13 : 12),
-    playerRosters: leagueData.player_rosters || initializePlayerRosters(teamCount),
-    draftOrder: leagueData.draft_order || generateDraftOrder(teamCount)
-  };
+  // Set global settings
+  leagueName = leagueData.league_name;
+  teamNames = leagueData.team_names || [];
+  teamCount = leagueData.team_count;
+  wildcard = leagueData.wildcard_round;
+  userTeamPosition = leagueData.user_team_position || 0;
+  
+  // Update draft state
+  updateDraftState(leagueData);
 }
 
-// Initialize playerRosters
-function initializePlayerRosters(teamCount) {
-  return Array.from({length: teamCount}, (_, i) => ({
-    NFL: [],
-    NBA: [],
-    MLB: [],
-    NHL: [],
-    NCAAF: [],
-    NCAAB: [],
-    wildcard: []
-  }));
+function updateDraftState(leagueData) {
+  draftState.currentPick = leagueData.current_pick || 0;
+  draftState.draftOrder = leagueData.draft_order || generateDraftOrder();
+  draftState.playerRosters = leagueData.player_rosters || initializePlayerRosters();
+  draftState.totalPicks = teamCount * (wildcard ? 13 : 12);
 }
 
 // Generate draft order
-function generateDraftOrder(size) {
+function generateDraftOrder() {
   const order = [];
-  for (let round = 1; round <= 13; round++) {
+  const totalRounds = wildcard ? 13 : 12;
+  
+  for (let round = 1; round <= totalRounds; round++) {
     const roundOrder = round % 2 === 1 ? 
-      Array.from({ length: size }, (_, i) => i + 1) : // Odd rounds: 1, 2, 3, ...
-      Array.from({ length: size }, (_, i) => size - i); // Even rounds: ..., 3, 2, 1
+      Array.from({ length: teamCount }, (_, i) => i + 1) : 
+      Array.from({ length: teamCount }, (_, i) => teamCount - i);
     order.push(...roundOrder);
   }
   return order;
 }
-  
-let teamCount;
-let teamNames = []; // Initialize as empty array
-let wildcard;
+  // Initialize playerRosters
+function initializePlayerRosters() {
+  const playerRosters = {};
+  for (let i = 1; i <= teamCount; i++) {
+    playerRosters[i] = {
+      NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], wildcard: []
+    };
+  }
+  return playerRosters;
+}
+
+async function saveDraftProgress() {
+  await supabase
+    .from('mock_drafts')
+    .update({
+      current_pick: draftState.currentPick,
+      player_rosters: draftState.playerRosters,
+      status: draftState.currentPick >= draftState.totalPicks ? 'completed' : 'active',
+      completed_at: draftState.currentPick >= draftState.totalPicks ? new Date().toISOString() : null
+    })
+    .eq('id', leagueId);
+}
 
 // Fetch league data and store it globally
 document.addEventListener('DOMContentLoaded', async () => {
-  leagueData = await fetchLeagueData(leagueId);
+  // Initialize the draft (which now handles all data fetching and state setup)
+  await initializeDraft();
 
-  if (leagueData) {
-    console.log('Global League Data:', leagueData); // Debugging
-    // Assign global variables
-    leagueName = leagueData.league_name;
-    teamCount = leagueData.teamCount;
-    teamNames = leagueData.teamNames || []; 
-    wildcard = leagueData.wildcard_round;
-const userPosition = leagueData.user_team_position;
-    // Update UI
-    createTeamSidebar();
-    updateDraftHeader();
-    // Update draft board title
-    document.querySelector('h1').textContent = 
-      `${leagueData.leagueName} Draft - ${teamCount} Teams`;
-  }
+  // Update UI elements
+  createTeamSidebar();
+  updateDraftHeader();
+  
+  // Set draft board title using the global variables
+  document.querySelector('h1').textContent = 
+    `${leagueName} Draft - ${teamCount} Teams`;
+  
+  // Set My Team box title
+  document.getElementById('myTeamName').textContent = 
+    `${teamNames[userTeamPosition]}'s Team`;
+  
+  // Start the draft timer
+  startCountdown();
+  
+  // Load team data and render initial view
+  loadTeamData();
 });
 
 // ========================
@@ -1744,20 +1767,6 @@ function updateMyTeamBox(team) {
 function toggleMyTeam() {
   const myTeamBox = document.getElementById('myTeamBox');
   myTeamBox.classList.toggle('collapsed');
-}
-
-async function saveDraftProgress() {
-  await supabase
-    .from('mock_drafts')
-    .update({
-      current_pick: draftState.currentPick,
-      player_rosters: draftState.playerRosters,
-      status: draftState.currentPick >= draftState.totalPicks 
-              ? 'completed' : 'active',
-      completed_at: draftState.currentPick >= draftState.totalPicks 
-                   ? new Date().toISOString() : null
-    })
-    .eq('id', leagueId);
 }
 
 // End the draft
