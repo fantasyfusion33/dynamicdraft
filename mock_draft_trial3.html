@@ -24,18 +24,21 @@
         /* Main Layout */
         .draft-container {
             display: grid;
+            /* FIXED: Added 'progress' area for the status bar */
             grid-template-areas:
                 "header header header"
                 "ticker ticker ticker"
+                "progress progress progress"
                 "main main sidebar";
             grid-template-columns: 1fr 1fr 350px;
             gap: 20px;
             max-width: 1600px;
             margin: auto;
-            position: relative; /* Needed for clock positioning */
+            position: relative;
         }
         .draft-header { grid-area: header; text-align: center; }
         .draft-flow-tracker { grid-area: ticker; }
+        .draft-status-bar { grid-area: progress; } /* FIXED: Assign grid area */
         .main-content { grid-area: main; }
         .sidebar { grid-area: sidebar; }
         
@@ -106,10 +109,26 @@
             font-weight: 400;
             opacity: 0.8;
         }
+
+        /* FIXED: Added styles for the draft progress bar */
+        .draft-status-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+        .draft-progress {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 0.5s ease-out;
+        }
         
         /* Available Teams Section */
         .available-teams-container {
-            display: block; /* Default view on desktop */
+            display: block;
         }
         .filters {
             display: flex;
@@ -188,6 +207,7 @@
                 grid-template-areas:
                     "header"
                     "ticker"
+                    "progress"
                     "tabs"
                     "main";
                 grid-template-columns: 1fr;
@@ -288,6 +308,11 @@
                 <p id="upcoming-pick-2">--</p>
             </div>
         </div>
+        
+        <!-- FIXED: Added the draft progress bar HTML element -->
+        <div class="draft-status-bar">
+            <div class="draft-progress"></div>
+        </div>
 
         <div class="mobile-tabs">
             <button class="mobile-tab active" onclick="showMobileView('available-teams')">Draft</button>
@@ -297,7 +322,6 @@
 
         <main class="main-content">
             <div class="available-teams-container active">
-                <!-- FIXED: Added the filter controls back into the HTML -->
                 <div class="filters">
                     <div class="search-bar">
                         <input type="text" id="teamSearch" placeholder="Search for teams...">
@@ -655,7 +679,13 @@
     function enableDraftButtons(isEnabled){document.querySelectorAll('.team-card button').forEach(b=>b.disabled=!isEnabled);}
     function showLoadingState(isLoading){document.body.style.cursor=isLoading?'wait':'default';document.body.style.opacity=isLoading?'0.5':'1';}
     function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
-    function updateDraftProgress(){const p=(draftState.current_pick/draftState.total_picks)*100;document.querySelector('.draft-progress').style.width=`${p}%`;}
+    function updateDraftProgress(){
+        const progressBar = document.querySelector('.draft-progress');
+        if(progressBar) {
+            const p=(draftState.current_pick/draftState.total_picks)*100;
+            progressBar.style.width=`${p}%`;
+        }
+    }
     function createFinalRosterView(){let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon ${t.sport}" style="--primaryColor:${t.primaryColor};--secondaryColor:${t.secondaryColor};">${getSportIcon(t)}</div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`;}
     function getSportIcon(team){switch(team.sport){case"NBA":case"NCAAB":return`<i class="fa-solid fa-basketball"></i>`;case"NFL":case"NCAAF":return`<i class="fa-solid fa-football"></i>`;case"MLB":return`<i class="fa-solid fa-baseball"></i>`;case"NHL":return`<i class="fa-solid fa-hockey-puck"></i>`;default:return""}}
 </script>
