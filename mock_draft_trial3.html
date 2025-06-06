@@ -47,7 +47,6 @@
             -webkit-text-fill-color: transparent;
         }
         
-        /* FIXED: Added styles for the countdown clock */
         .countdown-clock {
             position: absolute;
             top: 10px;
@@ -116,16 +115,36 @@
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
+            align-items: center;
         }
-        .filters .search-bar { flex: 1; }
-        .filters select { flex-shrink: 0; }
-        #teamSearch {
-            width: 100%;
+        .filters .search-bar { flex: 1; position: relative; }
+        .filters select { 
+            flex-shrink: 0; 
             padding: 10px;
             background: var(--gray);
             border: 1px solid #333;
             border-radius: 6px;
             color: white;
+        }
+        #teamSearch {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 30px 10px 10px;
+            background: var(--gray);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+        }
+        #clearSearch {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.2rem;
+            cursor: pointer;
         }
         .team-list {
             display: grid;
@@ -177,7 +196,7 @@
 
             .draft-header h1 { font-size: 1.8rem; }
             .countdown-clock {
-                position: static; /* Un-fix the clock on mobile */
+                position: static;
                 text-align: center;
                 margin: -10px auto 15px auto;
                 width: fit-content;
@@ -248,7 +267,6 @@
     <div class="draft-container">
         <header class="draft-header">
             <h1>Fantasy Fusion</h1>
-            <!-- FIXED: Added clock back to the HTML -->
             <div class="countdown-clock" id="countdownClock">2:00</div>
         </header>
 
@@ -259,7 +277,6 @@
             </div>
             <div class="flow-pick on-the-clock">
                 <h4>On The Clock</h4>
-                <!-- FIXED: This 'p' tag is now the single source for current pick info -->
                 <p id="current-pick-info">Loading...</p>
             </div>
             <div class="flow-pick upcoming">
@@ -280,8 +297,32 @@
 
         <main class="main-content">
             <div class="available-teams-container active">
+                <!-- FIXED: Added the filter controls back into the HTML -->
                 <div class="filters">
-                    <!-- Filters remain the same -->
+                    <div class="search-bar">
+                        <input type="text" id="teamSearch" placeholder="Search for teams...">
+                        <button id="clearSearch" title="Clear search">&times;</button>
+                    </div>
+                    <select id="sortBy">
+                        <option value="championship_odds">Sort by Odds</option>
+                        <option value="adp">Sort by ADP</option>
+                        <option value="lastYearPoints">Sort by Prev. Pts</option>
+                        <option value="championshipPct">Sort by % Odds</option>
+                    </select>
+                    <select id="seasonFilter">
+                        <option value="all">All Seasons</option>
+                        <option value="in-season">In Season</option>
+                        <option value="off-season">Off Season</option>
+                    </select>
+                    <select id="sportFilter">
+                        <option value="all">All Sports</option>
+                        <option value="NFL">NFL</option>
+                        <option value="NBA">NBA</option>
+                        <option value="MLB">MLB</option>
+                        <option value="NHL">NHL</option>
+                        <option value="NCAAF">NCAA Football</option>
+                        <option value="NCAAB">NCAA Basketball</option>
+                    </select>
                 </div>
                 <div class="team-list" id="teamList"></div>
             </div>
@@ -314,9 +355,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // The entire JavaScript from the previous version goes here, but with ONE KEY CHANGE.
-    // The `updateDraftHeader` function is removed, and `updateDraftFlowTracker` is enhanced.
-
     // =================================================================================
     // DRAFT INITIALIZATION & STATE MANAGEMENT
     // =================================================================================
@@ -497,11 +535,9 @@
         switchRosterToCurrentPlayer();
     }
 
-    // FIXED: This function now populates the ticker with all relevant info, removing the need for a separate `updateDraftHeader`.
     function updateDraftFlowTracker() {
         const { current_pick, draft_order, team_count } = draftState;
         
-        // Previous Pick
         const prevPickInfo = document.getElementById('previous-pick-info');
         if (current_pick > 0) {
             const prevDrafter = draft_order[current_pick - 1];
@@ -511,7 +547,6 @@
             prevPickInfo.textContent = '--';
         }
 
-        // Current Pick
         const currentPickInfo = document.getElementById('current-pick-info');
         if (current_pick < draftState.total_picks) {
             const teamName = draft_order[current_pick];
@@ -522,13 +557,10 @@
             currentPickInfo.innerHTML = 'Draft Complete';
         }
 
-        // Upcoming Picks
         document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
         document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
     }
     
-    // The rest of the UI functions (createTeamSidebar, updateRosterDisplay, renderTeams, etc.) remain largely the same as the previous version.
-    // They are included here for completeness.
     function createTeamSidebar() {
         const rosterContainer = document.getElementById('roster-container');
         const teamSelector = document.getElementById('teamSelector');
