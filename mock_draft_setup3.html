@@ -447,7 +447,7 @@ document.getElementById('leagueForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     
     // Redirect to draft page
-    window.location.href = `mock_draft_trial2.html?leagueId=${data.id}&userTeamPos=${user_team_position + 1}`;
+    window.location.href = `mock_draft_trial.html?leagueId=${data.id}&userTeamPos=${user_team_position + 1}`;
 
   } catch (err) {
     console.error('Error creating league:', err);
