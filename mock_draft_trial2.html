@@ -27,7 +27,7 @@
     .countdown-clock {
       position: fixed;
       top: 40px;
-      left: calc(350px + 45px);
+      left: calc(350px + 45px); /* Sidebar (350px) + 35px */
       width: 75px;
       font-size: 2rem;
       font-weight: 600;
@@ -40,6 +40,7 @@
       z-index: 300;
     }
 
+    /* When the sidebar is collapsed, move the clock 35px from the left */
     .sidebar.collapsed ~ .countdown-clock {
      left: 45px;
     }
@@ -87,62 +88,68 @@
       font-weight: 700;
     }
 
-   .filters {
-     display: flex;
-     align-items: center;
-     gap: 20px;
-     margin-bottom: 20px;
-     padding-left: 10px;
-   }
+   /* Filters and Search Bar */
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Ensures even spacing */
+  margin-bottom: 20px;
+  padding-left: 10px; /* Adds space from the left edge */
+}
 
-   .search-bar {
-     position: relative;
-     flex: 1;
-     max-width: 200px;
-     min-width: 200px;
-     margin-left: 10px;
-   }
+.search-bar {
+  position: relative;
+  flex: 1;
+  max-width: 200px;
+  min-width: 200px;
+  margin-left: 10px; /* Adds space between the search bar and left-most filter */
+}
 
-   #teamSearch {
-     width: 80%;
-     padding: 8px 30px 8px 12px;
-     background: var(--gray);
-     border: 1px solid rgba(255, 255, 255, 0.1);
-     border-radius: 6px;
-     color: var(--light);
-     font-size: 14px;
-   }
+#teamSearch {
+  width: 80%;
+  padding: 8px 30px 8px 12px;
+  background: var(--gray);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: var(--light);
+  font-size: 14px;
+}
 
-   .clear-search {
-     position: absolute;
-     right: 9px;
-     top: 50%;
-     transform: translateY(-50%);
-     background: none;
-     border: none;
-     color: rgba(255, 255, 255, 0.5);
-     cursor: pointer;
-     padding: 0;
-     font-size: 1.2rem;
-   }
+.clear-search {
+  position: absolute;
+  right: 9px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.2rem;
+}
 
-   .clear-search:hover {
-     color: var(--primary);
-   }
+.clear-search:hover {
+  color: var(--primary);
+}
 
-   .filters select {
-     padding: 10px 16px;
-     background: var(--gray);
-     color: var(--light);
-     border: 1px solid rgba(255, 255, 255, 0.1);
-     border-radius: 8px;
-     font-size: 14px;
-     transition: all 0.2s ease;
-   }
+.filters select {
+  padding: 10px 16px;
+  background: var(--gray);
+  color: var(--light);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
 
-   .filters select:hover {
-     border-color: var(--primary);
-   }
+/* Ensures search bar and filters don't overlap */
+.filters select:first-child {
+  margin-right: 15px; /* Adds space between left-most filter and search bar */
+}
+
+.filters select:hover {
+  border-color: var(--primary);
+}
 
     .team-list {
       display: grid;
@@ -163,13 +170,12 @@
       z-index: 200;
     }
 
-    .team-card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
+.team-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
     .team-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
@@ -267,6 +273,8 @@
       background: rgba(255, 255, 255, 0.05);
       padding: 12px;
       border-radius: 6px;
+      z-index: 100;
+
     }
 
     .roster ul {
@@ -284,7 +292,7 @@
       border-radius: 6px;
       background: rgba(255, 255, 255, 0.03);
     }
-    
+    /* Add these styles to your CSS */
     .roster li strong {
       font-weight: 700;
       font-size: 1.1rem;
@@ -352,48 +360,48 @@
       animation: pulse-glow 1.5s infinite;
     }
 
-    .draft-complete {
-      margin: 0;
-      padding: 20px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: var(--dark);
-    }
+.draft-complete {
+  margin: 0 !important; /* Remove default margins */
+  padding: 20px !important; /* Add padding for spacing */
+  width: 100% !important; /* Ensure full width */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark); /* Match the background color */
+}
 
-    .draft-complete-container {
-      padding: 20px;
-      overflow-y: auto;
-      height: calc(100vh - 120px);
-      scrollbar-width: none;
-    }
+.draft-complete-container {
+  padding: 20px;
+  overflow-y: auto;
+  height: calc(100vh - 120px);
+  scrollbar-width: none; /* Firefox */
+}
 
-    .draft-complete-container::-webkit-scrollbar {
-      display: none;
-    }
+.draft-complete-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
 
-    .final-rosters {
-      display: flex;
-      justify-content: center;
-      gap: 25px;
-      width: 100%;
-    }
+.final-rosters {
+  display: flex;
+  justify-content: center;
+  gap: 25px;
+  width: 100%;
+}
 
-    .final-rosters .roster {
-      display: block;
-      width: 350px;
-      background: var(--glass);
-      border-radius: 12px;
-      padding: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+.final-rosters .roster {
+  display: block; /* Change from flex to block */
+  width: 350px;
+  background: var(--glass);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
 
-    .final-rosters .roster h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.final-rosters .roster h2 {
+  text-align: center; /* Center the title */
+  margin-bottom: 20px; /* Add space below the title */
+}
 
     /* Sidebar Styles */
     .sidebar {
@@ -430,6 +438,7 @@
 
     .sidebar.collapsed + .sidebar-toggle {
       left: 0px;
+      transform: translateX(-100); /* Ensure button stays visible */
     }
 
     .sidebar-toggle .arrow {
@@ -465,12 +474,13 @@
      padding: 20px;
      overflow-y: auto;
      height: calc(100vh - 120px);
-     scrollbar-width: none;
+     scrollbar-width: none; /* Firefox */
    }
 
    .roster-container::-webkit-scrollbar {
-     display: none;
+     display: none; /* Chrome, Safari */
    }
+
 
     .roster {
       display: none;
@@ -488,282 +498,330 @@
     .sidebar.collapsed ~ .main-content {
       margin-left: 0;
     }
+.team-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primaryColor);
+  position: relative;
+  margin-right: 8px;
+}
 
-    .team-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--primaryColor);
-      position: relative;
-      margin-right: 8px;
-    }
+.team-icon i {
+  font-size: 20px; /* Adjust icon size */
+  color: var(--secondaryColor); /* Use secondary color for the icon */
+}
+/* MyTeam Box */
+#myTeamBox {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 275px;
+  height: 200px;
+  background: #333; /* Dark gray background */
+  padding: 16px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 300;
+  transition: transform 0.3s ease;
+}
 
-    .team-icon i {
-      font-size: 20px;
-      color: var(--secondaryColor);
-    }
-    
-    /* MyTeam Box */
-    #myTeamBox {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 275px;
-      height: 200px;
-      background: #333;
-      padding: 16px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 300;
-      transition: transform 0.3s ease;
-    }
+#myTeamContent h3 {
+  text-align: center; /* Center text horizontally */
+  display: flex;
+  align-items: center; /* Center text vertically */
+  justify-content: center; /* Center horizontally */
+  height: 50px; /* Adjust based on available space */
+  margin: 0; /* Remove default margins */
+}
 
-    #myTeamBox.collapsed {
-      transform: translateX(calc(100% - 40px));
-    }
 
-    #myTeamBox.collapsed #myTeamContent {
-      display: none;
-    }
+#myTeamBox.collapsed {
+  transform: translateX(calc(100% - 40px)); /* Collapse to the right */
+}
 
-    #toggleMyTeam {
-      position: absolute;
-      top: 10px;
-      left: -38px;
-      background: #D2042D;
-      color: #FFF;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px 0 0 6px;
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+#myTeamBox.collapsed #myTeamContent {
+  display: none; /* Hide content when collapsed */
+}
 
-    #toggleMyTeam .arrow {
-      transition: transform 0.3s ease;
-    }
+#toggleMyTeam {
+  position: absolute;
+  top: 10px;
+  left: -38px;
+  background: #D2042D; /* Primary color */
+  color: #FFF;
+  border: none;
+  padding: 8px 12px; /* Wider padding for better click area */
+  border-radius: 6px 0 0 6px; /* Rounded corners on the left */
+  cursor: pointer;
+  font-size: 16px; /* Adjust arrow size */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-    #myTeamBox.collapsed #toggleMyTeam .arrow {
-      transform: rotate(0deg);
-    }
+#toggleMyTeam .arrow {
+  transition: transform 0.3s ease;
+}
 
-    #myTeamBox:not(.collapsed) #toggleMyTeam .arrow {
-      transform: rotate(180deg);
-    }
+#myTeamBox.collapsed #toggleMyTeam .arrow {
+  transform: rotate(0deg); /* Arrow pointing left (◀) */
+}
 
-    .sport-grid {
-      display: grid;
-      margin-top: -10px;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1px;
-    }
+#myTeamBox:not(.collapsed) #toggleMyTeam .arrow {
+  transform: rotate(180deg); /* Arrow pointing right (▶) */
+}
 
-    .sport-slot h4 {
-      margin: 0 0 0px;
-      font-size: 14px;
-      color: #FFF;
-      text-align: center;
-    }
+.sport-grid {
+  display: grid;
+  margin-top: -10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+}
 
-    .sport-slot:nth-child(2n) {
-      margin-top: 4px;
-    }
+.sport-slot h4 {
+  margin: 0 0 0px;
+  font-size: 14px;
+  color: #FFF;
+  text-align: center;
+}
 
-    .slots {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
+.sport-slot:nth-child(2n) { /* Selects every second item (right column) */
+  margin-top: 4px;
+}
 
-    /* My Team Box Slots */
-    .slot {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: block;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.3s ease;
-      position: relative;
-    }
+.slots {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
 
-    .slot.filled {
-      background: transparent;
-    }
+/* My Team Box Slots */
+.slot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1); /* Light gray for empty slots */
+  display: block;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.3s ease;
+  position: relative; /* For positioning */
+}
 
-    /* Team Popup Styles */
-    .team-popup {
-      display: none;
-      position: fixed;
-      background: var(--glass);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      padding: 16px;
-      backdrop-filter: blur(10px);
-      z-index: 300;
-      width: 150px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
+/* Team Icons */
+.team-icon {
+  width: 32px; /* Ensure width matches slot size */
+  height: 32px; /* Ensure height matches slot size */
+  border-radius: 50%; /* Make it a perfect circle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primaryColor); /* Use team's primary color */
+}
 
-    .team-popup-content {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
+.team-icon i {
+  font-size: 20px; /* Adjust icon size to fit inside the circle */
+  color: var(--secondaryColor); /* Use team's secondary color */
+}
 
-    .team-popup-body p {
-      margin: 4px 0;
-      font-size: 0.9rem;
-    }
+/* Filled Slot Styling */
+.slot.filled {
+  background: transparent; /* Remove gray background when filled */
+}
 
-    .wildcard-badge {
-      display: inline-block;
-      background: #FFD700;
-      color: #000;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.8rem;
-      margin-left: 8px;
-    }
 
-    /* Mobile Styles */
-    @media (max-width: 768px) {
-      .countdown-clock {
-        top: 10px;
-        left: 10px;
-        font-size: 1.2rem;
-        padding: 6px 12px;
-        width: 60px;
-      }
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #myTeamBox {
+    transform: translateX(calc(100% - 40px)); /* Collapse by default on small screens */
+  }
 
-      .sidebar {
-        width: 200px;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-      }
+  #myTeamBox.collapsed {
+    transform: translateX(0); /* Expand when toggled */
+  }
+}
 
-      .sidebar.collapsed {
-        transform: translateX(-100%);
-      }
+/* Team Popup Styles */
+.team-popup {
+  display: none;
+  position: fixed;
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+  z-index: 300;
+  width: 150px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
 
-      .sidebar:not(.collapsed) ~ .main-content {
-        margin-left: 200px;
-      }
+.team-popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
-      .sidebar-toggle {
-        top: 10px;
-        left: 10px;
-        padding: 6px;
-        font-size: 1rem;
-      }
+.team-popup-body p {
+  margin: 4px 0;
+  font-size: 0.9rem;
+}
 
-      body {
-        font-size: 14px;
-      }
+.wildcard-badge {
+  display: inline-block;
+  background: #FFD700;
+  color: #000;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  margin-left: 8px;
+}
 
-      h1 {
-        font-size: 1.5rem;
-      }
+/* Mobile Styles (applied when screen width is less than 768px) */
+@media (max-width: 768px) {
+  /* Shrink clock */
+  .countdown-clock {
+    top: 10px;
+    left: 10px;
+    font-size: 1.2rem;
+    padding: 6px 12px;
+    width: 60px;
+  }
 
-      .team-card h3 {
-        font-size: 1rem;
-      }
+  /* Smaller sidebar */
+  .sidebar {
+    width: 200px; /* Narrower sidebar */
+    transform: translateX(-100%); /* Start hidden */
+    transition: transform 0.3s ease;
+  }
 
-      .team-card p {
-        font-size: 0.8rem;
-      }
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+  }
 
-      .team-list {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-      }
+  .sidebar:not(.collapsed) ~ .main-content {
+    margin-left: 200px; /* Adjust main content when sidebar is open */
+  }
 
-      .sidebar:not(.collapsed) ~ .main-content .team-list {
-        grid-template-columns: repeat(2, 1fr);
-      }
+  /* Smaller sidebar toggle */
+  .sidebar-toggle {
+    top: 10px;
+    left: 10px;
+    padding: 6px;
+    font-size: 1rem;
+  }
 
-      .team-card {
-        padding: 10px;
-      }
+  /* Smaller text */
+  body {
+    font-size: 14px;
+  }
 
-      #myTeamBox {
-        display: none;
-      }
+  h1 {
+    font-size: 1.5rem;
+  }
 
-      .team-popup {
-        display: none;
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
-        max-width: 300px;
-        background: var(--glass);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
-        padding: 15px;
-        backdrop-filter: blur(10px);
-        z-index: 1000;
-      }
+  .team-card h3 {
+    font-size: 1rem;
+  }
 
-      .team-card {
-        cursor: pointer;
-      }
+  .team-card p {
+    font-size: 0.8rem;
+  }
 
-      .filters {
-        display: grid;
-        grid-template-rows: auto auto;
-        gap: 10px;
-        margin-bottom: 15px;
-      }
+  /* Team card grid */
+  .team-list {
+    grid-template-columns: repeat(3, 1fr); /* 3 cards per row by default */
+    gap: 8px; /* Smaller gap */
+  }
 
-      .filters > .search-bar {
-        grid-row: 1;
-        grid-column: 1 / span 2;
-        max-width: none;
-      }
+  .sidebar:not(.collapsed) ~ .main-content .team-list {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row when sidebar is open */
+  }
 
-      .filters > #sortBy {
-        grid-row: 1;
-        grid-column: 3;
-        width: 100%;
-      }
+  .team-card {
+    padding: 10px; /* Smaller padding */
+  }
 
-      .filters > #sportFilter,
-      .filters > #seasonFilter {
-        grid-row: 2;
-        width: 100%;
-      }
+  /* Hide My Team Box */
+  #myTeamBox {
+    display: none;
+  }
 
-      .filters > #sportFilter {
-        grid-column: 1 / span 2;
-      }
+  /* Tap-based popups */
+  .team-popup {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 300px;
+    background: var(--glass);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+  }
 
-      .filters > #seasonFilter {
-        grid-column: 3;
-      }
+  .team-card {
+    cursor: pointer; /* Show tap indication */
+  }
+/* Stack filters into two rows */
+  .filters {
+    display: grid;
+    grid-template-rows: auto auto; /* Two rows */
+    gap: 10px; /* Spacing between rows */
+    margin-bottom: 15px; /* Add spacing below filters */
+  }
 
-      .search-bar,
-      .filters select {
-        width: 100%;
-        max-width: none;
-        font-size: 14px;
-        padding: 8px;
-      }
+  /* First row: Search and sort */
+  .filters > .search-bar {
+    grid-row: 1;
+    grid-column: 1 / span 2; /* Take up both columns */
+    max-width: none; /* Full width */
+  }
 
-      .clear-search {
-        right: 8px;
-        font-size: 1rem;
-      }
-    }
+  .filters > #sortBy {
+    grid-row: 1;
+    grid-column: 3; /* Place sort dropdown in the third column */
+    width: 100%; /* Full width */
+  }
+
+  /* Second row: Sport and season filters */
+  .filters > #sportFilter,
+  .filters > #seasonFilter {
+    grid-row: 2;
+    width: 100%; /* Full width */
+  }
+
+  .filters > #sportFilter {
+    grid-column: 1 / span 2; /* Take up two columns */
+  }
+
+  .filters > #seasonFilter {
+    grid-column: 3; /* Place season filter in the third column */
+  }
+
+  /* Adjust search bar and dropdowns */
+  .search-bar,
+  .filters select {
+    width: 100%; /* Full width */
+    max-width: none; /* Remove max-width */
+    font-size: 14px; /* Smaller text */
+    padding: 8px; /* Smaller padding */
+  }
+
+  /* Clear search button */
+  .clear-search {
+    right: 8px; /* Adjust position */
+    font-size: 1rem; /* Smaller icon */
+  }
+}
 
   </style>
 </head>
@@ -775,7 +833,7 @@
   </button>
   <div id="myTeamContent">
     <div class="sport-grid">
-    <h3 id="myTeamName">My Team</h3>
+    <h3>Player 1's Team</h3>
 <div class="sport-slot" data-sport="NFL">
   <h4>NFL</h4>
   <div class="slots">
@@ -826,11 +884,10 @@
 </div>
     </div>
   </div>
-</div>  
-<div class="draft-header">
-    <h1 id="draftTitle">Fantasy Fusion Draft</h1>
+</div>  <div class="draft-header">
+    <h1>Fantasy Fusion Draft</h1>
     <div class="current-player" id="currentPlayerBox">
-      <span>On The Clock:</span> <strong>Loading...</strong>
+      <span>On The Clock:</span> <strong>Player 1 - Round 1.1</strong>
     </div>
   </div>
   <div class="draft-status-bar">
@@ -838,36 +895,41 @@
   </div>
   <div id="app">
     <div class="filters">
+  <!-- Search Bar -->
   <div class="search-bar">
     <input type="text" id="teamSearch" placeholder="Search for teams...">
     <button id="clearSearch" class="clear-search">&times;</button>
   </div>
-  <label>Sort By:</label>
+  <!-- Sort By -->
+     <label>Sort By:</label>
   <select id="sortBy">
     <option value="championship_odds">Odds</option>
     <option value="adp">ADP</option>
     <option value="lastYearPoints">Prev. Pts</option>
-    <option value="championshipPct">% Odds</option>
+    <option value="championshipPct">% Odds</option> //calculated in database
   </select>
-  <label>Filter:</label>
-  <select id="seasonFilter">
-    <option value="all">All</option>
-    <option value="in-season">In Season</option>
-    <option value="off-season">Off Season</option>
-  </select>
-  <select id="sportFilter">
-    <option value="all">All Sports</option>
-    <option value="NFL">NFL</option>
-    <option value="NBA">NBA</option>
-    <option value="MLB">MLB</option>
-    <option value="NHL">NHL</option>
-    <option value="NCAAF">NCAA Football</option>
-    <option value="NCAAB">NCAA Basketball</option>
-  </select>
+  <!-- Fliter By -->
+      <label>Filter:</label>
+      <select id="seasonFilter">
+        <option value="all">All</option>
+        <option value="in-season">In Season</option>
+        <option value="off-season">Off Season</option>
+      </select>
+      <select id="sportFilter">
+        <option value="all">All Sports</option>
+        <option value="NFL">NFL</option>
+        <option value="NBA">NBA</option>
+        <option value="MLB">MLB</option>
+        <option value="NHL">NHL</option>
+        <option value="NCAAF">NCAA Football</option>
+        <option value="NCAAB">NCAA Basketball</option>
+      </select>
+ <!-- Conference Filter -->
   <select id="conferenceFilter" disabled>
     <option value="all">All Conferences</option>
   </select>
     </div>
+</div>
     <div class="team-list" id="teamList">
       <!-- Teams will be dynamically inserted here -->
     </div>
@@ -884,13 +946,14 @@
     <!-- Rosters will be dynamically generated here -->
   </div>
 </div>
+  </div>
 </div>
 
 <!-- Sidebar Toggle Button -->
 <button class="sidebar-toggle" onclick="toggleSidebar()">
   <span class="arrow">&#9664;</span>
 </button>  
-<div class="countdown-clock" id="countdownClock">02:00</div>
+<div class="countdown-clock" id="countdownClock"></div>
 
 <div id="teamPopup" class="team-popup">
   <div class="team-popup-content">
@@ -907,713 +970,491 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/uuid/8.3.2/uuidv4.min.js"></script>
 <script>
+// =================================================================================
+// DRAFT INITIALIZATION & STATE MANAGEMENT
+// =================================================================================
 
 // Initialize Supabase client
 const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-// Global variables for league settings
-let leagueName, teamNames, teamCount, wildcard, userTeamPosition;
-let DraftableTeams = [];
-let draftState = null;
-let leagueId = null;
-
-// Get league ID from URL
+// Global State
 const urlParams = new URLSearchParams(window.location.search);
-leagueId = urlParams.get('leagueId');
+const leagueId = urlParams.get('leagueId');
 
-// Fetch league data from Supabase
-async function fetchLeagueData(leagueId) {
-  try {
-    const { data, error } = await supabase
-      .from('mock_drafts')
-      .select('*')
-      .eq('id', leagueId)
-      .single();
+// A single object to hold all draft state, populated from the database
+const draftState = {
+    league_name: '',
+    team_names: [],
+    team_count: 0,
+    wildcard_round: 0,
+    user_team_name: '',
+    current_pick: 0,
+    draft_order: [],
+    player_rosters: {},
+    total_picks: 0,
+    timer: null,
+    isPaused: false,
+};
 
-    if (error) throw error;
+let DraftableTeams = []; // Holds all draftable teams from the SportTeamDatabase table
+let isUserTurn = false;
 
-    // Set global variables
-    leagueName = data.league_name;
-    teamNames = data.team_names || [];
-    teamCount = data.team_count;
-    wildcard = data.wildcard_round;
-    userTeamPosition = data.user_team_position || 0;
+// =================================================================================
+// SCRIPT ENTRY POINT
+// =================================================================================
 
-    return data;
-  } catch (err) {
-    console.error('Error fetching league data:', err);
-    alert('Failed to fetch league data. Please try again.');
-    return null;
-  }
-}
-
-// Initialize draft state
-function initializeDraftState(leagueData) {
-  // Calculate total picks
-  const totalPicks = teamCount * (wildcard ? 13 : 12);
-  
-  draftState = {
-    currentPick: leagueData.current_pick || 0,
-    draftOrder: leagueData.draft_order || generateDraftOrder(),
-    playerRosters: leagueData.player_rosters || initializePlayerRosters(),
-    totalPicks: totalPicks,
-    timer: null
-  };
-}
-
-// Initialize player rosters
-function initializePlayerRosters() {
-  const playerRosters = {};
-  for (let i = 1; i <= teamCount; i++) {
-    playerRosters[i] = {
-      NFL: [],
-      NBA: [],
-      MLB: [],
-      NHL: [],
-      NCAAF: [],
-      NCAAB: [],
-      wildcard: []
-    };
-  }
-  return playerRosters;
-}
-
-// Generate draft order
-function generateDraftOrder() {
-  const order = [];
-  const totalRounds = wildcard ? 13 : 12;
-  
-  for (let round = 1; round <= totalRounds; round++) {
-    const roundOrder = round % 2 === 1 ? 
-      Array.from({ length: teamCount }, (_, i) => i + 1) : 
-      Array.from({ length: teamCount }, (_, i) => teamCount - i);
-    order.push(...roundOrder);
-  }
-  return order;
-}
-
-// Save draft progress
-async function saveDraftProgress() {
-  try {
-    const { error } = await supabase
-      .from('mock_drafts')
-      .update({
-        current_pick: draftState.currentPick,
-        player_rosters: draftState.playerRosters,
-        status: draftState.currentPick >= draftState.totalPicks ? 'completed' : 'active',
-        completed_at: draftState.currentPick >= draftState.totalPicks ? new Date().toISOString() : null
-      })
-      .eq('id', leagueId);
-
-    if (error) throw error;
-  } catch (err) {
-    console.error('Error saving draft progress:', err);
-  }
-}
-
-// Update draft header
-function updateDraftHeader() {
-  if (!draftState) return;
-  
-  const currentPlayer = draftState.draftOrder[draftState.currentPick];
-  const round = Math.floor(draftState.currentPick / teamCount) + 1;
-  const isWildcardRound = round === 13 && wildcard;
-  const pick = (draftState.currentPick % teamCount) + 1;
-  const teamName = teamNames[currentPlayer - 1];
-
-  document.getElementById('currentPlayerBox').innerHTML = `
-    <span>On The Clock:</span>
-    <strong>${teamName} - ${isWildcardRound ? 
-      'Wildcard Round' : `Round ${Math.min(round, 13)}.${pick}`}
-    </strong>
-  `;
-}
-
-// Create team sidebar
-function createTeamSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  const rosterContainer = document.querySelector('.roster-container');
-  rosterContainer.innerHTML = '';
-
-  // Populate team selector
-  const teamSelector = document.getElementById('teamSelector');
-  teamSelector.innerHTML = teamNames
-    .map((name, index) => `<option value="player${index + 1}">${name}</option>`)
-    .join('');
-  
-  // Generate team sections
-  for (let i = 1; i <= teamCount; i++) {
-    const roster = document.createElement('div');
-    roster.className = `roster ${i === 1 ? 'active' : ''}`;
-    roster.id = `player${i}Roster`;
-    const teamName = teamNames[i - 1];
-    
-    roster.innerHTML = `
-      <h2>${teamName}</h2>
-      <ul id="player${i}Teams">
-        ${Object.keys(draftState.playerRosters[i])
-          .filter(k => k !== 'wildcard')
-          .map(sport => `
-            <strong>${sport}</strong>
-            ${draftState.playerRosters[i][sport].map(t => `
-              <li class="${t.sport}">
-                ${t.name}
-                <div class="draft-pick-circle ${t.sport}">
-                  ${t.round}.${t.pick}
-                </div>
-              </li>
-            `).join('')}
-            ${Array(2 - draftState.playerRosters[i][sport].length).fill('<li class="empty">Empty</li>').join('')}
-          `).join('')}
-        ${wildcard ? `
-          <strong>Wildcard</strong>
-          ${draftState.playerRosters[i].wildcard.map(t => `
-            <li class="${t.sport}">
-              ${t.name}
-              <div class="draft-pick-circle ${t.sport}">
-                ${t.round}.${t.pick}
-              </div>
-            </li>
-          `).join('')}
-          ${Array(1 - draftState.playerRosters[i].wildcard.length).fill('<li class="empty">Empty</li>').join('')}
-        ` : ''}
-      </ul>
-    `;
-    rosterContainer.appendChild(roster);
-  }
-}
-
-// Switch roster to current player
-function switchRosterToCurrentPlayer() {
-  const currentPlayerNumber = draftState.draftOrder[draftState.currentPick];
-  const teamSelector = document.getElementById('teamSelector');
-  teamSelector.value = `player${currentPlayerNumber}`;
-  switchRoster(`player${currentPlayerNumber}`);
-}
-
-// Switch roster display
-function switchRoster(team) {
-  const rosters = document.querySelectorAll('.roster');
-  rosters.forEach(roster => roster.style.display = 'none');
-  
-  const activeRoster = document.getElementById(`${team}Roster`);
-  if (activeRoster) {
-    activeRoster.style.display = 'block';
-  }
-}
-
-// Toggle sidebar
-function toggleSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  sidebar.classList.toggle('collapsed');
-  
-  const mainContent = document.querySelector('.main-content');
-  mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '0' : '350px';
-  
-  const arrow = document.querySelector('.sidebar-toggle .arrow');
-  arrow.innerHTML = sidebar.classList.contains('collapsed') ? '&#9654;' : '&#9664;';
-}
-
-// Toggle My Team box
-function toggleMyTeam() {
-  const myTeamBox = document.getElementById('myTeamBox');
-  myTeamBox.classList.toggle('collapsed');
-}
-
-// Start countdown timer
-function startCountdown() {
-  if (draftState.timer) {
-    clearInterval(draftState.timer);
-  }
-  
-  let timeLeft = 120;
-  const timerElement = document.getElementById('countdownClock');
-  
-  draftState.timer = setInterval(() => {
-    timeLeft--;
-    timerElement.textContent = `${String(Math.floor(timeLeft/60)).padStart(2,'0')}:${String(timeLeft%60).padStart(2,'0')}`;
-    
-    if (timeLeft <= 0) {
-      clearInterval(draftState.timer);
-      autoDraftTeam();
-    }
-  }, 1000);
-}
-
-// Get sport icon
-function getSportIcon(team) {
-  switch (team.sport) {
-    case "NBA":
-    case "NCAAB":
-      return `<i class="fa-solid fa-basketball" style="color: ${team.secondaryColor};"></i>`;
-    case "NFL":
-    case "NCAAF":
-      return `<i class="fa-solid fa-football" style="color: ${team.secondaryColor};"></i>`;
-    case "MLB":
-      return `<i class="fa-solid fa-baseball" style="color: ${team.secondaryColor};"></i>`;
-    case "NHL":
-      return `<i class="fa-solid fa-hockey-puck" style="color: ${team.secondaryColor};"></i>`;
-    default:
-      return "";
-  }
-}
-
-// Load team data
-function loadTeamData() {
-  Papa.parse("SportTeamDatabase_rows.csv", {
-    download: true,
-    header: true,
-    dynamicTyping: true,
-    complete: function (results) {
-      DraftableTeams = results.data || [];
-      renderTeams();
-    },
-    error: function (error) {
-      console.error('Error loading CSV file:', error);
-    }
-  });
-}
-
-// Render teams
-function renderTeams() {
-  if (!DraftableTeams.length) return;
-  
-  const filter = document.getElementById('seasonFilter').value;
-  const sport = document.getElementById('sportFilter').value;
-  const sortKey = document.getElementById('sortBy').value || 'championship_odds';
-  
-  // Filter teams
-  const filteredTeams = DraftableTeams.filter(team => {
-    const isCurrentSeason = String(team.season_year || "").startsWith('2024');
-    const isNextSeason = String(team.season_year || "").startsWith('2025');
-    
-    let seasonMatch = true;
-    if (filter === "in-season") seasonMatch = isCurrentSeason;
-    if (filter === "off-season") seasonMatch = isNextSeason;
-
-    const matchesSport = sport === "all" || team.sport === sport;
-    const matchesSearch = team.name.toLowerCase().includes(document.getElementById('teamSearch').value.toLowerCase());
-    
-    return seasonMatch && matchesSport && matchesSearch;
-  });
-
-  // Sort teams
-  const sortedTeams = filteredTeams.sort((a, b) => {
-    const aHasOdds = a.championshipPct > 0;
-    const bHasOdds = b.championshipPct > 0;
-    if (aHasOdds && !bHasOdds) return -1;
-    if (!aHasOdds && bHasOdds) return 1;
-    
-    const propMap = {
-      "championship_odds": "championship_odds",
-      "adp": "adp",
-      "lastYearPoints": "lastYearPoints",
-      "championshipPct": "championshipPct"
-    };
-    
-    const property = propMap[sortKey] || "championship_odds";
-    if (typeof a[property] === "undefined") return 1;
-    if (typeof b[property] === "undefined") return -1;
-    
-    const direction = property === "lastYearPoints" || property === "championshipPct" ? -1 : 1;
-    return (a[property] - b[property]) * direction;
-  });
-
-  // Render team list
-  const teamList = document.getElementById('teamList');
-  teamList.innerHTML = '';
-  
-  sortedTeams.forEach(team => {
-    const teamCard = document.createElement('div');
-    teamCard.className = `team-card ${team.sport}`;
-    teamCard.dataset.teamId = team.team_id;
-    
-    teamCard.innerHTML = `
-      <div class="flag ${String(team.season_year || "").startsWith("2024") ? 'in-season' : 'off-season'}">
-        ${String(team.season_year || "").startsWith("2024") ? 'In Season' : 'Off Season'}
-      </div>
-      <div class="team-card-header">
-        <div class="team-icon ${team.sport}" 
-             style="--primaryColor: ${team.primaryColor}; 
-                    --secondaryColor: ${team.secondaryColor}"> 
-          ${getSportIcon(team)}
-        </div>
-        <h3>${team.name}</h3>
-      </div>
-      <p>${team.sport} (${team.season_year})</p>
-      <p>${team.conference || team.league} ${team.division ? `${team.division}` : ''}</p>
-      <p>${getDynamicInfo(team, sortKey)}</p>
-      <button onclick="draftTeam('${team.team_id}')">Draft</button>
-    `;
-    
-    teamCard.addEventListener('mouseenter', handleTeamHover);
-    teamCard.addEventListener('mouseleave', handleTeamLeave);
-    teamList.appendChild(teamCard);
-  });
-}
-
-// Get dynamic info for team card
-function getDynamicInfo(team, sortKey) {
-  const formats = {
-    championship_odds: v => `Odds: +${v}`,
-    adp: v => `ADP: ${v}`,
-    lastYearPoints: v => `Prev: ${v} Pts`,
-    championshipPct: v => `% Odds: ${v.toFixed(1)}%`
-  };
-  
-  const value = team[sortKey] ?? 0;
-  const formatter = formats[sortKey] || formats.championship_odds;
-  return formatter(value);
-}
-
-// Handle team hover for popup
-function handleTeamHover(e) {
-  const teamCard = e.currentTarget;
-  const teamId = teamCard.dataset.teamId;
-  const team = DraftableTeams.find(t => t.team_id === teamId);
-  
-  if (team) {
-    positionPopup(e, team);
-    document.getElementById('teamPopup').style.display = 'block';
-  }
-}
-
-// Handle team leave
-function handleTeamLeave() {
-  document.getElementById('teamPopup').style.display = 'none';
-}
-
-// Position popup
-function positionPopup(e, team) {
-  const { clientX, clientY } = e;
-  const popup = document.getElementById('teamPopup');
-  
-  let left = clientX + 20;
-  let top = clientY - 50;
-  
-  if (left + popup.offsetWidth > window.innerWidth) {
-    left = window.innerWidth - popup.offsetWidth - 10;
-  }
-  
-  if (top + popup.offsetHeight > window.innerHeight) {
-    top = window.innerHeight - popup.offsetHeight - 10;
-  }
-  
-  popup.style.left = `${left}px`;
-  popup.style.top = `${top}px`;
-  
-  document.getElementById('popupTeamADP').textContent = team.adp;
-  document.getElementById('popupTeamOdds').textContent = team.championship_odds;
-  document.getElementById('popupTeamPoints').textContent = team.lastYearPoints;
-  document.getElementById('popupTeamChampionshipPct').textContent = team.championshipPct;
-}
-
-// Auto-draft team
-function autoDraftTeam() {
-  if (!draftState) return;
-  
-  const pickIndex = draftState.currentPick;
-  const playerIndex = draftState.draftOrder[pickIndex];
-  const isWildcardRound = Math.floor(pickIndex / teamCount) + 1 === 13;
-  const roster = draftState.playerRosters[playerIndex];
-  
-  // Filter eligible teams
-  const eligibleTeams = DraftableTeams.filter(team => {
-    const odds = parseFloat(team.championship_odds);
-    if (isNaN(odds) || odds <= 0) return false;
-    
-    return (isWildcardRound && wildcard) || roster[team.sport]?.length < 2;
-  });
-  
-  // Sort by odds
-  const sortedTeams = eligibleTeams.sort((a, b) => {
-    const aOdds = parseFloat(a.championship_odds);
-    const bOdds = parseFloat(b.championship_odds);
-    return aOdds - bOdds || a.name.localeCompare(b.name);
-  });
-  
-  // Draft the team with lowest odds
-  if (sortedTeams.length > 0) {
-    draftTeam(sortedTeams[0].team_id);
-  } else {
-    advanceDraft();
-  }
-}
-
-// Draft a team
-function draftTeam(teamId) {
-  if (!draftState) return;
-  
-  const pickIndex = draftState.currentPick;
-  const playerIndex = draftState.draftOrder[pickIndex];
-  const isWildcardRound = Math.floor(pickIndex / teamCount) + 1 === 13;
-  const roster = draftState.playerRosters[playerIndex];
-  
-  // Find team
-  const teamIndex = DraftableTeams.findIndex(t => t.team_id === teamId);
-  if (teamIndex === -1) {
-    alert('Team not found. Please try again.');
-    return;
-  }
-  
-  const team = DraftableTeams[teamIndex];
-  
-  // Check if team can be drafted
-  if (isWildcardRound && wildcard) {
-    roster.wildcard.push({
-      ...team,
-      round: Math.floor(pickIndex / teamCount) + 1,
-      pick: (pickIndex % teamCount) + 1
-    });
-  } else {
-    if (roster[team.sport].length >= 2) {
-      alert(`Maximum 2 ${team.sport} teams allowed!`);
-      return;
-    }
-    roster[team.sport].push({
-      ...team,
-      round: Math.floor(pickIndex / teamCount) + 1,
-      pick: (pickIndex % teamCount) + 1
-    });
-  }
-  
-  // Remove team from available pool
-  DraftableTeams.splice(teamIndex, 1);
-  
-  // Update UI
-  updateRosterDisplay(playerIndex);
-  if (playerIndex === userTeamPosition + 1) {
-    updateMyTeamBox(team);
-  }
-  
-  // Save and advance
-  saveDraftProgress().then(advanceDraft);
-}
-
-// Update roster display
-function updateRosterDisplay(playerIndex) {
-  const roster = draftState.playerRosters[playerIndex];
-  const rosterList = document.getElementById(`player${playerIndex}Teams`);
-  
-  if (!rosterList) return;
-  
-  let rosterHTML = Object.entries(roster)
-    .filter(([sport]) => sport !== 'wildcard')
-    .map(([sport, teams]) => `
-      <strong>${sport}</strong>
-      ${teams.map(team => `
-        <li class="${team.sport}">
-          ${team.name}
-          <div class="draft-pick-circle ${team.sport}">
-            ${team.round}.${team.pick}
-          </div>
-        </li>
-      `).join('')}
-      ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
-    `).join('');
-  
-  // Add wildcard slot if enabled
-  if (wildcard) {
-    rosterHTML += `
-      <strong>Wildcard</strong>
-      ${roster.wildcard.map(team => `
-        <li class="${team.sport}">
-          ${team.name}
-          <div class="draft-pick-circle ${team.sport}">
-            ${team.round}.${team.pick}
-          </div>
-        </li>
-      `).join('')}
-      ${Array(1 - roster.wildcard.length).fill('<li class="empty">Empty</li>').join('')}
-    `;
-  }
-  
-  rosterList.innerHTML = rosterHTML;
-}
-
-// Update My Team Box
-function updateMyTeamBox(team) {
-  const sportContainer = document.querySelector(`.sport-slot[data-sport="${team.sport}"]`);
-  const wildcardContainer = document.querySelector(`.sport-slot[data-sport="Wildcard"]`);
-  const container = draftState.currentPick >= (12 * teamCount) ? wildcardContainer : sportContainer;
-  
-  if (!container) return;
-  
-  // Find the first empty slot
-  const emptySlot = container.querySelector('.slot:not(.filled)');
-  if (!emptySlot) return;
-  
-  // Create team icon element
-  const teamIcon = document.createElement('div');
-  teamIcon.className = `team-icon ${team.sport}`;
-  teamIcon.style.setProperty('--primaryColor', team.primaryColor);
-  teamIcon.style.setProperty('--secondaryColor', team.secondaryColor);
-  teamIcon.innerHTML = getSportIcon(team);
-  
-  // Replace empty slot content
-  emptySlot.innerHTML = '';
-  emptySlot.classList.add('filled');
-  emptySlot.appendChild(teamIcon);
-}
-
-// Advance draft
-function advanceDraft() {
-  if (!draftState) return;
-  
-  draftState.currentPick++;
-  
-  // Check if draft is complete
-  if (draftState.currentPick >= draftState.totalPicks) {
-    endDraft();
-    return;
-  }
-  
-  // Show wildcard message if needed
-  if (draftState.currentPick === 12 * teamCount && wildcard) {
-    alert("You have made it to the Wild Card round! You will now draft 1 final team that can be from any sport.");
-  }
-  
-  // Update UI
-  updateDraftHeader();
-  updateDraftProgress();
-  startCountdown();
-  switchRosterToCurrentPlayer();
-}
-
-// Update draft progress bar
-function updateDraftProgress() {
-  if (!draftState) return;
-  
-  const progress = (draftState.currentPick / draftState.totalPicks) * 100;
-  document.querySelector('.draft-progress').style.width = `${progress}%`;
-}
-
-// End draft
-async function endDraft() {
-  if (!draftState) return;
-  
-  // Save final state
-  await saveDraftProgress();
-  
-  // Clear timer
-  clearInterval(draftState.timer);
-  
-  // Remove UI elements
-  ['#sidebar', '.sidebar-toggle', '.draft-header', '.countdown-clock', 
-   '.draft-status-bar', '.team-popup', '#myTeamBox', '#toggleMyTeam'].forEach(selector => {
-    const el = document.querySelector(selector);
-    if (el) el.remove();
-  });
-  
-  // Adjust main content
-  const mainContent = document.querySelector(".main-content");
-  if (mainContent) {
-    mainContent.style.marginLeft = "auto";
-    mainContent.style.marginRight = "auto";
-  }
-  
-  // Build final rosters
-  let rostersHTML = '';
-  for (let i = 1; i <= teamCount; i++) {
-    const roster = draftState.playerRosters[i];
-    const teamName = teamNames[i - 1];
-    
-    rostersHTML += `
-      <div class="roster">
-        <h2>${teamName}</h2>
-        <ul>
-          ${Object.entries(roster)
-            .filter(([sport]) => sport !== 'wildcard')
-            .map(([sport, teams]) => `
-              <strong>${sport}</strong>
-              ${teams.map(team => `
-                <li class="${team.sport}">
-                  <div class="team-icon ${team.sport}" 
-                       style="--primaryColor: ${team.primaryColor}; 
-                              --secondaryColor: ${team.secondaryColor}"> 
-                    ${getSportIcon(team)}
-                  </div>
-                  ${team.name}
-                  <div class="draft-pick-circle ${team.sport}">
-                    ${team.round}.${team.pick}
-                  </div>
-                </li>
-              `).join('')}
-              ${Array(2 - teams.length).fill('<li class="empty">Empty</li>').join('')}
-            `).join('')}
-          ${roster.wildcard?.length > 0 ? `
-            <strong>Wildcard</strong>
-            ${roster.wildcard.map(team => `
-              <li class="${team.sport}">
-                <div class="team-icon ${team.sport}" 
-                     style="--primaryColor: ${team.primaryColor}; 
-                            --secondaryColor: ${team.secondaryColor}"> 
-                  ${getSportIcon(team)}
-                </div>
-                ${team.name}
-                <div class="draft-pick-circle ${team.sport}">
-                  ${team.round}.${team.pick}
-                </div>
-              </li>
-            `).join('')}
-          ` : ''}
-        </ul>
-      </div>
-    `;
-  }
-  
-  // Update app content
-  const app = document.getElementById('app');
-  if (app) {
-    app.innerHTML = `
-      <div class="draft-complete">
-        <h2 style="text-align: center; margin-bottom: 30px;">
-          Draft Complete! Here are your league's final rosters below:
-        </h2>
-        <div class="final-rosters">
-          ${rostersHTML}
-        </div>
-      </div>
-    `;
-  }
-}
-
-// Initialize app
 document.addEventListener('DOMContentLoaded', async () => {
-  // Fetch league data
-  const leagueData = await fetchLeagueData(leagueId);
-  if (!leagueData) return;
-  
-  // Initialize draft state
-  initializeDraftState(leagueData);
-  
-  // Set up UI
-  document.getElementById('draftTitle').textContent = 
-    `${leagueName} Draft - ${teamCount} Teams`;
-  
-  document.getElementById('myTeamName').textContent = 
-    `${teamNames[userTeamPosition]}'s Team`;
-  
-  updateDraftHeader();
-  createTeamSidebar();
-  startCountdown();
-  
-  // Load team data and set up event listeners
-  loadTeamData();
-  
-  // Set up filter event listeners
-  document.getElementById('seasonFilter').addEventListener('change', renderTeams);
-  document.getElementById('sportFilter').addEventListener('change', renderTeams);
-  document.getElementById('sortBy').addEventListener('change', renderTeams);
-  document.getElementById('teamSearch').addEventListener('input', renderTeams);
-  
-  document.getElementById('clearSearch').addEventListener('click', () => {
-    document.getElementById('teamSearch').value = '';
-    renderTeams();
-  });
+    if (!leagueId) {
+        alert('No league ID found. Redirecting to setup.');
+        window.location.href = 'mock_draft_setup3.html';
+        return;
+    }
+
+    showLoadingState(true);
+
+    // 1. Fetch all necessary data
+    await Promise.all([
+        initializeDraftState(),
+        fetchDraftableTeamsFromDB()
+    ]);
+    
+    // 2. Set up the UI with the fetched data
+    setupInitialUI();
+    addEventListeners();
+    
+    // 3. Start the Draft
+    showLoadingState(false);
+    checkForNextPick();
 });
+
+// =================================================================================
+// DATA FETCHING
+// =================================================================================
+
+async function initializeDraftState() {
+    try {
+        const { data: leagueData, error } = await supabase
+            .from('mock_drafts')
+            .select('*')
+            .eq('id', leagueId)
+            .single();
+
+        if (error) throw error;
+
+        // Populate the global draftState object
+        draftState.league_name = leagueData.league_name;
+        draftState.team_names = leagueData.team_names || [];
+        draftState.team_count = leagueData.team_count;
+        draftState.wildcard_round = leagueData.wildcard_round;
+        draftState.current_pick = leagueData.current_pick || 0;
+        draftState.draft_order = leagueData.draft_order || [];
+
+        const userPosition = leagueData.user_team_position > 0 ? leagueData.user_team_position - 1 : 0;
+        draftState.user_team_name = draftState.team_names[userPosition] || '';
+
+        draftState.player_rosters = leagueData.player_rosters && Object.keys(leagueData.player_rosters).length > 0
+            ? leagueData.player_rosters
+            : initializePlayerRosters(draftState.team_names);
+
+        const totalRounds = 12 + draftState.wildcard_round;
+        draftState.total_picks = draftState.team_count * totalRounds;
+
+    } catch (err) {
+        console.error('Error initializing draft:', err);
+        alert('Failed to initialize draft. Please try again.');
+    }
+}
+
+// ***NEW: Fetches teams from the Supabase table instead of a CSV file.***
+async function fetchDraftableTeamsFromDB() {
+    try {
+        const { data, error } = await supabase
+            .from('SportTeamDatabase')
+            .select('*');
+
+        if (error) throw error;
+        
+        // Filter out any teams that have already been drafted
+        const pickedTeamIds = new Set();
+        Object.values(draftState.player_rosters).forEach(roster => {
+            Object.values(roster).forEach(teams => {
+                teams.forEach(team => pickedTeamIds.add(team.team_id));
+            });
+        });
+
+        DraftableTeams = data.filter(team => !pickedTeamIds.has(team.team_id));
+        console.log('Available teams loaded from DB:', DraftableTeams.length);
+
+    } catch (err) {
+        console.error('Error fetching draftable teams:', err);
+    }
+}
+
+
+// =================================================================================
+// DRAFT LOGIC
+// =================================================================================
+
+// This function is the new "heartbeat" of the draft
+function checkForNextPick() {
+    if (draftState.current_pick >= draftState.total_picks) {
+        endDraft();
+        return;
+    }
+
+    updateOnTheClockUI();
+    const currentDrafter = draftState.draft_order[draftState.current_pick];
+    isUserTurn = currentDrafter === draftState.user_team_name;
+
+    if (isUserTurn) {
+        console.log("It's your turn to pick.");
+        enableDraftButtons(true);
+        startCountdown();
+    } else {
+        console.log(`It's ${currentDrafter}'s turn. Auto-picking...`);
+        enableDraftButtons(false);
+        // Use a short delay for a more natural feel
+        setTimeout(autoDraftTeam, 1500);
+    }
+}
+
+async function draftTeam(teamId) {
+    if (!isUserTurn) {
+        console.warn("Attempted to draft when it's not the user's turn.");
+        return;
+    }
+
+    const team = DraftableTeams.find(t => t.team_id === teamId);
+    if (!team) return;
+
+    // Stop the countdown timer
+    if (draftState.timer) clearInterval(draftState.timer);
+
+    await processPick(team);
+}
+
+function autoDraftTeam() {
+    const playerRoster = draftState.player_rosters[draftState.draft_order[draftState.current_pick]];
+    const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+    const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
+
+    const eligibleTeams = DraftableTeams.filter(team => {
+        if (isWildcardPick) return true;
+        return playerRoster[team.sport]?.length < 2;
+    });
+
+    if (eligibleTeams.length === 0) {
+        console.error("No eligible teams for auto-pick.");
+        processPick(DraftableTeams[0] || null); // Failsafe: pick any remaining team
+        return;
+    }
+    
+    const sorted = sortTeams(eligibleTeams, 'championship_odds');
+    processPick(sorted[0]);
+}
+
+async function processPick(team) {
+    if (!team) { // Handle case where no team could be picked
+        console.log("No team selected, advancing pick.");
+    } else {
+        const draftingTeamName = draftState.draft_order[draftState.current_pick];
+        const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+        const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
+        const sportToCredit = isWildcardPick ? 'Wildcard' : team.sport;
+
+        // Add metadata to the picked team object
+        team.round = currentRound;
+        team.pick = (draftState.current_pick % draftState.team_count) + 1;
+        
+        // Add pick to roster in memory
+        draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
+
+        // Remove team from available pool
+        DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
+    }
+
+    // Advance state and save to DB
+    draftState.current_pick++;
+    await saveDraftProgress();
+    
+    // Update UI for the pick that just happened
+    updateAfterPick();
+
+    // Trigger the next pick
+    checkForNextPick();
+}
+
+async function saveDraftProgress() {
+    try {
+        const { error } = await supabase
+            .from('mock_drafts')
+            .update({
+                current_pick: draftState.current_pick,
+                player_rosters: draftState.player_rosters,
+                status: draftState.current_pick >= draftState.total_picks ? 'completed' : 'in_progress',
+                completed_at: draftState.current_pick >= draftState.total_picks ? new Date().toISOString() : null
+            })
+            .eq('id', leagueId);
+        if (error) throw error;
+    } catch (err) {
+        console.error('Error saving draft progress:', err);
+    }
+}
+
+function endDraft() {
+    if (draftState.timer) clearInterval(draftState.timer);
+    alert("Draft Complete! Click OK to view results.");
+    document.body.innerHTML = createFinalRosterView();
+}
+
+
+// =================================================================================
+// UI & EVENT HANDLERS
+// =================================================================================
+
+function setupInitialUI() {
+    document.querySelector('.draft-header h1').textContent = `${draftState.league_name} Draft`;
+    document.getElementById('myTeamName').textContent = `${draftState.user_team_name}'s Roster`;
+    createTeamSidebar();
+    renderTeams();
+}
+
+function addEventListeners() {
+    // Add event listeners for filters
+    document.getElementById("sortBy").addEventListener("change", renderTeams);
+    document.getElementById("sportFilter").addEventListener("change", renderTeams);
+    document.getElementById("seasonFilter").addEventListener("change", renderTeams);
+    document.getElementById("teamSearch").addEventListener("input", () => setTimeout(renderTeams, 300));
+    document.getElementById("clearSearch").addEventListener("click", () => {
+        document.getElementById("teamSearch").value = "";
+        renderTeams();
+    });
+}
+
+function updateAfterPick() {
+    updateDraftHeader();
+    updateDraftProgress();
+    renderTeams(); // Re-render available teams
+    // Update the roster display for the team that just picked
+    const lastDrafter = draftState.draft_order[draftState.current_pick - 1];
+    updateRosterDisplay(lastDrafter);
+    if (lastDrafter === draftState.user_team_name) {
+        const lastPick = draftState.player_rosters[lastDrafter].Wildcard.slice(-1)[0] || 
+                         Object.values(draftState.player_rosters[lastDrafter]).flat().slice(-1)[0];
+        updateMyTeamBox(lastPick);
+    }
+}
+
+function updateOnTheClockUI() {
+    updateDraftHeader();
+    switchRosterToCurrentPlayer();
+}
+
+function updateDraftHeader() {
+    if (draftState.current_pick >= draftState.total_picks) {
+        document.getElementById('currentPlayerBox').innerHTML = '<strong>Draft Complete</strong>';
+        return;
+    }
+    const teamName = draftState.draft_order[draftState.current_pick];
+    const round = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+    const pick = (draftState.current_pick % draftState.team_count) + 1;
+    document.getElementById('currentPlayerBox').innerHTML = `
+        <span>On The Clock:</span>
+        <strong>${teamName} - R${round}, P${pick}</strong>
+    `;
+}
+
+// ***FIXED: Creates the sidebar using team names and sanitized IDs.***
+function createTeamSidebar() {
+    const rosterContainer = document.querySelector('.roster-container');
+    const teamSelector = document.getElementById('teamSelector');
+    rosterContainer.innerHTML = '';
+    teamSelector.innerHTML = '';
+
+    draftState.team_names.forEach(name => {
+        const sanitizedId = name.replace(/\s+/g, '-');
+        const option = document.createElement('option');
+        option.value = sanitizedId;
+        option.textContent = name;
+        teamSelector.appendChild(option);
+
+        const rosterEl = document.createElement('div');
+        rosterEl.className = 'roster';
+        rosterEl.id = `roster-${sanitizedId}`;
+        rosterEl.innerHTML = `<h2>${name}</h2><ul id="roster-list-${sanitizedId}"></ul>`;
+        rosterContainer.appendChild(rosterEl);
+        
+        updateRosterDisplay(name);
+    });
+}
+
+// ***FIXED: Updates a specific team's roster display by name.***
+function updateRosterDisplay(teamName) {
+    const sanitizedId = teamName.replace(/\s+/g, '-');
+    const rosterList = document.getElementById(`roster-list-${sanitizedId}`);
+    if (!rosterList) return;
+
+    const roster = draftState.player_rosters[teamName];
+    let rosterHTML = '';
+    const allSports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+
+    allSports.forEach(sport => {
+        const teams = roster[sport] || [];
+        rosterHTML += `<strong>${sport}</strong>`;
+        teams.forEach(t => rosterHTML += `<li class="${t.sport}">${t.name}</li>`);
+        for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+    });
+
+    if (draftState.wildcard_round > 0) {
+        rosterHTML += `<strong>Wildcard</strong>`;
+        const wcTeams = roster['Wildcard'] || [];
+        wcTeams.forEach(t => rosterHTML += `<li class="${t.sport}">${t.name}</li>`);
+        for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+    }
+
+    rosterList.innerHTML = rosterHTML;
+}
+
+function updateMyTeamBox(team) {
+    const currentRound = Math.floor((draftState.current_pick - 1) / draftState.team_count) + 1;
+    const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
+    const sportCredited = isWildcardPick ? 'Wildcard' : team.sport;
+
+    const sportSlot = document.querySelector(`.sport-slot[data-sport="${sportCredited}"]`);
+    if (!sportSlot) return;
+
+    const emptySlot = sportSlot.querySelector('.slot:not(.filled)');
+    if (!emptySlot) return;
+    
+    // Create and fill the slot
+    const teamIcon = document.createElement('div');
+    teamIcon.className = `team-icon ${team.sport}`;
+    teamIcon.style.setProperty('--primaryColor', team.primaryColor);
+    teamIcon.style.setProperty('--secondaryColor', team.secondaryColor);
+    teamIcon.innerHTML = getSportIcon(team);
+    emptySlot.innerHTML = '';
+    emptySlot.appendChild(teamIcon);
+    emptySlot.classList.add('filled');
+}
+
+function renderTeams() {
+    const teamList = document.getElementById("teamList");
+    // Get filter values inside the function to ensure they're current
+    const sport = document.getElementById("sportFilter").value;
+    const sortKey = document.getElementById("sortBy").value;
+    const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
+
+    let filteredTeams = DraftableTeams.filter(team => {
+        const matchesSport = sport === 'all' || team.sport === sport;
+        const matchesSearch = team.name.toLowerCase().includes(searchQuery);
+        return matchesSport && matchesSearch;
+    });
+
+    const sortedTeams = sortTeams(filteredTeams, sortKey);
+
+    teamList.innerHTML = ""; // Clear list
+    sortedTeams.forEach(team => {
+        teamList.appendChild(createTeamCard(team, sortKey));
+    });
+}
+
+function createTeamCard(team, sortKey) {
+    const teamCard = document.createElement("div");
+    teamCard.className = `team-card ${team.sport}`;
+    
+    // The main button's onclick is now a direct call to draftTeam
+    teamCard.innerHTML = `
+        <h3>${team.name} (${team.sport})</h3>
+        <p>Odds: ${team.championship_odds || 'N/A'}</p>
+        <button onclick="draftTeam('${team.team_id}')" ${!isUserTurn ? 'disabled' : ''}>Draft</button>
+    `;
+    return teamCard;
+}
+
+function enableDraftButtons(isEnabled) {
+    document.querySelectorAll('.team-card button').forEach(button => {
+        button.disabled = !isEnabled;
+    });
+}
+
+function showLoadingState(isLoading) {
+    // You can implement a more sophisticated loading spinner here
+    document.body.style.opacity = isLoading ? '0.5' : '1';
+}
+
+
+// =================================================================================
+// UTILITY & HELPER FUNCTIONS
+// =================================================================================
+
+function initializePlayerRosters(teamNames) {
+    const rosters = {};
+    teamNames.forEach(name => {
+        rosters[name] = { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], Wildcard: [] };
+    });
+    return rosters;
+}
+
+function switchRosterToCurrentPlayer() {
+    if (draftState.current_pick >= draftState.total_picks) return;
+    const currentTeamName = draftState.draft_order[draftState.current_pick];
+    const sanitizedId = currentTeamName.replace(/\s+/g, '-');
+    document.getElementById('teamSelector').value = sanitizedId;
+    switchRoster(sanitizedId);
+}
+
+function switchRoster(sanitizedId) {
+    document.querySelectorAll(".roster").forEach(r => r.classList.remove('active'));
+    document.getElementById(`roster-${sanitizedId}`)?.classList.add('active');
+}
+
+function startCountdown() {
+    if (draftState.timer) clearInterval(draftState.timer);
+    let timeLeft = 120;
+    const timerElement = document.getElementById('countdownClock');
+    timerElement.textContent = "2:00";
+    
+    draftState.timer = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = `0:${String(timeLeft).padStart(2, '0')}`;
+        if (timeLeft <= 0) {
+            clearInterval(draftState.timer);
+            console.log("Time is up! Auto-drafting for user.");
+            autoDraftTeam();
+        }
+    }, 1000);
+}
+
+function updateDraftProgress() {
+    const progress = (draftState.current_pick / draftState.total_picks) * 100;
+    document.querySelector('.draft-progress').style.width = `${progress}%`;
+}
+
+function createFinalRosterView() {
+    let rostersHTML = '';
+    draftState.team_names.forEach(name => {
+        const roster = draftState.player_rosters[name];
+        rostersHTML += `<div class="roster" style="display:block; background:rgba(26, 26, 26, 0.8); padding:20px; border-radius:12px;"><h2>${name}</h2><ul>`;
+        for (const sport in roster) {
+            if (roster[sport].length > 0) {
+                rostersHTML += `<strong>${sport}</strong>`;
+                roster[sport].forEach(team => {
+                    rostersHTML += `<li>${team.name}</li>`;
+                });
+            }
+        }
+        rostersHTML += `</ul></div>`;
+    });
+    return `<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;}</style><h1>Draft Complete!</h1><div class="final-container">${rostersHTML}</div>`;
+}
+
+// Basic utility functions (unchanged)
+function getSportIcon(team) { switch(team.sport){case"NBA":case"NCAAB":return`<i class="fa-solid fa-basketball"></i>`;case"NFL":case"NCAAF":return`<i class="fa-solid fa-football"></i>`;case"MLB":return`<i class="fa-solid fa-baseball"></i>`;case"NHL":return`<i class="fa-solid fa-hockey-puck"></i>`;default:return""} }
+function sortTeams(teams, sortKey) { return teams.sort((a,b)=>{const prop=sortKey;if(!a[prop])return 1;if(!b[prop])return -1;const dir=prop==="lastYearPoints"||prop==="championshipPct"?-1:1;return(a[prop]-b[prop])*dir}); }
+function toggleSidebar() { document.getElementById("sidebar").classList.toggle("collapsed"); }
+function toggleMyTeam() { document.getElementById("myTeamBox").classList.toggle("collapsed"); }
 
 </script>
 </body>
