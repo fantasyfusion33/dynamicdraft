@@ -607,6 +607,7 @@ function setupInitialUI() {
     document.getElementById('myTeamName').textContent = `${draftState.user_team_name}'s Roster`;
     createTeamSidebar();
     renderTeams();
+    updateDraftFlowTracker();
 }
 
 function addEventListeners() {
@@ -617,7 +618,6 @@ function addEventListeners() {
     document.getElementById("clearSearch").addEventListener("click", () => {
         document.getElementById("teamSearch").value = "";
         renderTeams();
-        updateDraftFlowTracker();
     });
 }
 
