@@ -629,11 +629,6 @@ function updateAfterPick(pickedTeam) {
 
     const lastDrafterName = draftState.draft_order[draftState.current_pick - 1];
     updateRosterDisplay(lastDrafterName);
-
-    // If it was the user's turn and a team was successfully picked...
-    if (lastDrafterName === draftState.user_team_name && pickedTeam) {
-        updateMyTeamBox(pickedTeam); 
-    }
 }
 
 function updateOnTheClockUI() {
@@ -692,28 +687,6 @@ function updateRosterDisplay(teamName) {
         for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
     }
     rosterList.innerHTML = rosterHTML;
-}
-
-// FIXED (Fix #4): Correctly updates the MyTeamBox with logos
-function updateMyTeamBox(team) {
-    const currentRound = team.round;
-    const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
-    const sportCredited = isWildcardPick ? 'Wildcard' : team.sport;
-
-    const sportSlot = document.querySelector(`.sport-slot[data-sport="${sportCredited}"]`);
-    if (!sportSlot) return;
-
-    const emptySlot = sportSlot.querySelector('.slot:not(.filled)');
-    if (!emptySlot) return;
-    
-    const teamIcon = document.createElement('div');
-    teamIcon.className = `team-icon ${team.sport}`;
-    teamIcon.style.setProperty('--primaryColor', team.primaryColor);
-    teamIcon.style.setProperty('--secondaryColor', team.secondaryColor);
-    teamIcon.innerHTML = getSportIcon(team);
-    emptySlot.innerHTML = '';
-    emptySlot.appendChild(teamIcon);
-    emptySlot.classList.add('filled');
 }
 
 // FIXED (Fix #6): Re-integrated full-featured card and popup logic
@@ -915,7 +888,6 @@ function createFinalRosterView() {
 }
 function getSportIcon(team) { switch(team.sport){case"NBA":case"NCAAB":return`<i class="fa-solid fa-basketball"></i>`;case"NFL":case"NCAAF":return`<i class="fa-solid fa-football"></i>`;case"MLB":return`<i class="fa-solid fa-baseball"></i>`;case"NHL":return`<i class="fa-solid fa-hockey-puck"></i>`;default:return""} }
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("collapsed"); }
-function toggleMyTeam() { document.getElementById("myTeamBox").classList.toggle("collapsed"); }
 
 </script>
 </body>
