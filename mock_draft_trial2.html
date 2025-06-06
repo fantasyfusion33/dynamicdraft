@@ -1042,6 +1042,9 @@ async function initializeDraftState() {
             .single();
 
         if (error) throw error;
+        if (typeof leagueData.draft_order[0] !== 'string') {
+            throw new Error("Draft data is invalid. Please create a new draft using the updated setup page.");
+        }
 
         // Populate the global draftState object
         draftState.league_name = leagueData.league_name;
@@ -1062,12 +1065,11 @@ async function initializeDraftState() {
         draftState.total_picks = draftState.team_count * totalRounds;
 
     } catch (err) {
+        alert(err.message);
         console.error('Error initializing draft:', err);
-        alert('Failed to initialize draft. Please try again.');
     }
 }
 
-// ***NEW: Fetches teams from the Supabase table instead of a CSV file.***
 async function fetchDraftableTeamsFromDB() {
     try {
         const { data, error } = await supabase
@@ -1094,10 +1096,35 @@ async function fetchDraftableTeamsFromDB() {
 
 
 // =================================================================================
-// DRAFT LOGIC
+// DRAFT LOGIC & VALIDATION
 // =================================================================================
 
-// This function is the new "heartbeat" of the draft
+/**
+ * Checks if a pick is valid against roster rules.
+ * @param {object} team - The team object to be drafted.
+ * @param {object} roster - The roster object for the current drafter.
+ * @param {number} currentPickNumber - The overall pick number in the draft.
+ * @returns {boolean} - True if the pick is valid, false otherwise.
+ */
+function isPickValid(team, roster, currentPickNumber) {
+    const currentRound = Math.floor(currentPickNumber / draftState.team_count) + 1;
+    const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
+
+    if (isWildcardPick) {
+        // Check if wildcard slots are full
+        if (roster.Wildcard && roster.Wildcard.length >= draftState.wildcard_round) {
+            return false; // Wildcard slots are full
+        }
+    } else {
+        // Check if the specific sport's slots are full
+        if (roster[team.sport] && roster[team.sport].length >= 2) {
+            return false; // This sport's roster is full
+        }
+    }
+    return true; // The pick is valid
+}
+
+// Main "heartbeat" function of the draft
 function checkForNextPick() {
     if (draftState.current_pick >= draftState.total_picks) {
         endDraft();
@@ -1109,80 +1136,76 @@ function checkForNextPick() {
     isUserTurn = currentDrafter === draftState.user_team_name;
 
     if (isUserTurn) {
-        console.log("It's your turn to pick.");
         enableDraftButtons(true);
         startCountdown();
     } else {
-        console.log(`It's ${currentDrafter}'s turn. Auto-picking...`);
         enableDraftButtons(false);
-        // Use a short delay for a more natural feel
-        setTimeout(autoDraftTeam, 1500);
+        setTimeout(autoDraftTeam, 1500); // CPU picks after a short delay
     }
 }
 
+// Handles the USER's pick selection
 async function draftTeam(teamId) {
-    if (!isUserTurn) {
-        console.warn("Attempted to draft when it's not the user's turn.");
-        return;
-    }
+    if (!isUserTurn) return;
 
     const team = DraftableTeams.find(t => t.team_id === teamId);
     if (!team) return;
 
-    // Stop the countdown timer
-    if (draftState.timer) clearInterval(draftState.timer);
+    const draftingTeamName = draftState.draft_order[draftState.current_pick];
+    const roster = draftState.player_rosters[draftingTeamName];
 
+    // ***VALIDATION STEP***
+    if (!isPickValid(team, roster, draftState.current_pick)) {
+        alert(`Cannot draft ${team.name}. Your roster for the ${team.sport} sport is full. Please select a different team.`);
+        return; // Stop the function, user remains on the clock
+    }
+
+    if (draftState.timer) clearInterval(draftState.timer);
     await processPick(team);
 }
 
+// Handles the CPU's auto-pick
 function autoDraftTeam() {
-    const playerRoster = draftState.player_rosters[draftState.draft_order[draftState.current_pick]];
-    const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
-    const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
-
+    const draftingTeamName = draftState.draft_order[draftState.current_pick];
+    const roster = draftState.player_rosters[draftingTeamName];
+    
+    // Filter for all valid picks based on current roster rules
     const eligibleTeams = DraftableTeams.filter(team => {
-        if (isWildcardPick) return true;
-        return playerRoster[team.sport]?.length < 2;
+        return isPickValid(team, roster, draftState.current_pick);
     });
 
     if (eligibleTeams.length === 0) {
-        console.error("No eligible teams for auto-pick.");
-        processPick(DraftableTeams[0] || null); // Failsafe: pick any remaining team
+        console.error("CRITICAL: CPU could not find any valid team to draft. This may indicate an issue with remaining teams or draft logic.");
+        processPick(null); // Failsafe: advance draft to prevent it from getting stuck
         return;
     }
     
     const sorted = sortTeams(eligibleTeams, 'championship_odds');
-    processPick(sorted[0]);
+    const teamToDraft = sorted[0];
+
+    console.log(`CPU (${draftingTeamName}) is auto-drafting: ${teamToDraft.name}`);
+    processPick(teamToDraft);
 }
 
+// Universal function to process a pick once it's been validated/chosen
 async function processPick(team) {
-    if (!team) { // Handle case where no team could be picked
-        console.log("No team selected, advancing pick.");
-    } else {
+    if (team) {
         const draftingTeamName = draftState.draft_order[draftState.current_pick];
         const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
         const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
         const sportToCredit = isWildcardPick ? 'Wildcard' : team.sport;
 
-        // Add metadata to the picked team object
         team.round = currentRound;
         team.pick = (draftState.current_pick % draftState.team_count) + 1;
         
-        // Add pick to roster in memory
         draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
-
-        // Remove team from available pool
         DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
     }
 
-    // Advance state and save to DB
     draftState.current_pick++;
     await saveDraftProgress();
     
-    // Update UI for the pick that just happened
     updateAfterPick();
-
-    // Trigger the next pick
     checkForNextPick();
 }
 
@@ -1218,11 +1241,10 @@ function setupInitialUI() {
     document.querySelector('.draft-header h1').textContent = `${draftState.league_name} Draft`;
     document.getElementById('myTeamName').textContent = `${draftState.user_team_name}'s Roster`;
     createTeamSidebar();
-    renderTeams();
+    renderTeams(); // Initial render of draftable teams
 }
 
 function addEventListeners() {
-    // Add event listeners for filters
     document.getElementById("sortBy").addEventListener("change", renderTeams);
     document.getElementById("sportFilter").addEventListener("change", renderTeams);
     document.getElementById("seasonFilter").addEventListener("change", renderTeams);
@@ -1236,14 +1258,16 @@ function addEventListeners() {
 function updateAfterPick() {
     updateDraftHeader();
     updateDraftProgress();
-    renderTeams(); // Re-render available teams
-    // Update the roster display for the team that just picked
-    const lastDrafter = draftState.draft_order[draftState.current_pick - 1];
-    updateRosterDisplay(lastDrafter);
-    if (lastDrafter === draftState.user_team_name) {
-        const lastPick = draftState.player_rosters[lastDrafter].Wildcard.slice(-1)[0] || 
-                         Object.values(draftState.player_rosters[lastDrafter]).flat().slice(-1)[0];
-        updateMyTeamBox(lastPick);
+    renderTeams(); // Re-render available teams list
+    
+    const lastDrafterName = draftState.draft_order[draftState.current_pick - 1];
+    updateRosterDisplay(lastDrafterName);
+
+    if (lastDrafterName === draftState.user_team_name) {
+        // Find the last picked team to update the "My Team" box
+        const roster = draftState.player_rosters[lastDrafterName];
+        const lastPick = Object.values(roster).flat().sort((a, b) => b.pick - a.pick)[0];
+        if (lastPick) updateMyTeamBox(lastPick);
     }
 }
 
@@ -1266,7 +1290,6 @@ function updateDraftHeader() {
     `;
 }
 
-// ***FIXED: Creates the sidebar using team names and sanitized IDs.***
 function createTeamSidebar() {
     const rosterContainer = document.querySelector('.roster-container');
     const teamSelector = document.getElementById('teamSelector');
@@ -1274,7 +1297,7 @@ function createTeamSidebar() {
     teamSelector.innerHTML = '';
 
     draftState.team_names.forEach(name => {
-        const sanitizedId = name.replace(/\s+/g, '-');
+        const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
         const option = document.createElement('option');
         option.value = sanitizedId;
         option.textContent = name;
@@ -1290,9 +1313,8 @@ function createTeamSidebar() {
     });
 }
 
-// ***FIXED: Updates a specific team's roster display by name.***
 function updateRosterDisplay(teamName) {
-    const sanitizedId = teamName.replace(/\s+/g, '-');
+    const sanitizedId = teamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
     const rosterList = document.getElementById(`roster-list-${sanitizedId}`);
     if (!rosterList) return;
 
@@ -1313,12 +1335,11 @@ function updateRosterDisplay(teamName) {
         wcTeams.forEach(t => rosterHTML += `<li class="${t.sport}">${t.name}</li>`);
         for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
     }
-
     rosterList.innerHTML = rosterHTML;
 }
 
 function updateMyTeamBox(team) {
-    const currentRound = Math.floor((draftState.current_pick - 1) / draftState.team_count) + 1;
+    const currentRound = team.round;
     const isWildcardPick = currentRound > 12 && draftState.wildcard_round > 0;
     const sportCredited = isWildcardPick ? 'Wildcard' : team.sport;
 
@@ -1328,7 +1349,6 @@ function updateMyTeamBox(team) {
     const emptySlot = sportSlot.querySelector('.slot:not(.filled)');
     if (!emptySlot) return;
     
-    // Create and fill the slot
     const teamIcon = document.createElement('div');
     teamIcon.className = `team-icon ${team.sport}`;
     teamIcon.style.setProperty('--primaryColor', team.primaryColor);
@@ -1341,7 +1361,6 @@ function updateMyTeamBox(team) {
 
 function renderTeams() {
     const teamList = document.getElementById("teamList");
-    // Get filter values inside the function to ensure they're current
     const sport = document.getElementById("sportFilter").value;
     const sortKey = document.getElementById("sortBy").value;
     const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
@@ -1356,19 +1375,18 @@ function renderTeams() {
 
     teamList.innerHTML = ""; // Clear list
     sortedTeams.forEach(team => {
-        teamList.appendChild(createTeamCard(team, sortKey));
+        teamList.appendChild(createTeamCard(team));
     });
 }
 
-function createTeamCard(team, sortKey) {
+function createTeamCard(team) {
     const teamCard = document.createElement("div");
     teamCard.className = `team-card ${team.sport}`;
     
-    // The main button's onclick is now a direct call to draftTeam
     teamCard.innerHTML = `
         <h3>${team.name} (${team.sport})</h3>
         <p>Odds: ${team.championship_odds || 'N/A'}</p>
-        <button onclick="draftTeam('${team.team_id}')" ${!isUserTurn ? 'disabled' : ''}>Draft</button>
+        <button onclick="draftTeam('${team.team_id}')">Draft</button>
     `;
     return teamCard;
 }
@@ -1380,10 +1398,9 @@ function enableDraftButtons(isEnabled) {
 }
 
 function showLoadingState(isLoading) {
-    // You can implement a more sophisticated loading spinner here
+    document.body.style.cursor = isLoading ? 'wait' : 'default';
     document.body.style.opacity = isLoading ? '0.5' : '1';
 }
-
 
 // =================================================================================
 // UTILITY & HELPER FUNCTIONS
@@ -1400,7 +1417,8 @@ function initializePlayerRosters(teamNames) {
 function switchRosterToCurrentPlayer() {
     if (draftState.current_pick >= draftState.total_picks) return;
     const currentTeamName = draftState.draft_order[draftState.current_pick];
-    const sanitizedId = currentTeamName.replace(/\s+/g, '-');
+    if (typeof currentTeamName !== 'string') return;
+    const sanitizedId = currentTeamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
     document.getElementById('teamSelector').value = sanitizedId;
     switchRoster(sanitizedId);
 }
@@ -1417,13 +1435,15 @@ function startCountdown() {
     timerElement.textContent = "2:00";
     
     draftState.timer = setInterval(() => {
-        timeLeft--;
-        timerElement.textContent = `0:${String(timeLeft).padStart(2, '0')}`;
         if (timeLeft <= 0) {
             clearInterval(draftState.timer);
-            console.log("Time is up! Auto-drafting for user.");
             autoDraftTeam();
+            return;
         }
+        timeLeft--;
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerElement.textContent = `${minutes}:${String(seconds).padStart(2, '0')}`;
     }, 1000);
 }
 
@@ -1438,7 +1458,7 @@ function createFinalRosterView() {
         const roster = draftState.player_rosters[name];
         rostersHTML += `<div class="roster" style="display:block; background:rgba(26, 26, 26, 0.8); padding:20px; border-radius:12px;"><h2>${name}</h2><ul>`;
         for (const sport in roster) {
-            if (roster[sport].length > 0) {
+            if (roster[sport] && roster[sport].length > 0) {
                 rostersHTML += `<strong>${sport}</strong>`;
                 roster[sport].forEach(team => {
                     rostersHTML += `<li>${team.name}</li>`;
@@ -1447,12 +1467,13 @@ function createFinalRosterView() {
         }
         rostersHTML += `</ul></div>`;
     });
-    return `<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;}</style><h1>Draft Complete!</h1><div class="final-container">${rostersHTML}</div>`;
+    const finalStyles = `<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}</style>`;
+    return `${finalStyles}<h1>Draft Complete!</h1><div class="final-container">${rostersHTML}</div>`;
 }
 
-// Basic utility functions (unchanged)
+// Basic utility functions
 function getSportIcon(team) { switch(team.sport){case"NBA":case"NCAAB":return`<i class="fa-solid fa-basketball"></i>`;case"NFL":case"NCAAF":return`<i class="fa-solid fa-football"></i>`;case"MLB":return`<i class="fa-solid fa-baseball"></i>`;case"NHL":return`<i class="fa-solid fa-hockey-puck"></i>`;default:return""} }
-function sortTeams(teams, sortKey) { return teams.sort((a,b)=>{const prop=sortKey;if(!a[prop])return 1;if(!b[prop])return -1;const dir=prop==="lastYearPoints"||prop==="championshipPct"?-1:1;return(a[prop]-b[prop])*dir}); }
+function sortTeams(teams, sortKey) { return teams.sort((a,b)=>{const propA=a[sortKey]||0;const propB=b[sortKey]||0;if(sortKey==='championship_odds'){return propA-propB}return propB-propA}); }
 function toggleSidebar() { document.getElementById("sidebar").classList.toggle("collapsed"); }
 function toggleMyTeam() { document.getElementById("myTeamBox").classList.toggle("collapsed"); }
 
