@@ -57,7 +57,6 @@
         }
         .league-title { text-align: center; margin: 0; font-size: 2.5rem; color: var(--light); }
         
-        /* FIX 6: Clock moved and styled */
         .countdown-clock {
             font-size: 1.5rem;
             font-weight: 600;
@@ -85,7 +84,6 @@
             padding: 10px 0;
         }
 
-        /* FIX 4: Modernized Filter Styles */
         .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
         .filters select, .filters button, #teamSelector, #mobileTeamSelector {
@@ -154,11 +152,11 @@
             .site-brand { display: none; }
             .league-title { font-size: 1.5rem; }
             .draft-header { padding: 5px; }
+            .countdown-clock { position: fixed; top: 10px; right: 10px; z-index: 200; padding: 5px 10px; font-size: 1rem; }
 
             .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
             .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: wrap; }
             .flow-pick p { font-size: 0.9rem; }
-            .countdown-clock { display: none; }
             .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
             .filters::-webkit-scrollbar { display: none; }
             .filters .search-bar { min-width: 150px; }
@@ -418,7 +416,6 @@
         switchRosterToCurrentPlayer();
     }
 
-    // FIX 2: Fixed Draft Flow Tracker
     function updateDraftFlowTracker() {
         const { current_pick, draft_order, team_count, player_rosters } = draftState;
         
@@ -442,9 +439,28 @@
         document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
     }
     
-    function createTeamSidebar() { /* ... unchanged ... */ }
-    
-    // FIX 2: Fixed roster display
+    function createTeamSidebar() {
+        const rosterContainer = document.getElementById('roster-container');
+        const teamSelector = document.getElementById('teamSelector');
+        rosterContainer.innerHTML = '';
+        teamSelector.innerHTML = '';
+
+        draftState.team_names.forEach(name => {
+            const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+            const option = document.createElement('option');
+            option.value = sanitizedId;
+            option.textContent = name;
+            teamSelector.appendChild(option);
+            const rosterEl = document.createElement('div');
+            rosterEl.className = 'roster';
+            rosterEl.id = `roster-${sanitizedId}`;
+            rosterEl.innerHTML = `<h2>${name}</h2><ul id="roster-list-${sanitizedId}"></ul>`;
+            rosterContainer.appendChild(rosterEl);
+            updateRosterDisplay(name);
+        });
+        if (rosterContainer.firstChild) rosterContainer.firstChild.classList.add('active');
+    }
+
     function updateRosterDisplay(teamName, containerId) {
         const sanitizedId = teamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
         const listId = containerId || `roster-list-${sanitizedId}`;
@@ -524,13 +540,10 @@
         return thead;
     }
 
-    // FIX 1: Updated team row creation
     function createTeamRow(team) {
         const row = document.createElement('tr');
         const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
         const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
-        
-        // FIX 1 & 5: Division handling
         const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
 
         row.innerHTML = `
@@ -579,13 +592,12 @@
         document.body.style.opacity = isLoading ? '0.5' : '1';
     }
 
-    // FIX 7: Updated sorting logic with tie-breaker
     function sortTeams(teams) {
         const { key, direction } = sortState;
         return teams.sort((a,b) => {
             const valA = a[key];
             const valB = b[key];
-            const dir = direction === 'asc' ? 1 : -1;
+            const dir = direction === 'asc' ? 1 : 'desc' === 'asc' ? 1 : -1;
 
             if (key === 'name' || key === 'conference') {
                 return (valA || '').localeCompare(valB || '') * dir;
@@ -595,13 +607,11 @@
             const numB = parseFloat(valB) || 0;
 
             if (numA === numB) {
-                // Tie-breaker: lower odds are better
                 const oddsA = parseFloat(a.championship_odds) || 99999;
                 const oddsB = parseFloat(b.championship_odds) || 99999;
                 return oddsA - oddsB;
             }
             
-            // For asc sorts, move 0s to the end
             if(direction === 'asc') {
                  if (numA === 0) return 1;
                  if (numB === 0) return -1;
@@ -612,7 +622,12 @@
     }
 
     function getSportIcon(team){ const i={NBA:'fas fa-basketball-ball',NCAAB:'fas fa-basketball-ball',NFL:'fas fa-football-ball',NCAAF:'fas fa-football-ball',MLB:'fas fa-baseball-ball',NHL:'fas fa-hockey-puck'}; return i[team.sport]||''; }
-    // All other helper functions...
+    function switchRosterToCurrentPlayer(){if(draftState.current_pick>=draftState.total_picks)return;const name=draftState.draft_order[draftState.current_pick];if(typeof name!=='string')return;const id=name.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'');const sel=document.getElementById('teamSelector');if(sel)sel.value=id;switchRoster(id);}
+    function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
+    function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
+    function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+    function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
+    function createFinalRosterView(){ /* ... unchanged ... */ }
 </script>
 </body>
 </html>
