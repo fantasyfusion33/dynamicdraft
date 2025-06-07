@@ -87,7 +87,7 @@
             padding: 10px 0;
         }
 
-        /* FIX 4 & 7: Modernized Filter Styles */
+        /* Modernized Filter Styles */
         .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
         .filters select, .filters button {
@@ -103,7 +103,7 @@
             appearance: none;
         }
         .filters select:hover, .filters button:hover { background: #2a2a2a; }
-        #teamSearch { width: 100%; box-sizing: border-box; padding-right: 40px; }
+        #teamSearch { width: 100%; box-sizing: border-box; padding-right: 40px; font-size: 0.9rem; padding: 10px; }
         #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
 
         .table-container { overflow-y: auto; }
@@ -145,7 +145,7 @@
             }
             .roster { display: none; }
             .roster.active { display: block; }
-            #teamSelector { width: 100%; margin-bottom: 15px; } /* FIX 5 */
+            #teamSelector { width: 100%; margin-bottom: 15px; } /* Modern select */
         }
 
         /* MOBILE RESPONSIVE STYLES */
@@ -155,7 +155,6 @@
             .desktop-sidebar-area { display: none; }
             .site-brand { display: none; }
             .league-title { font-size: 1.5rem; }
-            /* FIX 6: Mobile Clock */
             .countdown-clock { position: fixed; top: 10px; right: 10px; z-index: 200; padding: 5px 10px; font-size: 1rem; }
 
             .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
@@ -164,16 +163,18 @@
             .filters::-webkit-scrollbar { display: none; }
             .filters .search-bar { min-width: 150px; }
 
-            /* FIX 2: Mobile Tabs Functional */
-            .mobile-tabs { display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px; }
+            .mobile-tabs {
+                display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px;
+            }
             .mobile-tab { padding: 10px; border: none; background: none; color: white; font-size: 1rem; flex-grow: 1; border-radius: 6px; }
             .mobile-tab.active { background: var(--primary); }
+
             .main-content > div { display: none; }
             .main-content > div.active { display: block; }
+            
             .rosters-mobile-container { padding: 10px; }
             .roster-mobile { display: block; }
             #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
-            /* FIX 3: Horizontal Scroll for Table */
             .table-container { overflow-x: auto; }
         }
     </style>
@@ -271,18 +272,102 @@
     });
 
     // =================================================================================
-    // DRAFT LOGIC & STATE
+    // DATA FETCHING & STATE SETUP
     // =================================================================================
-    async function initializeDraftState() { /* ... unchanged ... */ }
-    async function fetchDraftableTeamsFromDB() { /* ... unchanged ... */ }
-    function initializePlayerRosters(teamNames) { /* ... unchanged ... */ }
-    function isPickValid(team, roster) { /* ... unchanged ... */ }
-    function checkForNextPick() { /* ... unchanged ... */ }
-    async function draftTeam(teamId) { /* ... unchanged ... */ }
-    function autoDraftTeam() { /* ... unchanged ... */ }
-    async function processPick(team) { /* ... unchanged ... */ }
-    async function saveDraftProgress() { /* ... unchanged ... */ }
-    function endDraft() { /* ... unchanged ... */ }
+    async function initializeDraftState() {
+        try {
+            const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
+            if (error) throw error;
+            if (!data || typeof data.draft_order[0] !== 'string') throw new Error("Invalid draft data. Please create a new draft.");
+
+            Object.assign(draftState, data);
+            const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
+            draftState.user_team_name = data.team_names[userPosition] || '';
+            draftState.player_rosters = data.player_rosters && Object.keys(data.player_rosters).length > 0 ? data.player_rosters : initializePlayerRosters(data.team_names);
+            draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
+        } catch (err) {
+            alert(err.message);
+            console.error('Init Error:', err);
+        }
+    }
+    async function fetchDraftableTeamsFromDB() {
+        try {
+            const { data, error } = await supabase.from('SportTeamDatabase').select('*');
+            if (error) throw error;
+            const pickedTeamIds = new Set(Object.values(draftState.player_rosters).flatMap(roster => Object.values(roster).flat().map(team => team.team_id)));
+            DraftableTeams = data.filter(team => !pickedTeamIds.has(team.team_id));
+        } catch (err) { console.error('Fetch Teams Error:', err); }
+    }
+    function initializePlayerRosters(teamNames) {
+        const rosters = {};
+        teamNames.forEach(name => {
+            rosters[name] = { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], Wildcard: [] };
+        });
+        return rosters;
+    }
+
+    // =================================================================================
+    // DRAFT LOGIC & VALIDATION
+    // =================================================================================
+    function isPickValid(team, roster) {
+        const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+        const isWildcardRound = currentRound > 12 && draftState.wildcard_round > 0;
+        if (isWildcardRound) return roster.Wildcard.length < draftState.wildcard_round;
+        return roster[team.sport].length < 2;
+    }
+    function checkForNextPick() {
+        if (draftState.current_pick >= draftState.total_picks) {
+            endDraft();
+            return;
+        }
+        if (draftState.current_pick === 12 * draftState.team_count && draftState.wildcard_round > 0) {
+            alert(`Welcome to the Wildcard Round(s)!`);
+        }
+        updateOnTheClockUI();
+        isUserTurn = draftState.draft_order[draftState.current_pick] === draftState.user_team_name;
+        if (isUserTurn) {
+            enableDraftButtons(true);
+            startCountdown();
+        } else {
+            enableDraftButtons(false);
+            setTimeout(autoDraftTeam, 1500);
+        }
+    }
+    async function draftTeam(teamId) {
+        if (!isUserTurn) return;
+        const team = DraftableTeams.find(t => t.team_id === teamId);
+        if (!team) return;
+        if (!isPickValid(team, draftState.player_rosters[draftState.user_team_name])) {
+            alert(`Roster full for this sport. Please select a different team.`);
+            return;
+        }
+        if (draftState.timer) clearInterval(draftState.timer);
+        await processPick(team);
+    }
+    function autoDraftTeam() {
+        const draftingTeamName = draftState.draft_order[draftState.current_pick];
+        const roster = draftState.player_rosters[draftingTeamName];
+        const eligibleTeams = DraftableTeams.filter(team => isPickValid(team, roster));
+        const teamToPick = eligibleTeams.length > 0 ? sortTeams(eligibleTeams)[0] : null;
+        processPick(teamToPick);
+    }
+    async function processPick(team) {
+        if (team) {
+            const draftingTeamName = draftState.draft_order[draftState.current_pick];
+            const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+            team.round = currentRound;
+            team.pick = (draftState.current_pick % draftState.team_count) + 1;
+            const sportToCredit = (currentRound > 12 && draftState.wildcard_round > 0) ? 'Wildcard' : team.sport;
+            draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
+            DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
+        }
+        draftState.current_pick++;
+        await saveDraftProgress();
+        updateAfterPick(team);
+        checkForNextPick();
+    }
+    async function saveDraftProgress() { /* ... */ }
+    function endDraft() { /* ... */ }
 
     // =================================================================================
     // UI & EVENT HANDLERS
@@ -325,105 +410,29 @@
         switchRosterToCurrentPlayer();
     }
 
-    function updateDraftFlowTracker() {
-        const { current_pick, draft_order, team_count } = draftState;
-        
-        const prevPickInfo = document.getElementById('previous-pick-info');
-        if (current_pick > 0) {
-            const prevDrafter = draft_order[current_pick - 1];
-            const rosterPicks = Object.values(draftState.player_rosters[prevDrafter]).flat();
-            const prevPick = rosterPicks.find(p => p.round === Math.floor((current_pick-1)/team_count)+1 && p.pick === ((current_pick-1)%team_count)+1);
-            prevPickInfo.textContent = prevPick ? `${prevPick.name}` : '--';
-        } else { prevPickInfo.textContent = '--'; }
-
-        const currentPickInfo = document.getElementById('current-pick-info');
-        if (current_pick < draftState.total_picks) {
-            const teamName = draft_order[current_pick];
-            const round = Math.floor(current_pick / team_count) + 1;
-            const pick = (current_pick % team_count) + 1;
-            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
-        } else { currentPickInfo.innerHTML = 'Draft Complete'; }
-
-        document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
-        document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
-    }
+    function updateDraftFlowTracker() { /* ... */ }
     
-    // FIX 6: Desktop Sidebar Logic
-    function createTeamSidebar() {
-        const rosterContainer = document.getElementById('roster-container');
-        const teamSelector = document.getElementById('teamSelector');
-        rosterContainer.innerHTML = '';
-        teamSelector.innerHTML = '';
-
-        draftState.team_names.forEach(name => {
-            const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-            const option = document.createElement('option');
-            option.value = sanitizedId;
-            option.textContent = name;
-            teamSelector.appendChild(option);
-            const rosterEl = document.createElement('div');
-            rosterEl.className = 'roster';
-            rosterEl.id = `roster-${sanitizedId}`;
-            rosterEl.innerHTML = `<h2>${name}</h2><ul id="roster-list-${sanitizedId}"></ul>`;
-            rosterContainer.appendChild(rosterEl);
-            updateRosterDisplay(name);
-        });
-        if (rosterContainer.firstChild) rosterContainer.firstChild.classList.add('active');
-    }
-
-    function updateRosterDisplay(teamName, containerId) {
-        const sanitizedId = teamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
-        const listId = containerId || `roster-list-${sanitizedId}`;
-        const rosterList = document.getElementById(listId);
-        if (!rosterList) return;
-
-        const roster = draftState.player_rosters[teamName];
-        let rosterHTML = '';
-        const allSports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
-
-        allSports.forEach(sport => {
-            rosterHTML += `<strong>${sport}</strong>`;
-            const teams = roster[sport] || [];
-            teams.forEach(t => {
-                rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
-            });
-            for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
-        });
-
-        if (draftState.wildcard_round > 0) {
-            rosterHTML += `<strong>Wildcard</strong>`;
-            const wcTeams = roster.Wildcard || [];
-            wcTeams.forEach(t => {
-                 rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
-            });
-            for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
-        }
-        rosterList.innerHTML = rosterHTML;
-    }
+    function createTeamSidebar() { /* ... */ }
+    function updateRosterDisplay(teamName, containerId) { /* ... */ }
     
     function renderTeams() {
         const table = document.getElementById("draftable-teams-table");
         table.innerHTML = ''; 
-
         const sport = document.getElementById("sportFilter").value;
         const conference = document.getElementById("conferenceFilter").value;
         const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
-
         let filteredTeams = DraftableTeams.filter(t => 
             (sport === 'all' || t.sport === sport) &&
             (conference === 'all' || t.conference === conference) &&
             t.name.toLowerCase().includes(searchQuery)
         );
-        
         const sortedTeams = sortTeams(filteredTeams);
-        
         table.appendChild(createTableHeader());
         const tbody = document.createElement('tbody');
         sortedTeams.forEach(team => tbody.appendChild(createTeamRow(team)));
         table.appendChild(tbody);
     }
     
-    // FIX 1: Table header creation updated
     function createTableHeader() {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
@@ -437,7 +446,6 @@
         ];
         
         headers.forEach(header => {
-            if (isMobile && ['lastYearPoints', 'adp'].includes(header.key)) return;
             const th = document.createElement('th');
             th.dataset.key = header.key;
             th.innerHTML = `${header.text} <span class="sort-indicator"></span>`;
@@ -454,13 +462,12 @@
         return thead;
     }
 
-    // FIX 1: Table row creation updated
     function createTeamRow(team) {
         const row = document.createElement('tr');
         const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
         const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
         
-        let rowHTML = `
+        row.innerHTML = `
             <td class="team-name-cell">
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
                 <div>
@@ -470,11 +477,10 @@
             </td>
             <td>${oddsDisplay}</td>
             <td>${pctDisplay}</td>
-            ${!isMobile ? `<td>${team.lastYearPoints || 'N/A'}</td>` : ''}
-            ${!isMobile ? `<td>${team.adp || 'N/A'}</td>` : ''}
+            <td>${team.lastYearPoints || 'N/A'}</td>
+            <td>${team.adp || 'N/A'}</td>
             <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
-        row.innerHTML = rowHTML;
         return row;
     }
 
@@ -489,64 +495,46 @@
         renderTeams();
     }
 
-    function populateSportFilter() { /* unchanged */ }
-    function populateConferenceFilter() { /* unchanged */ }
+    function populateSportFilter() { /* ... */ }
+    function populateConferenceFilter() { /* ... */ }
     
-    // FIX 2 & 5: Mobile tab logic
     function showMobileView(viewName) {
         document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
         document.querySelector(`.${viewName}-container`).classList.add('active');
         document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.toggle('active', tab.textContent.toLowerCase().includes(viewName)));
     }
-    function renderMobileRosters(selectedTeamName = draftState.user_team_name) {
-        const container = document.getElementById('rosters-mobile');
-        let selectHTML = `<select id="mobileTeamSelector" onchange="renderMobileRosters(this.value)">`;
-        draftState.team_names.forEach(name => {
-            selectHTML += `<option value="${name}" ${name === selectedTeamName ? 'selected' : ''}>${name}</option>`;
-        });
-        selectHTML += `</select>`;
-        
-        container.innerHTML = `${selectHTML}<div class="roster active"><h2>${selectedTeamName}</h2><ul id="mobile-roster-list"></ul></div>`;
-        updateRosterDisplay(selectedTeamName, 'mobile-roster-list');
-    }
+    function renderMobileRosters(selectedTeamName = draftState.user_team_name) { /* ... */ }
     
     // =================================================================================
     // UTILITY & HELPER FUNCTIONS
     // =================================================================================
+    // FIXED: Added missing function
     function showLoadingState(isLoading) {
         document.body.style.cursor = isLoading ? 'wait' : 'default';
         document.body.style.opacity = isLoading ? '0.5' : '1';
     }
 
-    // FIX 7: Updated sorting logic with tie-breaker
     function sortTeams(teams) {
         const { key, direction } = sortState;
         return teams.sort((a,b) => {
             const valA = a[key];
             const valB = b[key];
             const dir = direction === 'asc' ? 1 : -1;
-
-            if (key === 'name' || key === 'conference') {
-                return (valA || '').localeCompare(valB || '') * dir;
-            }
+            if (key === 'name' || key === 'conference') return (valA || '').localeCompare(valB || '') * dir;
             
             const numA = parseFloat(valA) || 0;
             const numB = parseFloat(valB) || 0;
-
             if (numA === numB) {
-                // Tie-breaker: lower odds are better
                 const oddsA = parseFloat(a.championship_odds) || 99999;
                 const oddsB = parseFloat(b.championship_odds) || 99999;
                 return oddsA - oddsB;
             }
-
             if (key === 'championship_odds' || key === 'adp') {
-                if (numA === 0) return 1; // Sort 0 to the end for asc sorts
+                if (numA === 0) return 1;
                 if (numB === 0) return -1;
                 return (numA - numB) * dir;
             }
-
-            return (numA - numB) * dir; // Default desc sort for points, etc.
+            return (numA - numB) * dir;
         });
     }
 
