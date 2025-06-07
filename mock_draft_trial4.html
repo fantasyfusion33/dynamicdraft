@@ -102,7 +102,7 @@
         #teamSearch { width: 100%; box-sizing: border-box; padding-right: 40px; }
         #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
 
-        /* FIX 1 & 3: Table View for Teams */
+        /* Table View for Teams */
         .table-container { max-height: 70vh; overflow-y: auto; }
         .draft-table { width: 100%; border-collapse: collapse; }
         .draft-table th, .draft-table td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
@@ -130,8 +130,8 @@
         /* Sidebar & Rosters */
         .roster ul { list-style: none; padding: 0; }
         .roster li { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
-        .team-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--primaryColor); }
-        .team-icon i { font-size: 14px; color: var(--secondaryColor); }
+        .team-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .team-icon i { font-size: 14px; }
         .draft-pick-circle { margin-left: auto; width: 36px; height: 24px; font-size: 0.8em; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
         .draft-pick-circle.NFL, .sport-badge.NFL { background-color: var(--nfl-color); }
         .draft-pick-circle.NBA, .sport-badge.NBA { background-color: var(--nba-color); }
@@ -190,7 +190,6 @@
             .main-content > div { display: none; }
             .main-content > div.active { display: block; }
 
-            /* Mobile Roster view */
             .rosters-mobile-container { padding: 10px; }
             .roster-mobile { display: block; }
         }
@@ -263,14 +262,12 @@
     let DraftableTeams = [];
     let isUserTurn = false;
     let isMobile = window.innerWidth <= 768;
-    // FIX 4: Sort state replaces dropdown
     const sortState = { key: 'championship_odds', direction: 'asc' };
     
-    // FIX 5: Conference Data
     const conferenceData = {
         NFL: ["AFC", "NFC"], NBA: ["Eastern", "Western"], MLB: ["AL", "NL"], NHL: ["Eastern", "Western"],
         NCAAF: ["AAC", "ACC", "Big 12", "Big Ten", "C-USA", "Independents", "MAC", "Mountain West", "Pac-12", "SEC", "Sun Belt"],
-        NCAAB: ["AAC", "ACC", "Big 12", "Big East", "Big Ten", "Pac-12", "SEC", "Other"] // Simplified for brevity
+        NCAAB: ["AAC", "ACC", "Big 12", "Big East", "Big Ten", "Pac-12", "SEC", "Other"]
     };
 
     // =================================================================================
@@ -289,6 +286,41 @@
         showLoadingState(false);
         checkForNextPick();
     });
+
+    // =================================================================================
+    // DATA FETCHING & STATE SETUP
+    // =================================================================================
+    async function initializeDraftState() {
+        try {
+            const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
+            if (error) throw error;
+            if (!data || typeof data.draft_order[0] !== 'string') throw new Error("Invalid draft data. Please create a new draft.");
+
+            Object.assign(draftState, data);
+            const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
+            draftState.user_team_name = data.team_names[userPosition] || '';
+            draftState.player_rosters = data.player_rosters && Object.keys(data.player_rosters).length > 0 ? data.player_rosters : initializePlayerRosters(data.team_names);
+            draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
+        } catch (err) {
+            alert(err.message);
+            console.error('Init Error:', err);
+        }
+    }
+    async function fetchDraftableTeamsFromDB() {
+        try {
+            const { data, error } = await supabase.from('SportTeamDatabase').select('*');
+            if (error) throw error;
+            const pickedTeamIds = new Set(Object.values(draftState.player_rosters).flatMap(roster => Object.values(roster).flat().map(team => team.team_id)));
+            DraftableTeams = data.filter(team => !pickedTeamIds.has(team.team_id));
+        } catch (err) { console.error('Fetch Teams Error:', err); }
+    }
+    function initializePlayerRosters(teamNames) {
+        const rosters = {};
+        teamNames.forEach(name => {
+            rosters[name] = { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], Wildcard: [] };
+        });
+        return rosters;
+    }
 
     // =================================================================================
     // DRAFT LOGIC & VALIDATION
@@ -350,8 +382,20 @@
         updateAfterPick(team);
         checkForNextPick();
     }
-    async function saveDraftProgress() { /* ... */ }
-    function endDraft() { /* ... */ }
+    async function saveDraftProgress() {
+        try {
+            await supabase.from('mock_drafts').update({
+                current_pick: draftState.current_pick, player_rosters: draftState.player_rosters,
+                status: draftState.current_pick >= draftState.total_picks ? 'completed' : 'in_progress',
+                completed_at: draftState.current_pick >= draftState.total_picks ? new Date().toISOString() : null
+            }).eq('id', leagueId);
+        } catch(err) { console.error("Save Error", err); }
+    }
+    function endDraft() {
+        if (draftState.timer) clearInterval(draftState.timer);
+        alert("Draft Complete!");
+        document.body.innerHTML = createFinalRosterView();
+    }
 
     // =================================================================================
     // UI & EVENT HANDLERS
@@ -375,7 +419,11 @@
             document.getElementById("teamSearch").value = "";
             renderTeams();
         });
-        window.addEventListener('resize', () => { isMobile = window.innerWidth <= 768; renderTeams(); });
+        window.addEventListener('resize', () => { 
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+            if (wasMobile !== isMobile) renderTeams(); // Re-render only if breakpoint changes
+        });
     }
     function updateAfterPick(pickedTeam) {
         updateDraftProgress();
@@ -390,15 +438,84 @@
         switchRosterToCurrentPlayer();
     }
 
-    function updateDraftFlowTracker() { /* ... */ }
+    function updateDraftFlowTracker() {
+        const { current_pick, draft_order, team_count } = draftState;
+        
+        const prevPickInfo = document.getElementById('previous-pick-info');
+        if (current_pick > 0) {
+            const prevDrafter = draft_order[current_pick - 1];
+            const rosterPicks = Object.values(draftState.player_rosters[prevDrafter]).flat();
+            const prevPick = rosterPicks.find(p => p.round === Math.floor((current_pick-1)/team_count)+1 && p.pick === ((current_pick-1)%team_count)+1);
+            prevPickInfo.textContent = prevPick ? `${prevPick.name}` : '--';
+        } else { prevPickInfo.textContent = '--'; }
+
+        const currentPickInfo = document.getElementById('current-pick-info');
+        if (current_pick < draftState.total_picks) {
+            const teamName = draft_order[current_pick];
+            const round = Math.floor(current_pick / team_count) + 1;
+            const pick = (current_pick % team_count) + 1;
+            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
+        } else { currentPickInfo.innerHTML = 'Draft Complete'; }
+
+        document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
+        document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
+    }
     
-    function createTeamSidebar() { /* ... */ }
-    function updateRosterDisplay(teamName, containerId) { /* ... */ }
+    function createTeamSidebar() {
+        const rosterContainer = document.getElementById('roster-container');
+        const teamSelector = document.getElementById('teamSelector');
+        rosterContainer.innerHTML = '';
+        teamSelector.innerHTML = '';
+
+        draftState.team_names.forEach(name => {
+            const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+            const option = document.createElement('option');
+            option.value = sanitizedId;
+            option.textContent = name;
+            teamSelector.appendChild(option);
+            const rosterEl = document.createElement('div');
+            rosterEl.className = 'roster';
+            rosterEl.id = `roster-${sanitizedId}`;
+            rosterEl.innerHTML = `<h2>${name}</h2><ul id="roster-list-${sanitizedId}"></ul>`;
+            rosterContainer.appendChild(rosterEl);
+            updateRosterDisplay(name);
+        });
+        if (rosterContainer.firstChild) rosterContainer.firstChild.classList.add('active');
+    }
+
+    function updateRosterDisplay(teamName, containerId) {
+        const sanitizedId = teamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        const listId = containerId || `roster-list-${sanitizedId}`;
+        const rosterList = document.getElementById(listId);
+        if (!rosterList) return;
+
+        const roster = draftState.player_rosters[teamName];
+        let rosterHTML = '';
+        const allSports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+
+        allSports.forEach(sport => {
+            rosterHTML += `<strong>${sport}</strong>`;
+            const teams = roster[sport] || [];
+            teams.forEach(t => {
+                rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
+            });
+            for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+        });
+
+        if (draftState.wildcard_round > 0) {
+            rosterHTML += `<strong>Wildcard</strong>`;
+            const wcTeams = roster.Wildcard || [];
+            wcTeams.forEach(t => {
+                 rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
+            });
+            for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+        }
+        rosterList.innerHTML = rosterHTML;
+    }
     
-    // FIX 1 & 3: Main rendering function for the draftable teams table
     function renderTeams() {
         const table = document.getElementById("draftable-teams-table");
-        table.innerHTML = ''; // Clear table
+        table.innerHTML = ''; 
 
         const sport = document.getElementById("sportFilter").value;
         const conference = document.getElementById("conferenceFilter").value;
@@ -418,7 +535,6 @@
         table.appendChild(tbody);
     }
     
-    // FIX 4: Clickable table headers for sorting
     function createTableHeader() {
         const thead = document.createElement('thead');
         const headerRow = document.createElement('tr');
@@ -433,7 +549,7 @@
         ];
         
         headers.forEach(header => {
-            if (isMobile && ['conference', 'lastYearPoints', 'adp'].includes(header.key)) return; // Skip columns on mobile
+            if (isMobile && ['conference', 'lastYearPoints', 'adp'].includes(header.key)) return;
             const th = document.createElement('th');
             th.dataset.key = header.key;
             th.innerHTML = `${header.text} <span class="sort-indicator"></span>`;
@@ -450,7 +566,6 @@
         return thead;
     }
 
-    // FIX 1: Create a table row for a team
     function createTeamRow(team) {
         const row = document.createElement('tr');
         const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
@@ -486,12 +601,12 @@
         renderTeams();
     }
 
-    // FIX 5: Filter population
     function populateSportFilter() {
         const sportFilter = document.getElementById("sportFilter");
-        const sports = [...new Set(DraftableTeams.map(t => t.sport))].sort();
+        // Get unique, non-null sports and sort them
+        const sports = [...new Set(DraftableTeams.map(t => t.sport).filter(s => s))].sort();
         sports.forEach(sport => {
-            if(sport) sportFilter.add(new Option(sport, sport));
+            sportFilter.add(new Option(sport, sport));
         });
     }
     function populateConferenceFilter() {
@@ -506,17 +621,32 @@
         }
     }
     
-    // FIX 2 & 5: Mobile tab logic
     function showMobileView(viewName) {
         document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
         document.querySelector(`.${viewName}-container`).classList.add('active');
         document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.toggle('active', tab.textContent.toLowerCase().includes(viewName)));
     }
-    function renderMobileRosters(selectedTeamName = draftState.user_team_name) { /* unchanged */ }
-
+    function renderMobileRosters(selectedTeamName = draftState.user_team_name) {
+        const container = document.getElementById('rosters-mobile');
+        let selectHTML = `<select id="mobileTeamSelector" onchange="renderMobileRosters(this.value)">`;
+        draftState.team_names.forEach(name => {
+            selectHTML += `<option value="${name}" ${name === selectedTeamName ? 'selected' : ''}>${name}</option>`;
+        });
+        selectHTML += `</select>`;
+        
+        container.innerHTML = `${selectHTML}<div class="roster active"><h2>${selectedTeamName}</h2><ul id="mobile-roster-list"></ul></div>`;
+        updateRosterDisplay(selectedTeamName, 'mobile-roster-list');
+    }
+    
     // =================================================================================
     // UTILITY & HELPER FUNCTIONS
     // =================================================================================
+    // FIXED: Added this missing function back in.
+    function showLoadingState(isLoading) {
+        document.body.style.cursor = isLoading ? 'wait' : 'default';
+        document.body.style.opacity = isLoading ? '0.5' : '1';
+    }
+
     function sortTeams(teams) {
         const { key, direction } = sortState;
         return teams.sort((a,b) => {
@@ -529,14 +659,19 @@
             } else {
                 const numA = parseFloat(valA) || 0;
                 const numB = parseFloat(valB) || 0;
-                if (numA === 0) return 1 * dir;
-                if (numB === 0) return -1 * dir;
+                if (numA === 0 && numB !== 0) return 1; // Sort 0 to the end
+                if (numB === 0 && numA !== 0) return -1;
                 return (numA - numB) * dir;
             }
         });
     }
     function getSportIcon(team){ const i={NBA:'fas fa-basketball-ball',NCAAB:'fas fa-basketball-ball',NFL:'fas fa-football-ball',NCAAF:'fas fa-football-ball',MLB:'fas fa-baseball-ball',NHL:'fas fa-hockey-puck'}; return i[team.sport]||''; }
-    // ... all other unchanged helpers ...
+    function switchRosterToCurrentPlayer(){if(draftState.current_pick>=draftState.total_picks)return;const name=draftState.draft_order[draftState.current_pick];if(typeof name!=='string')return;const id=name.replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'');const sel=document.getElementById('teamSelector');if(sel)sel.value=id;switchRoster(id);}
+    function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
+    function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
+    function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+    function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
+    function createFinalRosterView(){let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`;}
 </script>
 </body>
 </html>
