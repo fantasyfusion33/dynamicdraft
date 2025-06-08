@@ -331,7 +331,12 @@
             alert(`Welcome to the Wildcard Round(s)!`);
         }
         updateOnTheClockUI();
-        isUserTurn = draftState.draft_order[draftState.current_pick] === draftState.user_team_name;
+
+        // FIXED: Use .trim() to make the comparison robust against whitespace
+        const currentDrafter = draftState.draft_order[draftState.current_pick].trim();
+    const myTeamName = draftState.user_team_name.trim();
+    isUserTurn = currentDrafter === myTeamName;
+
         if (isUserTurn) {
             enableDraftButtons(true);
             startCountdown();
