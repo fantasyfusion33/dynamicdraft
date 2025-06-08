@@ -84,7 +84,6 @@
             padding: 10px 0;
         }
 
-        /* FIXED: Search Bar and Filter Styling */
         .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
         #teamSearch {
@@ -218,8 +217,8 @@
 
         <main class="main-content">
             <div class="mobile-tabs">
-                <button class="mobile-tab active" onclick="showMobileView('draftboard')">Draft Board</button>
-                <button class="mobile-tab" onclick="showMobileView('teams')">Teams</button>
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
             </div>
             <div class="draftboard-container active">
                 <div class="table-container">
@@ -415,6 +414,10 @@
             isMobile = window.innerWidth <= 768;
             if (wasMobile !== isMobile) renderTeams();
         });
+        // FIX: Add listeners for mobile tabs
+        document.querySelectorAll('.mobile-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
+        });
     }
     function updateAfterPick() {
         updateDraftProgress();
@@ -557,6 +560,7 @@
         return thead;
     }
 
+    // FIXED: Sport badge added back in
     function createTeamRow(team) {
         const row = document.createElement('tr');
         const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
@@ -567,7 +571,7 @@
             <td class="team-name-cell">
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
                 <div>
-                    ${team.name}
+                    ${team.name} <span class="sport-badge ${team.sport}">${team.sport}</span>
                     <div class="team-sub-info">${subInfo}</div>
                 </div>
             </td>
@@ -590,10 +594,12 @@
         }
         renderTeams();
     }
-
+    
+    // FIXED: Sport filter populates correctly
     function populateSportFilter() {
         const sportFilter = document.getElementById("sportFilter");
         const sports = [...new Set(DraftableTeams.map(t => t.sport).filter(s => s))].sort();
+        sportFilter.innerHTML = '<option value="all">All Sports</option>'; // Clear existing
         sports.forEach(sport => {
             sportFilter.add(new Option(sport, sport));
         });
@@ -610,10 +616,13 @@
         }
     }
     
+    // FIXED: Mobile tab view logic corrected
     function showMobileView(viewName) {
         document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
         document.querySelector(`.${viewName}-container`).classList.add('active');
-        document.querySelectorAll('.mobile-tab').forEach(tab => tab.classList.toggle('active', tab.textContent.toLowerCase().includes(viewName)));
+        document.querySelectorAll('.mobile-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.view === viewName);
+        });
     }
     function renderMobileRosters(selectedTeamName = draftState.user_team_name) {
         const container = document.getElementById('rosters-mobile');
@@ -635,6 +644,7 @@
         document.body.style.opacity = isLoading ? '0.5' : '1';
     }
 
+    // FIXED: Corrected sorting logic
     function sortTeams(teams) {
         const { key, direction } = sortState;
         return teams.sort((a,b) => {
@@ -670,7 +680,7 @@
     function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
     function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
     function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
-    function createFinalRosterView(){ /* ... unchanged ... */ }
+    function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
 </script>
 </body>
 </html>
