@@ -62,7 +62,7 @@
             font-weight: 600;
             color: var(--primary);
             flex-shrink: 0;
-            margin-left: 20px; /* Space between ticker and clock on desktop */
+            margin-left: 20px;
         }
 
         .draft-flow-tracker { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 12px; gap: 15px; }
@@ -84,9 +84,23 @@
             padding: 10px 0;
         }
 
+        /* FIXED: Search Bar and Filter Styling */
         .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
-        .filters select, .filters button, #teamSelector, #mobileTeamSelector {
+        #teamSearch {
+            padding: 10px 15px;
+            background: var(--gray);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            width: 100%; 
+            box-sizing: border-box; 
+            padding-right: 40px;
+        }
+        #teamSearch:hover { background: #2a2a2a; }
+        .filters select {
             padding: 10px 15px;
             background: var(--gray);
             border: 1px solid #333;
@@ -98,8 +112,7 @@
             -moz-appearance: none;
             appearance: none;
         }
-        .filters select:hover, .filters button:hover, #teamSelector:hover, #mobileTeamSelector:hover { background: #2a2a2a; }
-        #teamSearch { width: 100%; box-sizing: border-box; padding-right: 40px; font-size: 0.9rem; padding: 10px; }
+        .filters select:hover { background: #2a2a2a; }
         #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
 
         .table-container { overflow-y: auto; }
