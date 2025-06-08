@@ -437,32 +437,42 @@
         switchRosterToCurrentPlayer();
     }
 
-    function updateDraftFlowTracker() {
-        const { current_pick, draft_order, team_count, player_rosters } = draftState;
-        
-        const prevPickInfo = document.getElementById('previous-pick-info');
-        if (current_pick > 0) {
-            const prevDrafter = draft_order[current_pick - 1];
-            if (player_rosters[prevDrafter]) {
-                const rosterPicks = Object.values(player_rosters[prevDrafter]).flat();
-                const prevPick = rosterPicks.find(p => p.round === Math.floor((current_pick-1)/team_count)+1 && p.pick === ((current_pick-1)%team_count)+1);
-                prevPickInfo.textContent = prevPick ? `${prevPick.name}` : '--';
+function updateDraftFlowTracker() {
+    const { current_pick, draft_order, team_count, player_rosters } = draftState;
+    
+    const prevPickInfo = document.getElementById('previous-pick-info');
+    if (current_pick > 0) {
+        const prevDrafter = draft_order[current_pick - 1];
+        if (player_rosters[prevDrafter]) {
+            // FIXED: This logic is simpler and more reliable.
+            // It gets all players on that roster and finds the most recent one.
+            const rosterPicks = Object.values(player_rosters[prevDrafter]).flat();
+            if (rosterPicks.length > 0) {
+                const prevPick = rosterPicks[rosterPicks.length - 1];
+                prevPickInfo.textContent = prevPick.name;
             } else {
-                 prevPickInfo.textContent = '--';
+                prevPickInfo.textContent = '--';
             }
-        } else { prevPickInfo.textContent = '--'; }
-
-        const currentPickInfo = document.getElementById('current-pick-info');
-        if (current_pick < draftState.total_picks) {
-            const teamName = draft_order[current_pick];
-            const round = Math.floor(current_pick / team_count) + 1;
-            const pick = (current_pick % team_count) + 1;
-            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
-        } else { currentPickInfo.innerHTML = 'Draft Complete'; }
-
-        document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
-        document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
+        } else {
+             prevPickInfo.textContent = '--';
+        }
+    } else {
+        prevPickInfo.textContent = '--';
     }
+
+    const currentPickInfo = document.getElementById('current-pick-info');
+    if (current_pick < draftState.total_picks) {
+        const teamName = draft_order[current_pick];
+        const round = Math.floor(current_pick / team_count) + 1;
+        const pick = (current_pick % team_count) + 1;
+        currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
+    } else {
+        currentPickInfo.innerHTML = 'Draft Complete';
+    }
+
+    document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
+    document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
+}
     
     function createTeamSidebar() {
         const rosterContainer = document.getElementById('roster-container');
