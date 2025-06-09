@@ -374,6 +374,7 @@
         draftState.current_pick++;
         await saveDraftProgress();
         updateAfterPick();
+        checkForNextPick();
     }
     async function saveDraftProgress() {
         try {
