@@ -203,8 +203,10 @@
                 position: sticky;
                 right: 0;
                 background: var(--dark);
+                z-index: 1;
             }
             .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table thead th:last-child { z-index: 3; /* Highest z-index */}
         }
     </style>
 </head>
