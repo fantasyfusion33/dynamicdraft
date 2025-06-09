@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Fusion - Mock Draft</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #D2042D;
+            --dark: #0A0A0A;
+            --light: #FFFFFF;
+            --gray: #1A1A1A;
+            --glass: rgba(26, 26, 26, 0.8);
+            /* Sport Colors */
+            --nfl-color: #00338D;
+            --nba-color: #FF671F;
+            --mlb-color: #009688;
+            --nhl-color: #8E44AD;
+            --ncaaf-color: #D32F2F;
+            --ncaab-color: #FBC02D;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--gray); }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 20px;
+        }
+        .draft-container {
+            display: grid;
+            grid-template-areas: "header" "ticker" "progress" "main";
+            grid-template-columns: 1fr;
+            gap: 20px;
+            max-width: 1600px;
+            margin: auto;
+        }
+        .desktop-sidebar-area { display: none; }
+        .draft-header { grid-area: header; position: relative; padding: 10px 0; }
+        .draft-flow-tracker { grid-area: ticker; }
+        .draft-status-bar { grid-area: progress; }
+        .main-content { grid-area: main; }
+
+        .site-brand {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        .league-title { text-align: center; margin: 0; font-size: 2.5rem; color: var(--light); }
+        
+        .countdown-clock {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-left: 20px; /* Space between ticker and clock on desktop */
+        }
+
+        .draft-flow-tracker { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 12px; gap: 15px; }
+        .flow-pick-container { display: flex; flex-grow: 1; justify-content: space-around; gap: 15px;}
+        .flow-pick { flex: 1; text-align: center; padding: 10px; border-radius: 8px; transition: all 0.3s ease; }
+        .flow-pick h4 { margin: 0 0 8px 0; font-size: 0.8rem; text-transform: uppercase; color: rgba(255, 255, 255, 0.5); }
+        .flow-pick p { margin: 0; font-weight: 600; font-size: 1.1rem; line-height: 1.3; }
+        .flow-pick.on-the-clock { background: var(--primary); transform: scale(1.05); }
+        .flow-pick .round-pick-info { font-size: 0.9rem; font-weight: 400; opacity: 0.8; }
+
+        .draft-status-bar { height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; }
+        .draft-progress { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s ease-out; }
+
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--dark);
+            padding: 10px 0;
+        }
+
+        .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+        .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
+        #teamSearch {
+            padding: 10px 15px;
+            background: var(--gray);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            width: 100%; 
+            box-sizing: border-box; 
+            padding-right: 40px;
+        }
+        #teamSearch:hover { background: #2a2a2a; }
+        .filters select {
+            padding: 10px 15px;
+            background: var(--gray);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: white;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .filters select:hover { background: #2a2a2a; }
+        #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
+
+        .table-container { overflow-y: auto; }
+        .draft-table { width: 100%; border-collapse: collapse; }
+        .draft-table th, .draft-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #333; white-space: nowrap; }
+        .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark); }
+        .draft-table th:hover { background: var(--gray); }
+        .draft-table th .sort-indicator { display: inline-block; margin-left: 8px; opacity: 0.5; transition: opacity 0.2s; width: 1em; }
+        .draft-table th.sort-active .sort-indicator { opacity: 1; }
+        .draft-table tr:hover { background: var(--gray); }
+        .draft-table .team-name-cell { display: flex; align-items: center; gap: 15px; }
+        .draft-table .team-sub-info { font-size: 0.8rem; color: #aaa; }
+        .draft-table .sport-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: bold; }
+        .draft-table .draft-button { background: var(--primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .draft-table .draft-button:disabled { background: #555; cursor: not-allowed; }
+        
+        .roster ul { list-style: none; padding: 0; }
+        .roster li { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
+        .team-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .team-icon i { font-size: 14px; }
+        .draft-pick-circle { margin-left: auto; width: 36px; height: 24px; font-size: 0.8em; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .draft-pick-circle.NFL, .sport-badge.NFL { background-color: var(--nfl-color); }
+        .draft-pick-circle.NBA, .sport-badge.NBA { background-color: var(--nba-color); }
+        .draft-pick-circle.MLB, .sport-badge.MLB { background-color: var(--mlb-color); }
+        .draft-pick-circle.NHL, .sport-badge.NHL { background-color: var(--nhl-color); }
+        .draft-pick-circle.NCAAF, .sport-badge.NCAAF { background-color: var(--ncaaf-color); }
+        .draft-pick-circle.NCAAB, .sport-badge.NCAAB { background-color: var(--ncaab-color); }
+
+        /* Desktop Specific Layout */
+        @media (min-width: 769px) {
+            .draft-container {
+                grid-template-areas: "header header" "ticker ticker" "progress progress" "main sidebar";
+                grid-template-columns: 1fr 400px;
+            }
+            .mobile-tabs, .rosters-mobile-container { display: none; }
+            .desktop-sidebar-area {
+                display: block; grid-area: sidebar; background: var(--glass);
+                border-radius: 12px; padding: 20px; height: 80vh; overflow-y: auto;
+            }
+            .roster { display: none; }
+            .roster.active { display: block; }
+            #teamSelector { width: 100%; margin-bottom: 15px; }
+        }
+
+        /* MOBILE RESPONSIVE STYLES */
+        @media (max-width: 768px) {
+            body { padding: 10px 5px; }
+            .draft-container { grid-template-areas: "header" "sticky-header" "main"; }
+            .desktop-sidebar-area { display: none; }
+            .site-brand { display: none; }
+            .league-title { font-size: 1.5rem; }
+            .draft-header { padding: 5px; }
+            .countdown-clock { position: fixed; top: 10px; right: 10px; z-index: 200; padding: 5px 10px; font-size: 1rem; }
+
+            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
+            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: wrap; }
+            .flow-pick p { font-size: 0.9rem; }
+            .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+            .filters::-webkit-scrollbar { display: none; }
+            .filters .search-bar { min-width: 150px; }
+
+            .mobile-tabs {
+                display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px;
+            }
+            .mobile-tab { padding: 10px; border: none; background: none; color: white; font-size: 1rem; flex-grow: 1; border-radius: 6px; }
+            .mobile-tab.active { background: var(--primary); }
+
+            .main-content > div { display: none; }
+            .main-content > div.active { display: block; }
+            
+            .rosters-mobile-container { padding: 10px; }
+            .roster-mobile { display: block; }
+            #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
+            .table-container { overflow-x: auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="draft-container">
+        <header class="draft-header">
+            <div class="site-brand">Fantasy Fusion</div>
+            <h1 class="league-title">League Name</h1>
+        </header>
+
+        <div class="sticky-header">
+            <div class="draft-flow-tracker">
+                <div class="flow-pick-container">
+                    <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
+                    <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
+                    <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
+                    <div class="flow-pick upcoming"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+                </div>
+                 <div class="countdown-clock" id="countdownClock">2:00</div>
+            </div>
+            <div class="filters">
+                <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
+                <select id="sportFilter"><option value="all">All Sports</option></select>
+                <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
+            </div>
+        </div>
+        
+        <div class="draft-status-bar"><div class="draft-progress"></div></div>
+
+        <main class="main-content">
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
+            </div>
+            <div class="draftboard-container active">
+                <div class="table-container">
+                    <table class="draft-table" id="draftable-teams-table"></table>
+                </div>
+            </div>
+            <div class="teams-container">
+                 <div id="rosters-mobile"></div>
+            </div>
+        </main>
+
+        <aside class="desktop-sidebar-area">
+            <div class="team-selector">
+                <select id="teamSelector" onchange="switchRoster(this.value)"></select>
+            </div>
+            <div class="roster-container" id="roster-container"></div>
+        </aside>
+    </div>
+    
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // =================================================================================
+    // DRAFT INITIALIZATION & STATE MANAGEMENT
+    // =================================================================================
+    const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const leagueId = urlParams.get('leagueId');
+
+    const draftState = {
+        league_name: '', team_names: [], team_count: 0, wildcard_round: 0,
+        user_team_name: '', current_pick: 0, draft_order: [],
+        player_rosters: {}, total_picks: 0, timer: null,
+    };
+    let DraftableTeams = [];
+    let isUserTurn = false;
+    let isMobile = window.innerWidth <= 768;
+    const sortState = { key: 'championship_odds', direction: 'asc' };
+    
+    const conferenceData = {
+        NFL: ["AFC", "NFC"], NBA: ["Eastern", "Western"], MLB: ["AL", "NL"], NHL: ["Eastern", "Western"],
+        NCAAF: ["AAC", "ACC", "Big 12", "Big Ten", "C-USA", "Independents", "MAC", "Mountain West", "Pac-12", "SEC", "Sun Belt"],
+        NCAAB: ["AAC", "ACC", "Big 12", "Big East", "Big Ten", "Pac-12", "SEC", "Other"]
+    };
+
+    // =================================================================================
+    // SCRIPT ENTRY POINT
+    // =================================================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        if (!leagueId) {
+            alert('No league ID found.');
+            window.location.href = 'mock_draft_setup3.html';
+            return;
+        }
+        showLoadingState(true);
+        await Promise.all([initializeDraftState(), fetchDraftableTeamsFromDB()]);
+        setupInitialUI();
+        addEventListeners();
+        showLoadingState(false);
+        checkForNextPick();
+    });
+
+    // =================================================================================
+    // DRAFT LOGIC & STATE
+    // =================================================================================
+    async function initializeDraftState() {
+        try {
+            const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
+            if (error) throw error;
+            if (!data || typeof data.draft_order[0] !== 'string') throw new Error("Invalid draft data. Please create a new draft.");
+            Object.assign(draftState, data);
+            const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
+            draftState.user_team_name = data.team_names[userPosition] || '';
+            draftState.player_rosters = data.player_rosters && Object.keys(data.player_rosters).length > 0 ? data.player_rosters : initializePlayerRosters(data.team_names);
+            draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
+        } catch (err) {
+            alert(err.message);
+            console.error('Init Error:', err);
+        }
+    }
+    async function fetchDraftableTeamsFromDB() {
+        try {
+            const { data, error } = await supabase.from('SportTeamDatabase').select('*');
+            if (error) throw error;
+            const pickedTeamIds = new Set(Object.values(draftState.player_rosters).flatMap(roster => Object.values(roster).flat().map(team => team.team_id)));
+            DraftableTeams = data.filter(team => !pickedTeamIds.has(team.team_id));
+        } catch (err) { console.error('Fetch Teams Error:', err); }
+    }
+    function initializePlayerRosters(teamNames) {
+        const rosters = {};
+        teamNames.forEach(name => {
+            rosters[name] = { NFL: [], NBA: [], MLB: [], NHL: [], NCAAF: [], NCAAB: [], Wildcard: [] };
+        });
+        return rosters;
+    }
+    function isPickValid(team, roster) {
+        const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+        const isWildcardRound = currentRound > 12 && draftState.wildcard_round > 0;
+        if (isWildcardRound) return roster.Wildcard.length < draftState.wildcard_round;
+        return roster[team.sport].length < 2;
+    }
+    function checkForNextPick() {
+        if (draftState.current_pick >= draftState.total_picks) {
+            endDraft();
+            return;
+        }
+        if (draftState.current_pick === 12 * draftState.team_count && draftState.wildcard_round > 0) {
+            alert(`Welcome to the Wildcard Round(s)!`);
+        }
+        updateOnTheClockUI();
+        const currentDrafter = draftState.draft_order[draftState.current_pick].trim();
+        const myTeamName = draftState.user_team_name.trim();
+        isUserTurn = currentDrafter === myTeamName;
+
+        if (isUserTurn) {
+            enableDraftButtons(true);
+            startCountdown();
+        } else {
+            enableDraftButtons(false);
+            setTimeout(autoDraftTeam, 1500);
+        }
+    }
+    async function draftTeam(teamId) {
+        if (!isUserTurn) return;
+        const team = DraftableTeams.find(t => t.team_id === teamId);
+        if (!team) return;
+        if (!isPickValid(team, draftState.player_rosters[draftState.user_team_name])) {
+            alert(`Roster full for this sport. Please select a different team.`);
+            return;
+        }
+        if (draftState.timer) clearInterval(draftState.timer);
+        await processPick(team);
+    }
+    function autoDraftTeam() {
+        const draftingTeamName = draftState.draft_order[draftState.current_pick];
+        const roster = draftState.player_rosters[draftingTeamName];
+        const eligibleTeams = DraftableTeams.filter(team => isPickValid(team, roster));
+        const teamToPick = eligibleTeams.length > 0 ? sortTeams(eligibleTeams)[0] : null;
+        processPick(teamToPick);
+    }
+    async function processPick(team) {
+        if (team) {
+            const draftingTeamName = draftState.draft_order[draftState.current_pick];
+            const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
+            team.round = currentRound;
+            team.pick = (draftState.current_pick % draftState.team_count) + 1;
+            const sportToCredit = (currentRound > 12 && draftState.wildcard_round > 0) ? 'Wildcard' : team.sport;
+            draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
+            DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
+        }
+        draftState.current_pick++;
+        await saveDraftProgress();
+        updateAfterPick();
+    }
+    async function saveDraftProgress() {
+        try {
+            await supabase.from('mock_drafts').update({
+                current_pick: draftState.current_pick, player_rosters: draftState.player_rosters,
+                status: draftState.current_pick >= draftState.total_picks ? 'completed' : 'in_progress',
+                completed_at: draftState.current_pick >= draftState.total_picks ? new Date().toISOString() : null
+            }).eq('id', leagueId);
+        } catch(err) { console.error("Save Error", err); }
+    }
+    function endDraft() {
+        if (draftState.timer) clearInterval(draftState.timer);
+        alert("Draft Complete!");
+        document.body.innerHTML = createFinalRosterView();
+    }
+
+    // =================================================================================
+    // UI & EVENT HANDLERS
+    // =================================================================================
+    function setupInitialUI() {
+        document.querySelector('.league-title').textContent = `${draftState.league_name} Mock Draft`;
+        updateDraftFlowTracker();
+        createTeamSidebar();
+        populateSportFilter();
+        renderTeams();
+        if (isMobile) renderMobileRosters();
+    }
+    function addEventListeners() {
+        document.getElementById("sportFilter").addEventListener("change", () => {
+            populateConferenceFilter();
+            renderTeams();
+        });
+        document.getElementById("conferenceFilter").addEventListener("change", renderTeams);
+        document.getElementById("teamSearch").addEventListener("input", () => setTimeout(renderTeams, 300));
+        document.getElementById("clearSearch").addEventListener("click", () => {
+            document.getElementById("teamSearch").value = "";
+            renderTeams();
+        });
+        window.addEventListener('resize', () => { 
+            const wasMobile = isMobile;
+            isMobile = window.innerWidth <= 768;
+            if (wasMobile !== isMobile) renderTeams();
+        });
+        document.querySelectorAll('.mobile-tab').forEach(tab => {
+            tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
+        });
+    }
+    function updateAfterPick() {
+        updateDraftProgress();
+        renderTeams();
+        const lastDrafterName = draftState.draft_order[draftState.current_pick - 1];
+        updateRosterDisplay(lastDrafterName);
+        if (isMobile) renderMobileRosters(document.getElementById('mobileTeamSelector')?.value);
+        updateDraftFlowTracker();
+    }
+    function updateOnTheClockUI() {
+        updateDraftFlowTracker();
+        switchRosterToCurrentPlayer();
+    }
+
+    function updateDraftFlowTracker() {
+        const { current_pick, draft_order, team_count, player_rosters } = draftState;
+        
+        const prevPickInfo = document.getElementById('previous-pick-info');
+        if (current_pick > 0) {
+            const prevDrafter = draft_order[current_pick - 1];
+            if (player_rosters[prevDrafter]) {
+                const rosterPicks = Object.values(player_rosters[prevDrafter]).flat();
+                const prevPick = rosterPicks[rosterPicks.length - 1];
+                prevPickInfo.textContent = prevPick ? prevPick.name : '(Skipped)';
+            } else {
+                 prevPickInfo.textContent = '--';
+            }
+        } else { prevPickInfo.textContent = '--'; }
+
+        const currentPickInfo = document.getElementById('current-pick-info');
+        if (current_pick < draftState.total_picks) {
+            const teamName = draft_order[current_pick];
+            const round = Math.floor(current_pick / team_count) + 1;
+            const pick = (current_pick % team_count) + 1;
+            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
+        } else { currentPickInfo.innerHTML = 'Draft Complete'; }
+
+        document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
+        document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
+    }
+    
+    function createTeamSidebar() {
+        const rosterContainer = document.getElementById('roster-container');
+        const teamSelector = document.getElementById('teamSelector');
+        rosterContainer.innerHTML = '';
+        teamSelector.innerHTML = '';
+
+        draftState.team_names.forEach(name => {
+            const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+            const option = document.createElement('option');
+            option.value = sanitizedId;
+            option.textContent = name;
+            teamSelector.appendChild(option);
+            const rosterEl = document.createElement('div');
+            rosterEl.className = 'roster';
+            rosterEl.id = `roster-${sanitizedId}`;
+            rosterEl.innerHTML = `<h2>${name}</h2><ul id="roster-list-${sanitizedId}"></ul>`;
+            rosterContainer.appendChild(rosterEl);
+            updateRosterDisplay(name);
+        });
+        if (rosterContainer.firstChild) rosterContainer.firstChild.classList.add('active');
+    }
+
+    function updateRosterDisplay(teamName, containerId) {
+        const sanitizedId = teamName.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+        const listId = containerId || `roster-list-${sanitizedId}`;
+        const rosterList = document.getElementById(listId);
+        if (!rosterList) return;
+
+        const roster = draftState.player_rosters[teamName];
+        if(!roster) return; 
+        
+        let rosterHTML = '';
+        const allSports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+
+        allSports.forEach(sport => {
+            rosterHTML += `<strong>${sport}</strong>`;
+            const teams = roster[sport] || [];
+            teams.forEach(t => {
+                rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
+            });
+            for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+        });
+
+        if (draftState.wildcard_round > 0) {
+            rosterHTML += `<strong>Wildcard</strong>`;
+            const wcTeams = roster.Wildcard || [];
+            wcTeams.forEach(t => {
+                 rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
+            });
+            for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+        }
+        rosterList.innerHTML = rosterHTML;
+    }
+    
+    function renderTeams() {
+        const table = document.getElementById("draftable-teams-table");
+        table.innerHTML = ''; 
+        const sport = document.getElementById("sportFilter").value;
+        const conference = document.getElementById("conferenceFilter").value;
+        const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
+        let filteredTeams = DraftableTeams.filter(t => 
+            (sport === 'all' || t.sport === sport) &&
+            (conference === 'all' || t.conference === conference) &&
+            t.name.toLowerCase().includes(searchQuery)
+        );
+        const sortedTeams = sortTeams(filteredTeams);
+        table.appendChild(createTableHeader());
+        const tbody = document.createElement('tbody');
+        sortedTeams.forEach(team => tbody.appendChild(createTeamRow(team)));
+        table.appendChild(tbody);
+    }
+    
+    function createTableHeader() {
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        const headers = [
+            { key: 'name', text: 'Team' },
+            { key: 'championship_odds', text: 'Odds' },
+            { key: 'championshipPct', text: '% Odds' },
+            { key: 'lastYearPoints', text: 'Prev. Pts' },
+            { key: 'adp', text: 'ADP' },
+            { key: 'draft', text: ''}
+        ];
+        
+        headers.forEach(header => {
+            const th = document.createElement('th');
+            th.dataset.key = header.key;
+            th.innerHTML = `${header.text} <span class="sort-indicator"></span>`;
+            if (header.key === sortState.key) {
+                th.classList.add('sort-active');
+                th.querySelector('.sort-indicator').innerHTML = sortState.direction === 'asc' ? '▲' : '▼';
+            }
+            if(header.key !== 'draft') {
+                th.addEventListener('click', handleSortClick);
+            }
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        return thead;
+    }
+
+    function createTeamRow(team) {
+        const row = document.createElement('tr');
+        const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
+        const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
+        const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
+
+        row.innerHTML = `
+            <td class="team-name-cell">
+                <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
+                <div>
+                    ${team.name} <span class="sport-badge ${team.sport}">${team.sport}</span>
+                    <div class="team-sub-info">${subInfo}</div>
+                </div>
+            </td>
+            <td>${oddsDisplay}</td>
+            <td>${pctDisplay}</td>
+            <td>${team.lastYearPoints || 'N/A'}</td>
+            <td>${team.adp || 'N/A'}</td>
+            <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
+        `;
+        return row;
+    }
+
+    function handleSortClick(e) {
+        const key = e.currentTarget.dataset.key;
+        if (sortState.key === key) {
+            sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+            sortState.key = key;
+            sortState.direction = (key === 'championship_odds' || key === 'adp') ? 'asc' : 'desc';
+        }
+        renderTeams();
+    }
+
+    function populateSportFilter() {
+        const sportFilter = document.getElementById("sportFilter");
+        const sports = [...new Set(DraftableTeams.map(t => t.sport).filter(s => s))].sort();
+        sportFilter.innerHTML = '<option value="all">All Sports</option>';
+        sports.forEach(sport => {
+            sportFilter.add(new Option(sport, sport));
+        });
+    }
+    function populateConferenceFilter() {
+        const confFilter = document.getElementById("conferenceFilter");
+        const selectedSport = document.getElementById("sportFilter").value;
+        confFilter.innerHTML = '<option value="all">All Conferences</option>';
+        if (selectedSport !== 'all' && conferenceData[selectedSport]) {
+            confFilter.disabled = false;
+            conferenceData[selectedSport].forEach(conf => confFilter.add(new Option(conf, conf)));
+        } else {
+            confFilter.disabled = true;
+        }
+    }
+    
+    function showMobileView(viewName) {
+        document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
+        document.querySelector(`.${viewName}-container`).classList.add('active');
+        document.querySelectorAll('.mobile-tab').forEach(tab => {
+            tab.classList.toggle('active', tab.dataset.view === viewName);
+        });
+        if (viewName === 'teams') {
+            renderMobileRosters(document.getElementById('mobileTeamSelector')?.value || draftState.user_team_name);
+        }
+    }
+    function renderMobileRosters(selectedTeamName = draftState.user_team_name) {
+        const container = document.getElementById('rosters-mobile');
+        let selectHTML = `<select id="mobileTeamSelector" onchange="renderMobileRosters(this.value)">`;
+        draftState.team_names.forEach(name => {
+            selectHTML += `<option value="${name}" ${name === selectedTeamName ? 'selected' : ''}>${name}</option>`;
+        });
+        selectHTML += `</select>`;
+        
+        container.innerHTML = `${selectHTML}<div class="roster active"><h2>${selectedTeamName}</h2><ul id="mobile-roster-list"></ul></div>`;
+        updateRosterDisplay(selectedTeamName, 'mobile-roster-list');
+    }
+    
+    // =================================================================================
+    // UTILITY & HELPER FUNCTIONS
+    // =================================================================================
+    function showLoadingState(isLoading) {
+        document.body.style.cursor = isLoading ? 'wait' : 'default';
+        document.body.style.opacity = isLoading ? '0.5' : '1';
+    }
+
+    function sortTeams(teams) {
+        const { key, direction } = sortState;
+        return teams.sort((a,b) => {
+            const valA = a[key];
+            const valB = b[key];
+            const dir = direction === 'asc' ? 1 : -1;
+
+            if (key === 'name' || key === 'conference') {
+                return (valA || '').localeCompare(valB || '') * dir;
+            }
+            
+            const numA = parseFloat(valA) || 0;
+            const numB = parseFloat(valB) || 0;
+
+            if (numA === numB) {
+                const oddsA = parseFloat(a.championship_odds) || 99999;
+                const oddsB = parseFloat(b.championship_odds) || 99999;
+                return oddsA - oddsB;
+            }
+            
+            if(direction === 'asc') {
+                 if (numA === 0) return 1;
+                 if (numB === 0) return -1;
+            }
+
+            return (numA - numB) * dir;
+        });
+    }
+
+    function getSportIcon(team){ const i={'NBA':'fas fa-basketball-ball','NCAAB':'fas fa-basketball-ball','NFL':'fas fa-football-ball','NCAAF':'fas fa-football-ball','MLB':'fas fa-baseball-ball','NHL':'fas fa-hockey-puck'}; return i[team.sport]||''; }
+    
+    function switchRosterToCurrentPlayer() {
+        try {
+            if (draftState.current_pick >= draftState.total_picks) return;
+            const name = draftState.draft_order[draftState.current_pick];
+            if (typeof name !== 'string') return;
+            const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
+            const sel = document.getElementById('teamSelector');
+            if(sel) sel.value = sanitizedId;
+            switchRoster(sanitizedId);
+        } catch (err) {
+            console.error("Non-critical UI error in switchRosterToCurrentPlayer:", err);
+        }
+    }
+    
+    function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
+    function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
+    function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+    function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
+    function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
+</script>
+</body>
+</html>
