@@ -125,7 +125,7 @@
         .table-container { overflow-y: auto; }
         .draft-table { width: 100%; border-collapse: collapse; }
         .draft-table th, .draft-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #333; white-space: nowrap; }
-        .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark);}
+        .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark); z-index: 2;}
         .draft-table th:hover { background: var(--gray); }
         .draft-table th .sort-indicator { display: inline-block; margin-left: 8px; opacity: 0.5; transition: opacity 0.2s; width: 1em; }
         .draft-table th.sort-active .sort-indicator { opacity: 1; }
@@ -206,6 +206,7 @@
                 z-index: 1;
             }
             .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table thead th:last-child { z-index: 3; }
         }
     </style>
 </head>
