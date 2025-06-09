@@ -435,18 +435,14 @@
     }
 
     function updateDraftFlowTracker() {
-        const { current_pick, draft_order, team_count, player_rosters } = draftState;
+        const { current_pick, draft_order, team_count } = draftState;
         
         const prevPickInfo = document.getElementById('previous-pick-info');
         if (current_pick > 0) {
             const prevDrafter = draft_order[current_pick - 1];
-            if (player_rosters[prevDrafter]) {
-                const rosterPicks = Object.values(player_rosters[prevDrafter]).flat();
-                const prevPick = rosterPicks[rosterPicks.length - 1];
-                prevPickInfo.textContent = prevPick ? prevPick.name : '(Skipped)';
-            } else {
-                 prevPickInfo.textContent = '--';
-            }
+            const rosterPicks = Object.values(draftState.player_rosters[prevDrafter]).flat();
+            const prevPick = rosterPicks.find(p => p.round === Math.floor((current_pick-1)/team_count)+1 && p.pick === ((current_pick-1)%team_count)+1);
+            prevPickInfo.textContent = prevPick ? `${prevPick.name}` : '--';
         } else { prevPickInfo.textContent = '--'; }
 
         const currentPickInfo = document.getElementById('current-pick-info');
