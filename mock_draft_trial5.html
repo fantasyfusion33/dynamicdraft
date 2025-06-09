@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fantasy Fusion - Mock Draft</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+<style>
         :root {
             --primary: #D2042D;
             --dark: #0A0A0A;
@@ -62,7 +62,7 @@
             font-weight: 600;
             color: var(--primary);
             flex-shrink: 0;
-            margin-left: 20px; /* Space between ticker and clock on desktop */
+            margin-left: 20px;
         }
 
         .draft-flow-tracker { display: flex; justify-content: space-between; align-items: center; background: var(--glass); padding: 15px; border-radius: 12px; gap: 15px; }
@@ -99,7 +99,7 @@
             padding-right: 40px;
         }
         #teamSearch:hover { background: #2a2a2a; }
-        .filters select {
+        .filters select, #teamSelector, #mobileTeamSelector {
             padding: 10px 15px;
             background: var(--gray);
             border: 1px solid #333;
@@ -111,13 +111,13 @@
             -moz-appearance: none;
             appearance: none;
         }
-        .filters select:hover { background: #2a2a2a; }
+        .filters select:hover, #teamSelector:hover, #mobileTeamSelector:hover { background: #2a2a2a; }
         #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
 
         .table-container { overflow-y: auto; }
         .draft-table { width: 100%; border-collapse: collapse; }
         .draft-table th, .draft-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #333; white-space: nowrap; }
-        .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark); }
+        .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark); z-index: 2; }
         .draft-table th:hover { background: var(--gray); }
         .draft-table th .sort-indicator { display: inline-block; margin-left: 8px; opacity: 0.5; transition: opacity 0.2s; width: 1em; }
         .draft-table th.sort-active .sort-indicator { opacity: 1; }
@@ -139,6 +139,7 @@
         .draft-pick-circle.NHL, .sport-badge.NHL { background-color: var(--nhl-color); }
         .draft-pick-circle.NCAAF, .sport-badge.NCAAF { background-color: var(--ncaaf-color); }
         .draft-pick-circle.NCAAB, .sport-badge.NCAAB { background-color: var(--ncaab-color); }
+        .mobile-tabs { display: none; }
 
         /* Desktop Specific Layout */
         @media (min-width: 769px) {
@@ -164,11 +165,14 @@
             .site-brand { display: none; }
             .league-title { font-size: 1.5rem; }
             .draft-header { padding: 5px; }
-            .countdown-clock { position: fixed; top: 10px; right: 10px; z-index: 200; padding: 5px 10px; font-size: 1rem; }
-
+            
             .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
-            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: wrap; }
+            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; justify-content: space-between; }
+            .flow-pick-container { gap: 5px; }
             .flow-pick p { font-size: 0.9rem; }
+            .flow-pick.after-that { display: none; }
+            .countdown-clock { font-size: 1.2rem; margin-left: 10px; padding: 5px 10px;}
+
             .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
             .filters::-webkit-scrollbar { display: none; }
             .filters .search-bar { min-width: 150px; }
@@ -185,7 +189,14 @@
             .rosters-mobile-container { padding: 10px; }
             .roster-mobile { display: block; }
             #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
+            
             .table-container { overflow-x: auto; }
+            .draft-table td:last-child, .draft-table th:last-child {
+                position: sticky;
+                right: 0;
+                background: var(--gray);
+            }
+            .draft-table tr:hover td:last-child { background: #2a2a2a; }
         }
     </style>
 </head>
@@ -202,9 +213,13 @@
                     <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
                     <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
                     <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
-                    <div class="flow-pick upcoming"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+                    <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
                 </div>
                  <div class="countdown-clock" id="countdownClock">2:00</div>
+            </div>
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
             </div>
             <div class="filters">
                 <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
@@ -216,10 +231,6 @@
         <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
         <main class="main-content">
-            <div class="mobile-tabs">
-                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                <button class="mobile-tab" data-view="teams">Teams</button>
-            </div>
             <div class="draftboard-container active">
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
