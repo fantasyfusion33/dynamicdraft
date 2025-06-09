@@ -84,6 +84,14 @@
             padding: 10px 0;
         }
 
+        .sticky-left {
+          position: sticky;
+          left: 0;
+          background: #0a0a0a; /* Match your table background */
+          z-index: 3; /* Higher than row hover and base table */
+        }
+
+
         .filters { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
         .filters .search-bar { flex-grow: 1; max-width: 400px; position: relative; }
         #teamSearch {
@@ -607,7 +615,7 @@
             <td>${pctDisplay}</td>
             <td>${team.lastYearPoints || 'N/A'}</td>
             <td>${team.adp || 'N/A'}</td>
-            <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
+            <td class="sticky-left"><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
         return row;
     }
