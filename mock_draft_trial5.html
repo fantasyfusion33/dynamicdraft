@@ -217,6 +217,10 @@
                 </div>
                  <div class="countdown-clock" id="countdownClock">2:00</div>
             </div>
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
+            </div>
             <div class="filters">
                 <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
                 <select id="sportFilter"><option value="all">All Sports</option></select>
@@ -227,10 +231,6 @@
         <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
         <main class="main-content">
-            <div class="mobile-tabs">
-                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                <button class="mobile-tab" data-view="teams">Teams</button>
-            </div>
             <div class="draftboard-container active">
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
