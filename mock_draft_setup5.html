@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create League</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0A0A0A;
+            color: #FFFFFF;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .league-creation-container {
+            background: rgba(26, 26, 26, 0.8);
+            padding: 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+        h1 {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #D2042D, #FF4F4F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 500;
+            font-size: 16px;
+        }
+        #leagueName {
+            width: 95%;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        #leagueName:focus {
+            border-color: #D2042D;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+        }
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            flex-grow: 1;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #D2042D;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .slider-value {
+            font-weight: 600;
+            font-size: 18px;
+            min-width: 30px;
+            text-align: center;
+        }
+        .subheading {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #D2042D;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        button:hover:not(:disabled) {
+            background: #B00326;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .team-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+        }
+        .user-team {
+            background: rgba(210, 4, 45, 0.1);
+            border-left: 3px solid #D2042D;
+        }
+        .draft-order {
+            width: 30px;
+            font-weight: 600;
+            color: #D2042D;
+            text-align: center;
+        }
+        .team-name-input {
+            flex: 1;
+            min-width: 0;
+        }
+        .team-name-input input {
+            width: 90%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            color: white;
+            font-size: 14px;
+        }
+        .user-team .team-name-input input {
+            color: #FF4F4F;
+            font-weight: 600;
+        }
+        .arrow-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .arrow-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .arrow-btn:hover:not(:disabled) {
+            background: rgba(210, 4, 45, 0.3);
+            border-color: #D2042D;
+        }
+        .arrow-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        #wildcardRadios input[type="radio"] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            margin-right: 6px;
+            vertical-align: middle;
+            transition: border-color 0.2s;
+            cursor: pointer;
+        }
+        #wildcardRadios input[type="radio"]:checked {
+            border: 2px solid #D2042D;
+            background: #D2042D;
+        }
+        #wildcardRadios input[type="radio"]:checked::before {
+            content: '';
+            display: block;
+            width: 10px;
+            height: 10px;
+            margin: 3px auto;
+            border-radius: 50%;
+            background: #fff;
+        }
+        #wildcardRadios label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="league-creation-container">
+        <h1>Welcome to Fantasy Fusion!</h1>
+        <h1>Create Your Mock Draft</h1>
+        <form id="leagueForm">
+            <div class="form-group">
+                <label for="leagueName">League Name</label>
+                <input type="text" id="leagueName" placeholder="Enter league name" required>
+            </div>
+            <div class="form-group">
+                <label>League Size</label>
+                <div class="slider-container">
+                    <span>2</span>
+                    <input type="range" id="leagueSize" min="2" max="12" step="1" value="8">
+                    <span class="slider-value">8</span>
+                    <span>12</span>
+                </div>
+            </div>
+            <div class="form-group" id="teamNamesGroup">
+                <label>Team Names</label>
+                <div id="teamNamesContainer">
+                    <!-- Team name inputs will be dynamically added here -->
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Wildcard Rounds</label>
+                <div id="wildcardRadios" style="display: flex; gap: 16px;">
+                    <label>
+                        <input type="radio" name="wildcard" value="0" checked> None
+                    </label>
+                    <label>
+                        <input type="radio" name="wildcard" value="1"> 1 Round
+                    </label>
+                    <label>
+                        <input type="radio" name="wildcard" value="2"> 2 Rounds
+                    </label>
+                </div>
+                <p class="subheading">
+                    Choose the number of wildcard rounds (extra roster spots to draft teams from any sport).
+                </p>
+            </div>
+            <button type="submit">Create League & Start Draft</button>
+        </form>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+    // Initialize Supabase client
+    const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // =========================================================================
+    // SNAKE DRAFT ORDER GENERATION
+    // =========================================================================
+
+    /**
+     * Generates a full snake draft order for all rounds.
+     * @param {string[]} teamNames - The array of team names in their draft positions.
+     * @param {number} wildcardRounds - The number of wildcard rounds (0, 1, or 2).
+     * @returns {string[]} A flat array representing the full snake draft order.
+     */
+    function generateSnakeDraftOrder(teamNames, wildcardRounds) {
+        const draftOrder = [];
+        const teamCount = teamNames.length;
+        const totalRounds = 12 + parseInt(wildcardRounds, 10);
+
+        for (let i = 0; i < totalRounds; i++) {
+            const round = i + 1;
+            // Create a copy of team names for the current round's order
+            let roundOrder = [...teamNames]; 
+
+            // Reverse the order for even-numbered rounds (the "snake" part)
+            if (round % 2 === 0) { 
+                roundOrder.reverse();
+            }
+            // Add the round's order to the full draft order
+            draftOrder.push(...roundOrder);
+        }
+        return draftOrder;
+    }
+
+
+    // =========================================================================
+    // FORM SUBMISSION
+    // =========================================================================
+    document.getElementById('leagueForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        document.querySelector('button[type="submit"]').disabled = true;
+
+        const teamCount = parseInt(document.getElementById('leagueSize').value);
+        const wildcardValue = parseInt(document.querySelector('input[name="wildcard"]:checked').value, 10);
+        
+        // Get the final, re-ordered list of team names from the UI
+        const teamItems = document.querySelectorAll('.team-item .team-name-input input');
+        const teamNames = Array.from(teamItems).map(input => input.value);
+        
+        // Find the final position of the user's team (0-indexed)
+        const userTeamIndex = Array.from(document.querySelectorAll('.team-item')).findIndex(item => item.classList.contains('user-team'));
+        
+        // ***Generate the correct snake draft order with team names***
+        const snakeDraftOrder = generateSnakeDraftOrder(teamNames, wildcardValue);
+
+        // Prepare the complete data object for Supabase
+        const leagueData = {
+            league_name: document.getElementById('leagueName').value.trim(),
+            team_count: teamCount,
+            wildcard_round: wildcardValue,
+            team_names: teamNames, 
+            draft_order: snakeDraftOrder, // ***Saves the correct snake order***
+            user_team_position: userTeamIndex + 1, // Convert to 1-based index for DB
+            player_rosters: {}, // Initialize as an empty object
+            status: 'not_started',
+            current_pick: 0
+        };
+
+        try {
+            // Insert data into the mock_drafts table
+            const { data, error } = await supabase
+                .from('mock_drafts')
+                .insert([leagueData])
+                .select('id')
+                .single();
+
+            if (error) throw error;
+            
+            // Redirect to the draft page
+            window.location.href = `mock_draft_trial4.html?leagueId=${data.id}`;
+
+        } catch (err) {
+            console.error('Error creating league:', err);
+            alert('League creation failed. Please check the console for details and try again.');
+            document.querySelector('button[type="submit"]').disabled = false;
+        }
+    });
+
+    // =========================================================================
+    // UI HELPER FUNCTIONS
+    // =========================================================================
+    
+    // Global state for UI management
+    let user_team_position = 0; // Tracks user team position (0-indexed)
+    let userTeamName = "My Team";
+
+    const leagueSizeSlider = document.getElementById('leagueSize');
+    const sliderValue = document.querySelector('.slider-value');
+
+    leagueSizeSlider.addEventListener('input', (e) => {
+        sliderValue.textContent = e.target.value;
+        updateTeamNameInputs(parseInt(e.target.value, 10));
+    });
+
+    function updateTeamNameInputs(teamCount) {
+        const teamNamesContainer = document.getElementById('teamNamesContainer');
+        // Reset the position if team count shrinks below it
+        if (user_team_position >= teamCount) {
+            user_team_position = teamCount - 1;
+        }
+        teamNamesContainer.innerHTML = '';
+    
+        for (let i = 0; i < teamCount; i++) {
+            const isUserTeam = i === user_team_position;
+            const teamItem = document.createElement('div');
+            teamItem.className = `team-item ${isUserTeam ? 'user-team' : ''}`;
+            teamItem.dataset.position = i;
+            teamItem.innerHTML = `
+                <span class="draft-order">${i + 1}</span>
+                <div class="team-name-input">
+                    <input type="text" id="team${i}Name" value="${isUserTeam ? userTeamName : 'Team ' + (i + 1)}" ${isUserTeam ? '' : 'readonly'} required>
+                </div>
+                <div class="arrow-buttons">
+                    ${isUserTeam ? `
+                        <button class="arrow-btn" onclick="moveUserTeamUp(event)"><i class="fas fa-chevron-up"></i></button>
+                        <button class="arrow-btn" onclick="moveUserTeamDown(event)"><i class="fas fa-chevron-down"></i></button>
+                    ` : ''}
+                </div>
+            `;
+            teamNamesContainer.appendChild(teamItem);
+        }
+    
+        // Add listener to the user's input field to update their team name
+        const userTeamInput = document.querySelector('.user-team input');
+        if (userTeamInput) {
+            userTeamInput.addEventListener('input', (e) => { userTeamName = e.target.value; });
+        }
+        refreshTeamDisplay();
+    }
+
+    // Prevents default form submission when arrow buttons are clicked
+    function moveUserTeamUp(e) {
+        e.preventDefault(); 
+        const container = document.getElementById('teamNamesContainer');
+        const items = Array.from(container.querySelectorAll('.team-item'));
+        if (user_team_position > 0) {
+            container.insertBefore(items[user_team_position], items[user_team_position - 1]);
+            refreshTeamDisplay();
+        }
+    }
+
+    // Prevents default form submission when arrow buttons are clicked
+    function moveUserTeamDown(e) {
+        e.preventDefault();
+        const container = document.getElementById('teamNamesContainer');
+        const items = Array.from(container.querySelectorAll('.team-item'));
+        if (user_team_position < items.length - 1) {
+            container.insertBefore(items[user_team_position + 1], items[user_team_position]);
+            refreshTeamDisplay();
+        }
+    }
+
+    function refreshTeamDisplay() {
+        const container = document.getElementById('teamNamesContainer');
+        const items = Array.from(container.querySelectorAll('.team-item'));
+        items.forEach((item, index) => {
+            // Update draft number
+            item.querySelector('.draft-order').textContent = index + 1;
+            // Update CPU team names based on new position
+            if (!item.classList.contains('user-team')) {
+                item.querySelector('input').value = `Team ${index + 1}`;
+            }
+            // Update button states and user position tracker
+            if (item.classList.contains('user-team')) {
+                user_team_position = index;
+                const upButton = item.querySelector('.arrow-btn:first-child');
+                const downButton = item.querySelector('.arrow-btn:last-child');
+                if (upButton) upButton.disabled = index === 0;
+                if (downButton) downButton.disabled = index === items.length - 1;
+            }
+        });
+    }
+
+    // Initial call to populate team names on page load
+    updateTeamNameInputs(parseInt(leagueSizeSlider.value, 10));
+
+</script>
+</body>
+</html>
