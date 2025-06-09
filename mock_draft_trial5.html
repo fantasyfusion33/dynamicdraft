@@ -590,13 +590,13 @@
         const row = document.createElement('tr');
         const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
         const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
-        const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
+        const subInfo = <span class="sport-badge ${team.sport}">${team.sport}</span> `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
 
         row.innerHTML = `
             <td class="team-name-cell">
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
                 <div>
-                    ${team.name} <span class="sport-badge ${team.sport}">${team.sport}</span>
+                    ${team.name} 
                     <div class="team-sub-info">${subInfo}</div>
                 </div>
             </td>
