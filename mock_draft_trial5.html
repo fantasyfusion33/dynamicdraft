@@ -42,7 +42,7 @@
         }
         .desktop-sidebar-area { display: none; }
         .draft-header { grid-area: header; position: relative; padding: 10px 0; }
-        .draft-flow-tracker { grid-area: ticker; margin-bottom: 10px;}
+        .draft-flow-tracker { grid-area: ticker;}
         .draft-status-bar { grid-area: progress; }
         .main-content { grid-area: main; }
 
@@ -122,7 +122,7 @@
         .draft-table th .sort-indicator { display: inline-block; margin-left: 8px; opacity: 0.5; transition: opacity 0.2s; width: 1em; }
         .draft-table th.sort-active .sort-indicator { opacity: 1; }
         .draft-table tr:hover { background: var(--gray); }
-        .draft-table .team-name-cell { display: flex; align-items: center; gap: 15px; }
+        .draft-table .team-name-cell { display: flex; align-items: center; gap: 15px; white-space: normal; }
         .draft-table .team-sub-info { font-size: 0.8rem; color: #aaa; }
         .draft-table .sport-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: bold; }
         .draft-table .draft-button { background: var(--primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
@@ -165,13 +165,13 @@
             .site-brand { display: none; }
             .league-title { font-size: 1.5rem; }
             .draft-header { padding: 5px; }
+            .countdown-clock { position: fixed; top: 10px; right: 10px; z-index: 200; padding: 5px 10px; font-size: 1rem; }
             
             .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
-            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; justify-content: space-between; }
-            .flow-pick-container { gap: 5px; }
+            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; }
             .flow-pick p { font-size: 0.9rem; }
             .flow-pick.after-that { display: none; }
-            .countdown-clock { font-size: 1.2rem; margin-left: 10px; padding: 5px 10px;}
+            .countdown-clock { font-size: 1.5rem; margin-left: 10px; padding: 5px 10px;}
 
             .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
             .filters::-webkit-scrollbar { display: none; }
@@ -194,9 +194,9 @@
             .draft-table td:last-child, .draft-table th:last-child {
                 position: sticky;
                 right: 0;
-                background: var(--gray);
+                background: var(--dark);
             }
-            .draft-table tr:hover td:last-child { background: #2a2a2a; }
+            .draft-table tr:hover td:last-child { background: var(--gray); }
         }
     </style>
 </head>
@@ -217,10 +217,6 @@
                 </div>
                  <div class="countdown-clock" id="countdownClock">2:00</div>
             </div>
-            <div class="mobile-tabs">
-                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                <button class="mobile-tab" data-view="teams">Teams</button>
-            </div>
             <div class="filters">
                 <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
                 <select id="sportFilter"><option value="all">All Sports</option></select>
@@ -231,6 +227,10 @@
         <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
         <main class="main-content">
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
+            </div>
             <div class="draftboard-container active">
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
