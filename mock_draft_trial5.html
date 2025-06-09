@@ -135,8 +135,10 @@
         .draft-table .sport-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: bold; }
         .draft-table .draft-button { background: var(--primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
         .draft-table .draft-button:disabled { background: #555; cursor: not-allowed; }
-        .draft-table thead th:last-child { position: sticky; z-index: 3; }
-        
+        .draft-table thead th:last-child { position: sticky; right: 0; z-index: 3; }
+        .draft-table td:last-child { position: sticky; right: 0; background: var(--dark); }
+        .draft-table tr:hover td:last-child { background: var(--gray); }
+    
         .roster ul { list-style: none; padding: 0; }
         .roster li { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
         .team-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -162,7 +164,7 @@
                 border-radius: 12px; padding: 20px; height: 80vh; overflow-y: auto;
             }
             .roster { display: none; }
-            .roster.active { width: 100%; display: block; }
+            .roster.active { display: block; }
             #teamSelector { width: 100%; margin-bottom: 15px; }   
         }
 
@@ -196,23 +198,18 @@
             .main-content > div.active { display: block; }
             
             .rosters-mobile-container { padding: 10px; }
-            .roster-mobile { width: 100%; display: block; }
+            .roster-mobile { display: block; }
             #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
             
-            .table-container { overflow-x: auto; width: 100%; max-width: 96vw; }
+            .table-container { overflow-x: auto; }
             .draft-table td:last-child, .draft-table th:last-child {
                 position: sticky;
                 right: 0;
                 background: var(--dark);
-                z-index: 4;
-            }
-            .draft-table td:first-child, .draft-table th:first-child {
-                position: sticky;
-                left: 0;
-                background: var(--dark);
-                z-index: 4;
+                z-index: 1;
             }
             .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table thead th:last-child { z-index: 3; }
         }
     </style>
 </head>
@@ -623,7 +620,7 @@
             <td>${pctDisplay}</td>
             <td>${team.lastYearPoints || 'N/A'}</td>
             <td>${team.adp || 'N/A'}</td>
-            <td class="sticky-left"><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
+            <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
         return row;
     }
