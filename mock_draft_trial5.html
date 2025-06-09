@@ -597,7 +597,10 @@
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
                 <div>
                     ${team.name} 
-                    <span class="sport-badge ${team.sport}">${team.sport}</span> <div class="team-sub-info">${subInfo}</div>
+                    <div class="team-sub-info">
+                        <span class="sport-badge ${team.sport}">${team.sport}</span>
+                        <span>${subInfo}</span>
+                    </div>                
                 </div>
             </td>
             <td>${oddsDisplay}</td>
