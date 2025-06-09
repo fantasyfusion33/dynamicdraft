@@ -421,7 +421,6 @@
         createTeamSidebar();
         populateSportFilter();
         renderTeams();
-        updateStickyHeaderOffset();
         if (isMobile) renderMobileRosters();
     }
     function addEventListeners() {
@@ -440,7 +439,6 @@
             isMobile = window.innerWidth <= 768;
             if (wasMobile !== isMobile) renderTeams();
         });
-        window.addEventListener('resize', updateStickyHeaderOffset);
         document.querySelectorAll('.mobile-tab').forEach(tab => {
             tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
         });
@@ -727,17 +725,6 @@
             switchRoster(sanitizedId);
         } catch (err) {
             console.error("Non-critical UI error in switchRosterToCurrentPlayer:", err);
-        }
-    }
-    
-    function updateStickyHeaderOffset() {
-    const stickyHeader = document.querySelector('.sticky-header');
-    const tableHeaders = document.querySelectorAll('.draft-table th');
-    if (stickyHeader && tableHeaders.length > 0) {
-        const stickyHeaderHeight = stickyHeader.offsetHeight;
-        tableHeaders.forEach(th => {
-            th.style.top = `${stickyHeaderHeight}px`;
-            });
         }
     }
     
