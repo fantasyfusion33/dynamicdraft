@@ -85,10 +85,10 @@
         }
 
         .sticky-left {
-          position: sticky;
-          left: 0;
-          background: #0a0a0a; /* Match your table background */
-          z-index: 3; /* Higher than row hover and base table */
+        position: sticky;
+        left: 0;
+        background: #0a0a0a; /* Match your table background */
+        z-index: 3; /* Higher than row hover and base table */
         }
 
 
@@ -165,7 +165,7 @@
             }
             .roster { display: none; }
             .roster.active { display: block; }
-            #teamSelector { width: 100%; margin-bottom: 15px; }   
+            #teamSelector { width: 100%; margin-bottom: 15px; }    
         }
 
         /* MOBILE RESPONSIVE STYLES */
@@ -278,6 +278,7 @@
         league_name: '', team_names: [], team_count: 0, wildcard_round: 0,
         user_team_name: '', current_pick: 0, draft_order: [],
         player_rosters: {}, total_picks: 0, timer: null,
+        last_pick_details: null, // *** MODIFICATION: Explicitly track the last pick
     };
     let DraftableTeams = [];
     let isUserTurn = false;
@@ -314,25 +315,43 @@
         try {
             const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
             if (error) throw error;
-            if (!data || typeof data.draft_order[0] !== 'string') throw new Error("Invalid draft data. Please create a new draft.");
+            if (!data || !Array.isArray(data.draft_order)) throw new Error("Invalid draft data. Please create a new draft.");
+            
             Object.assign(draftState, data);
+            
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
             draftState.user_team_name = data.team_names[userPosition] || '';
-            draftState.player_rosters = data.player_rosters && Object.keys(data.player_rosters).length > 0 ? data.player_rosters : initializePlayerRosters(data.team_names);
+            
+            // *** MODIFICATION: More robustly initialize rosters
+            if (!data.player_rosters || Object.keys(data.player_rosters).length === 0) {
+                draftState.player_rosters = initializePlayerRosters(data.team_names);
+            } else {
+                draftState.player_rosters = data.player_rosters;
+            }
+
             draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
         } catch (err) {
             alert(err.message);
             console.error('Init Error:', err);
         }
     }
+
     async function fetchDraftableTeamsFromDB() {
         try {
             const { data, error } = await supabase.from('SportTeamDatabase').select('*');
             if (error) throw error;
-            const pickedTeamIds = new Set(Object.values(draftState.player_rosters).flatMap(roster => Object.values(roster).flat().map(team => team.team_id)));
+
+            // Flatten the entire rosters object to get all picked teams
+            const pickedTeamIds = new Set(
+                Object.values(draftState.player_rosters)
+                      .flatMap(roster => Object.values(roster).flat())
+                      .map(team => team.team_id)
+            );
+
             DraftableTeams = data.filter(team => !pickedTeamIds.has(team.team_id));
         } catch (err) { console.error('Fetch Teams Error:', err); }
     }
+
     function initializePlayerRosters(teamNames) {
         const rosters = {};
         teamNames.forEach(name => {
@@ -340,37 +359,46 @@
         });
         return rosters;
     }
+
     function isPickValid(team, roster) {
         const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
         const isWildcardRound = currentRound > 12 && draftState.wildcard_round > 0;
-        if (isWildcardRound) return roster.Wildcard.length < draftState.wildcard_round;
+        
+        if (isWildcardRound) {
+            return roster.Wildcard.length < draftState.wildcard_round;
+        }
         return roster[team.sport].length < 2;
     }
+
     function checkForNextPick() {
         if (draftState.current_pick >= draftState.total_picks) {
             endDraft();
             return;
         }
+
         if (draftState.current_pick === 12 * draftState.team_count && draftState.wildcard_round > 0) {
             alert(`Welcome to the Wildcard Round(s)!`);
         }
+        
         updateOnTheClockUI();
-        const currentDrafter = draftState.draft_order[draftState.current_pick].trim();
-        const myTeamName = draftState.user_team_name.trim();
-        isUserTurn = currentDrafter === myTeamName;
+        
+        const currentDrafter = draftState.draft_order[draftState.current_pick];
+        isUserTurn = currentDrafter === draftState.user_team_name;
 
         if (isUserTurn) {
             enableDraftButtons(true);
             startCountdown();
         } else {
             enableDraftButtons(false);
-            setTimeout(autoDraftTeam, 1500);
+            setTimeout(autoDraftTeam, 1500); // AI picks after a short delay
         }
     }
+
     async function draftTeam(teamId) {
         if (!isUserTurn) return;
         const team = DraftableTeams.find(t => t.team_id === teamId);
         if (!team) return;
+
         if (!isPickValid(team, draftState.player_rosters[draftState.user_team_name])) {
             alert(`Roster full for this sport. Please select a different team.`);
             return;
@@ -378,37 +406,52 @@
         if (draftState.timer) clearInterval(draftState.timer);
         await processPick(team);
     }
+
     function autoDraftTeam() {
         const draftingTeamName = draftState.draft_order[draftState.current_pick];
         const roster = draftState.player_rosters[draftingTeamName];
+        
         const eligibleTeams = DraftableTeams.filter(team => isPickValid(team, roster));
         const teamToPick = eligibleTeams.length > 0 ? sortTeams(eligibleTeams)[0] : null;
+        
         processPick(teamToPick);
     }
+
     async function processPick(team) {
+        const draftingTeamName = draftState.draft_order[draftState.current_pick];
+        
+        // *** MODIFICATION: Explicitly set last pick details here for reliability
+        draftState.last_pick_details = { team, drafter: draftingTeamName };
+
         if (team) {
-            const draftingTeamName = draftState.draft_order[draftState.current_pick];
             const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
             team.round = currentRound;
             team.pick = (draftState.current_pick % draftState.team_count) + 1;
+            
             const sportToCredit = (currentRound > 12 && draftState.wildcard_round > 0) ? 'Wildcard' : team.sport;
+            
             draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
             DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
         }
+        
         draftState.current_pick++;
+        
         await saveDraftProgress();
         updateAfterPick();
         checkForNextPick();
     }
+
     async function saveDraftProgress() {
         try {
             await supabase.from('mock_drafts').update({
-                current_pick: draftState.current_pick, player_rosters: draftState.player_rosters,
+                current_pick: draftState.current_pick,
+                player_rosters: draftState.player_rosters,
                 status: draftState.current_pick >= draftState.total_picks ? 'completed' : 'in_progress',
                 completed_at: draftState.current_pick >= draftState.total_picks ? new Date().toISOString() : null
             }).eq('id', leagueId);
         } catch(err) { console.error("Save Error", err); }
     }
+
     function endDraft() {
         if (draftState.timer) clearInterval(draftState.timer);
         alert("Draft Complete!");
@@ -426,6 +469,7 @@
         renderTeams();
         if (isMobile) renderMobileRosters();
     }
+
     function addEventListeners() {
         document.getElementById("sportFilter").addEventListener("change", () => {
             populateConferenceFilter();
@@ -446,56 +490,51 @@
             tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
         });
     }
+    
     function updateAfterPick() {
         updateDraftProgress();
         renderTeams();
-        const lastDrafterName = draftState.draft_order[draftState.current_pick - 1];
-        updateRosterDisplay(lastDrafterName);
+        // Use the new reliable last_pick_details to update the correct roster
+        const lastDrafterName = draftState.last_pick_details?.drafter;
+        if(lastDrafterName) {
+            updateRosterDisplay(lastDrafterName);
+        }
         if (isMobile) renderMobileRosters(document.getElementById('mobileTeamSelector')?.value);
         updateDraftFlowTracker();
     }
+    
     function updateOnTheClockUI() {
         updateDraftFlowTracker();
         switchRosterToCurrentPlayer();
     }
 
     function updateDraftFlowTracker() {
-        try {
-            const { current_pick, draft_order, team_count, player_rosters } = draftState;
-            
-            const prevPickInfo = document.getElementById('previous-pick-info');
-            if (current_pick > 0) {
-                const prevDrafter = draft_order[current_pick - 1];
-                if (player_rosters && player_rosters[prevDrafter]) {
-                    const rosterPicks = Object.values(player_rosters[prevDrafter]).flat();
-                    if (rosterPicks.length > 0) {
-                        const prevPick = rosterPicks[rosterPicks.length - 1];
-                        prevPickInfo.textContent = prevPick ? prevPick.name : '(Skipped)';
-                    } else {
-                        prevPickInfo.textContent = '(Skipped)';
-                    }
-                } else {
-                     prevPickInfo.textContent = '--';
-                }
+        const { current_pick, draft_order, team_count, total_picks, last_pick_details } = draftState;
+        
+        // *** MODIFICATION: Use the reliable last_pick_details object
+        const prevPickInfo = document.getElementById('previous-pick-info');
+        if (last_pick_details) {
+            if (last_pick_details.team) {
+                prevPickInfo.textContent = `${last_pick_details.team.name}`;
             } else {
-                prevPickInfo.textContent = '--';
+                 prevPickInfo.innerHTML = `<span style="color: #aaa;">${last_pick_details.drafter} (Skipped)</span>`;
             }
-
-            const currentPickInfo = document.getElementById('current-pick-info');
-            if (current_pick < draftState.total_picks) {
-                const teamName = draft_order[current_pick];
-                const round = Math.floor(current_pick / team_count) + 1;
-                const pick = (current_pick % team_count) + 1;
-                currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
-            } else {
-                currentPickInfo.innerHTML = 'Draft Complete';
-            }
-
-            document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
-            document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
-        } catch (err) {
-            console.error("Error updating draft flow tracker:", err);
+        } else {
+            prevPickInfo.textContent = '--';
         }
+
+        const currentPickInfo = document.getElementById('current-pick-info');
+        if (current_pick < total_picks) {
+            const teamName = draft_order[current_pick];
+            const round = Math.floor(current_pick / team_count) + 1;
+            const pick = (current_pick % team_count) + 1;
+            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">R ${round}, P ${pick}</span>`;
+        } else {
+            currentPickInfo.innerHTML = 'Draft Complete';
+        }
+
+        document.getElementById('upcoming-pick-1').textContent = draft_order[current_pick + 1] || '--';
+        document.getElementById('upcoming-pick-2').textContent = draft_order[current_pick + 2] || '--';
     }
     
     function createTeamSidebar() {
@@ -510,6 +549,7 @@
             option.value = sanitizedId;
             option.textContent = name;
             teamSelector.appendChild(option);
+
             const rosterEl = document.createElement('div');
             rosterEl.className = 'roster';
             rosterEl.id = `roster-${sanitizedId}`;
@@ -538,7 +578,7 @@
             teams.forEach(t => {
                 rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
             });
-            for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+            for (let i = 0; i < (2 - teams.length); i++) rosterHTML += `<li class="empty" style="opacity: 0.4;">Empty Slot</li>`;
         });
 
         if (draftState.wildcard_round > 0) {
@@ -547,7 +587,7 @@
             wcTeams.forEach(t => {
                  rosterHTML += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
             });
-            for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty">Empty</li>`;
+            for (let i = 0; i < (draftState.wildcard_round - wcTeams.length); i++) rosterHTML += `<li class="empty" style="opacity: 0.4;">Empty Slot</li>`;
         }
         rosterList.innerHTML = rosterHTML;
     }
@@ -558,11 +598,13 @@
         const sport = document.getElementById("sportFilter").value;
         const conference = document.getElementById("conferenceFilter").value;
         const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
+
         let filteredTeams = DraftableTeams.filter(t => 
             (sport === 'all' || t.sport === sport) &&
             (conference === 'all' || t.conference === conference) &&
             t.name.toLowerCase().includes(searchQuery)
         );
+
         const sortedTeams = sortTeams(filteredTeams);
         table.appendChild(createTableHeader());
         const tbody = document.createElement('tbody');
@@ -613,7 +655,7 @@
                     <div class="team-sub-info">
                         <span class="sport-badge ${team.sport}">${team.sport}</span>
                         <span>${subInfo}</span>
-                    </div>                
+                    </div>                  
                 </div>
             </td>
             <td>${oddsDisplay}</td>
@@ -697,20 +739,15 @@
                 return (valA || '').localeCompare(valB || '') * dir;
             }
             
-            const numA = parseFloat(valA) || 0;
-            const numB = parseFloat(valB) || 0;
+            const numA = parseFloat(valA) || (direction === 'asc' ? Infinity : -Infinity);
+            const numB = parseFloat(valB) || (direction === 'asc' ? Infinity : -Infinity);
 
             if (numA === numB) {
-                const oddsA = parseFloat(a.championship_odds) || 99999;
-                const oddsB = parseFloat(b.championship_odds) || 99999;
+                const oddsA = parseFloat(a.championship_odds) || Infinity;
+                const oddsB = parseFloat(b.championship_odds) || Infinity;
                 return oddsA - oddsB;
             }
             
-            if(direction === 'asc') {
-                 if (numA === 0) return 1;
-                 if (numB === 0) return -1;
-            }
-
             return (numA - numB) * dir;
         });
     }
