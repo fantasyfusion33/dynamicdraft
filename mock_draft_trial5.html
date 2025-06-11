@@ -34,7 +34,8 @@
         }
         .draft-container {
             display: grid;
-            grid-template-areas: "header" "ticker" "progress" "main";
+            /* MODIFICATION: Removed 'progress' from grid layout */
+            grid-template-areas: "header" "ticker" "main";
             grid-template-columns: 1fr;
             gap: 20px;
             max-width: 1600px;
@@ -42,8 +43,7 @@
         }
         .desktop-sidebar-area { display: none; }
         .draft-header { grid-area: header; position: relative; padding: 10px 0; }
-        .draft-flow-tracker { grid-area: ticker; margin-bottom: 10px;}
-        .draft-status-bar { grid-area: progress; }
+        .draft-flow-tracker { grid-area: ticker; }
         .main-content { grid-area: main; }
 
         .site-brand {
@@ -73,7 +73,7 @@
         .flow-pick.on-the-clock { background: var(--primary); transform: scale(1.05); }
         .flow-pick .round-pick-info { font-size: 0.9rem; font-weight: 400; opacity: 0.8; }
 
-        .draft-status-bar { height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; }
+        .draft-status-bar { height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; margin-bottom: 20px;}
         .draft-progress { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s ease-out; }
 
         .sticky-header {
@@ -114,7 +114,7 @@
         .filters select:hover, #teamSelector:hover, #mobileTeamSelector:hover { background: #2a2a2a; }
         #clearSearch { position: absolute; right: 0; top: 0; bottom: 0; background: none; border: none; color: #888; font-size: 1.2rem; cursor: pointer; padding: 0 12px; }
 
-        .table-container { overflow-y: auto; }
+        .table-container { overflow: auto; }
         .draft-table { width: 100%; border-collapse: separate; border-spacing: 0;}
         .draft-table th, .draft-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #333; white-space: nowrap; }
         .draft-table th { cursor: pointer; user-select: none; position: sticky; top: 0; background: var(--dark); z-index: 2;}
@@ -140,17 +140,18 @@
         .draft-pick-circle.NCAAF, .sport-badge.NCAAF { background-color: var(--ncaaf-color); }
         .draft-pick-circle.NCAAB, .sport-badge.NCAAB { background-color: var(--ncaab-color); }
         .mobile-tabs { display: none; }
+        .mobile-hide { display: none; } /* Class to hide elements on mobile */
 
         /* Desktop Specific Layout */
         @media (min-width: 769px) {
             .draft-container {
-                grid-template-areas: "header header" "ticker ticker" "progress progress" "main sidebar";
+                /* MODIFICATION: Removed 'progress' row */
+                grid-template-areas: "header header" "ticker ticker" "main sidebar";
                 grid-template-columns: 1fr 400px;
             }
             .mobile-tabs, .rosters-mobile-container { display: none; }
             .desktop-sidebar-area {
                 display: block; grid-area: sidebar; 
-                /* MODIFICATION: Make sidebar sticky */
                 position: sticky;
                 top: 20px;
                 height: calc(100vh - 40px);
@@ -161,7 +162,13 @@
              }
             .roster { display: none; }
             .roster.active { display: block; }
-            #teamSelector { width: 100%; margin-bottom: 15px; }    
+            #teamSelector { width: 100%; margin-bottom: 15px; }
+
+            /* MODIFICATION: Create scrollable container for desktop draft board */
+            .main-content .table-container {
+                max-height: calc(100vh - 320px); /* Adjust height to fit below headers */
+                overflow: auto;
+            }
         }
 
         /* MOBILE RESPONSIVE STYLES */
@@ -173,75 +180,50 @@
             .league-title { font-size: 1.5rem; }
             .draft-header { padding: 5px; }
             
-            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding: 10px 0; }
-            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; }
+            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; }
+            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; margin-bottom: 10px;}
             .flow-pick p { font-size: 0.9rem; }
             .flow-pick.after-that { display: none; }
-            /* MODIFICATION: Clock is now part of the flex flow, no special positioning */
             .countdown-clock { font-size: 1.2rem; margin-left: 10px; padding: 5px 8px; text-align: center;}
-
+    
             .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
             .filters::-webkit-scrollbar { display: none; }
             .filters .search-bar { min-width: 150px; }
-
+    
             .mobile-tabs {
                 display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px;
             }
             .mobile-tab { padding: 10px; border: none; background: none; color: white; font-size: 1rem; flex-grow: 1; border-radius: 6px; }
             .mobile-tab.active { background: var(--primary); }
-
+    
             .main-content > div { display: none; }
             .main-content > div.active { display: block; }
-            
+    
             .rosters-mobile-container { padding: 10px; }
             .roster-mobile { display: block; }
             #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
-            
-            /* MODIFICATION: Make draft board container scrollable below sticky header */
-            .table-container { 
-                overflow: auto; /* Changed from overflow-y */
+    
+            .table-container {
+                overflow: auto;
                 width: 100%;
-                max-height: calc(100vh - 250px); /* Adjust height based on your sticky header's height */
-                max-width: 100vw;
-            }
-            
-            /* MODIFICATION: Sticky/frozen columns and header for mobile draft board */
-            .draft-table th {
-                position: sticky;
-                top: 0;
-                z-index: 2;
-                background: var(--dark);
-            }
-            .draft-table td:first-child, .draft-table th:first-child {
-                position: sticky;
-                left: 0;
-                background: var(--dark);
-                z-index: 1;
-            }
-            .draft-table tr:hover td:first-child {
-                background: var(--gray);
-            }
-             .draft-table td:last-child, .draft-table th:last-child {
-                position: sticky;
-                right: 0;
-                background: var(--dark);
-                z-index: 1;
-            }
-            .draft-table tr:hover td:last-child {
-                background: var(--gray);
-            }
-            .draft-table th:first-child, .draft-table th:last-child {
-                z-index: 3;
-            }
-            /* MODIFICATION: Reduce text size in mobile draft board */
+                max-height: calc(100vh - 250px);
+             }
+    
+            .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
+            .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:first-child { background: var(--gray); }
+            .draft-table td:last-child, .draft-table th:last-child { position: sticky; right: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table th:first-child, .draft-table th:last-child { z-index: 3; }
+    
+            /* MODIFICATION: Further reduce text size for mobile draft board */
             .draft-table th, .draft-table td {
-                font-size: 0.8rem;
-                padding: 8px 10px;
+                font-size: 0.7rem; /* Even smaller font */
+                padding: 6px 8px; /* Slightly reduced padding */
             }
-            .draft-table .sport-badge { font-size: 0.7rem; padding: 2px 6px; }
-            .draft-table .team-name-cell { gap: 8px; }
-
-             /* MODIFICATION: Compact roster list */
+            .draft-table .sport-badge { font-size: 0.6rem; padding: 1px 5px; }
+            .draft-table .team-name-cell { gap: 6px; }
+    
             .roster li { padding-right: 4px; }
         }
     </style>
@@ -253,36 +235,42 @@
             <h1 class="league-title">League Name</h1>
         </header>
 
-        <div class="sticky-header">
-            <div class="draft-flow-tracker">
-                <div class="flow-pick-container">
-                    <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
-                    <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
-                    <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
-                    <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
-                </div>
-                 <div class="countdown-clock" id="countdownClock">2:00</div>
+        <div class="draft-flow-tracker">
+            <div class="flow-pick-container">
+                <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
+                <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
+                <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
+                <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
             </div>
-            <div class="mobile-tabs">
-                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                <button class="mobile-tab" data-view="teams">Teams</button>
-            </div>
+            <div class="countdown-clock" id="countdownClock">2:00</div>
         </div>
         
-        <div class="draft-status-bar"><div class="draft-progress"></div></div>
-
         <main class="main-content">
+             <div class="draft-status-bar"><div class="draft-progress"></div></div>
+
             <div class="draftboard-container active">
-                <div class="filters">
-                    <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
-                    <select id="sportFilter"><option value="all">All Sports</option></select>
-                    <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
+                <div class="sticky-header">
+                    <div class="mobile-tabs">
+                        <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                        <button class="mobile-tab" data-view="teams">Teams</button>
+                    </div>
+                    <div class="filters">
+                        <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
+                        <select id="sportFilter"><option value="all">All Sports</option></select>
+                        <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
+                    </div>
                 </div>
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
                 </div>
             </div>
             <div class="teams-container">
+                 <div class="sticky-header">
+                    <div class="mobile-tabs">
+                        <button class="mobile-tab" data-view="draftboard">Draft Board</button>
+                        <button class="mobile-tab active" data-view="teams">Teams</button>
+                    </div>
+                </div>
                  <div id="rosters-mobile"></div>
             </div>
         </main>
@@ -299,9 +287,6 @@
     
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-    // Script remains the same as the previous corrected version.
-    // The only change required was moving the .filters div in the HTML.
-    // All other changes are purely CSS and HTML structure.
     const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -333,7 +318,12 @@
             return;
         }
         showLoadingState(true);
-        await Promise.all([initializeDraftState(), fetchDraftableTeamsFromDB()]);
+        
+        // *** MODIFICATION: Fixed race condition by running these sequentially.
+        // This ensures draft state is loaded BEFORE we try to filter draftable teams.
+        await initializeDraftState();
+        await fetchDraftableTeamsFromDB();
+
         setupInitialUI();
         addEventListeners();
         showLoadingState(false);
@@ -472,7 +462,9 @@
         createTeamSidebar();
         populateSportFilter();
         renderTeams();
-        if (isMobile) renderMobileRosters();
+        if (isMobile) {
+            showMobileView('draftboard'); // Default to draftboard view
+        }
     }
 
     function addEventListeners() {
@@ -487,12 +479,11 @@
             renderTeams();
         });
         window.addEventListener('resize', () => { 
-            const wasMobile = isMobile;
-            isMobile = window.innerWidth <= 768;
-            if (wasMobile !== isMobile) {
-                // Full re-render needed if switching between mobile/desktop
+            const newIsMobile = window.innerWidth <= 768;
+            if (isMobile !== newIsMobile) {
                 window.location.reload();
             }
+            isMobile = newIsMobile;
         });
         document.querySelectorAll('.mobile-tab').forEach(tab => {
             tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
@@ -598,9 +589,9 @@
     function renderTeams() {
         const table = document.getElementById("draftable-teams-table");
         table.innerHTML = ''; 
-        const sport = document.getElementById("sportFilter").value;
-        const conference = document.getElementById("conferenceFilter").value;
-        const searchQuery = document.getElementById("teamSearch").value.toLowerCase();
+        const sport = document.getElementById("sportFilter")?.value || 'all';
+        const conference = document.getElementById("conferenceFilter")?.value || 'all';
+        const searchQuery = document.getElementById("teamSearch")?.value.toLowerCase() || '';
         let filteredTeams = DraftableTeams.filter(t => 
             (sport === 'all' || t.sport === sport) &&
             (conference === 'all' || t.conference === conference) &&
@@ -625,6 +616,9 @@
             const th = document.createElement('th');
             th.dataset.key = header.key;
             th.innerHTML = `${header.text} <span class="sort-indicator"></span>`;
+            if (header.isMobileHidden) {
+                th.classList.add('mobile-hide');
+            }
             if (header.key === sortState.key) {
                 th.classList.add('sort-active');
                 th.querySelector('.sort-indicator').innerHTML = sortState.direction === 'asc' ? '▲' : '▼';
@@ -653,8 +647,10 @@
                     </div>                  
                 </div>
             </td>
-            <td>${oddsDisplay}</td> <td>${pctDisplay}</td>
-            <td>${team.lastYearPoints || 'N/A'}</td> <td>${team.adp || 'N/A'}</td>
+            <td>${oddsDisplay}</td>
+            <td class="mobile-hide">${pctDisplay}</td>
+            <td class="mobile-hide">${team.lastYearPoints || 'N/A'}</td>
+            <td>${team.adp || 'N/A'}</td>
             <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
         return row;
