@@ -207,6 +207,11 @@
                 max-height: calc(100vh - 250px);
                 max-width: 100vw;
              }
+
+            .draftboard-container, .teams-container {
+                padding: 0 10px;
+                box-sizing: border-box; /* Ensures padding is included in the element's width */
+            }
     
             .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
             .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; background: var(--dark); z-index: 1; }
