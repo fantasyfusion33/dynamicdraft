@@ -179,7 +179,7 @@
             .league-title { font-size: 1.5rem; }
             .draft-header { padding: 5px; }
             
-            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; box-sizing: border-box; overflow-x: auto; }
+            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; box-sizing: border-box; overflow-x: auto; max-width: 96vw; justify-content: center; }
             .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; margin-bottom: 10px;}
             .flow-pick p { font-size: 0.9rem; }
             .flow-pick.after-that { display: none; }
@@ -206,6 +206,8 @@
                 overflow: auto;
                 max-height: calc(100vh - 250px);
                 overflow-x: auto;
+                max-width: 96vw;
+                justify-content: center;
              }
             /* For Chrome, Safari, Edge, and Opera */
             .table-container::-webkit-scrollbar {
