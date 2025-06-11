@@ -235,21 +235,26 @@
             <h1 class="league-title">League Name</h1>
         </header>
 
-        <div class="draft-flow-tracker">
-            <div class="flow-pick-container">
-                <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
-                <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
-                <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
-                <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+        <div class="sticky-header">
+            <div class="draft-flow-tracker">
+                <div class="flow-pick-container">
+                    <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
+                    <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
+                    <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
+                    <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+                </div>
+                 <div class="countdown-clock" id="countdownClock">2:00</div>
             </div>
-            <div class="countdown-clock" id="countdownClock">2:00</div>
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
+            </div>
         </div>
         
         <main class="main-content">
              <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
             <div class="draftboard-container active">
-                <div class="sticky-header">
                     <div class="mobile-tabs">
                         <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
                         <button class="mobile-tab" data-view="teams">Teams</button>
@@ -259,7 +264,6 @@
                         <select id="sportFilter"><option value="all">All Sports</option></select>
                         <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
                     </div>
-                </div>
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
                 </div>
@@ -647,10 +651,8 @@
                     </div>                  
                 </div>
             </td>
-            <td>${oddsDisplay}</td>
-            <td class="mobile-hide">${pctDisplay}</td>
-            <td class="mobile-hide">${team.lastYearPoints || 'N/A'}</td>
-            <td>${team.adp || 'N/A'}</td>
+            <td>${oddsDisplay}</td> <td>${pctDisplay}</td>
+            <td>${team.lastYearPoints || 'N/A'}</td> <td>${team.adp || 'N/A'}</td>
             <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
         return row;
