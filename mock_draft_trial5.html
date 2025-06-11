@@ -266,12 +266,6 @@
                 </div>
             </div>
             <div class="teams-container">
-                 <div class="sticky-header">
-                    <div class="mobile-tabs">
-                        <button class="mobile-tab" data-view="draftboard">Draft Board</button>
-                        <button class="mobile-tab active" data-view="teams">Teams</button>
-                    </div>
-                </div>
                  <div id="rosters-mobile"></div>
             </div>
         </main>
@@ -524,7 +518,7 @@
             const teamName = draft_order[current_pick];
             const round = Math.floor(current_pick / team_count) + 1;
             const pick = (current_pick % team_count) + 1;
-            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">R ${round}, P ${pick}</span>`;
+            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
         } else {
             currentPickInfo.innerHTML = 'Draft Complete';
         }
