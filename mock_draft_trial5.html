@@ -207,6 +207,7 @@
                 overflow: auto;
                 width: 100%;
                 max-height: calc(100vh - 250px);
+                max-width: 100vw;
              }
     
             .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
@@ -255,10 +256,6 @@
              <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
             <div class="draftboard-container active">
-                    <div class="mobile-tabs">
-                        <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                        <button class="mobile-tab" data-view="teams">Teams</button>
-                    </div>
                     <div class="filters">
                         <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
                         <select id="sportFilter"><option value="all">All Sports</option></select>
