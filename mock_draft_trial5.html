@@ -206,6 +206,8 @@
                 max-height: calc(100vh - 250px);
                 max-width: 96vw;
                 justify-content: center;
+                overflow: auto;
+                overflow-x: auto;
              }
             /* For Chrome, Safari, Edge, and Opera */
             .table-container::-webkit-scrollbar {
@@ -611,55 +613,101 @@
         table.appendChild(tbody);
     }
     
-    function createTableHeader() {
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        const headers = [
-            { key: 'name', text: 'Team' }, { key: 'championship_odds', text: 'Odds' },
-            { key: 'championshipPct', text: '% Odds' }, { key: 'lastYearPoints', text: 'Prev. Pts' },
-            { key: 'adp', text: 'ADP' }, { key: 'draft', text: ''}
-        ];
-        headers.forEach(header => {
-            const th = document.createElement('th');
-            th.dataset.key = header.key;
-            th.innerHTML = `${header.text} <span class="sort-indicator"></span>`;
-            if (header.isMobileHidden) {
-                th.classList.add('mobile-hide');
-            }
-            if (header.key === sortState.key) {
-                th.classList.add('sort-active');
-                th.querySelector('.sort-indicator').innerHTML = sortState.direction === 'asc' ? '▲' : '▼';
-            }
-            if(header.key !== 'draft') {
-                th.addEventListener('click', handleSortClick);
-            }
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        return thead;
-    }
+function createTableHeader() {
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const headers = [
+        { key: 'name', text: 'Team' }, { key: 'championship_odds', text: 'Odds' },
+        { key: 'championshipPct', text: '% Odds' }, { key: 'lastYearPoints', text: 'Prev. Pts' },
+        { key: 'adp', text: 'ADP' }, { key: 'draft', text: '' }
+    ];
 
-    function createTeamRow(team) {
-        const row = document.createElement('tr');
-        const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
-        const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
-        const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
+    headers.forEach((header, index) => {
+        const th = document.createElement('th');
+        th.dataset.key = header.key;
+
+        // **MODIFICATION**: Check if we are on mobile before adding the wrapper
+        const isStickyColumn = isMobile && (index === 0 || index === headers.length - 1);
+
+        if (isStickyColumn) {
+            th.innerHTML = `<div class="sticky-cell-content"><span>${header.text}</span><span class="sort-indicator"></span></div>`;
+        } else {
+            th.innerHTML = `<span>${header.text}</span> <span class="sort-indicator"></span>`;
+        }
+
+        if (header.key === sortState.key) {
+            th.classList.add('sort-active');
+            th.querySelector('.sort-indicator').innerHTML = sortState.direction === 'asc' ? '▲' : '▼';
+        }
+        if (header.key !== 'draft') {
+            th.addEventListener('click', handleSortClick);
+        }
+        headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    return thead;
+}
+
+function createTeamRow(team) {
+    const row = document.createElement('tr');
+    const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
+    const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
+    const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
+    
+    // **MODIFICATION**: Check if we are on mobile to decide which HTML structure to build
+    if (isMobile) {
+        // --- MOBILE VERSION (with inner divs for sticky columns) ---
+        const firstCellHTML = `
+            <td>
+                <div class="sticky-cell-content team-name-cell">
+                    <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
+                    <div> ${team.name}
+                        <div class="team-sub-info">
+                            <span class="sport-badge ${team.sport}">${team.sport}</span>
+                            <span>${subInfo}</span>
+                        </div>
+                    </div>
+                </div>
+            </td>`;
+            
+        const lastCellHTML = `
+            <td>
+                <div class="sticky-cell-content">
+                    <button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button>
+                </div>
+            </td>`;
+
+        row.innerHTML = `
+            ${firstCellHTML}
+            <td>${oddsDisplay}</td>
+            <td>${pctDisplay}</td>
+            <td>${team.lastYearPoints || 'N/A'}</td>
+            <td>${team.adp || 'N/A'}</td>
+            ${lastCellHTML}
+        `;
+
+    } else {
+        // --- DESKTOP VERSION (original, simple structure) ---
         row.innerHTML = `
             <td class="team-name-cell">
                 <div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div>
-                <div> ${team.name} 
+                <div> ${team.name}
                     <div class="team-sub-info">
                         <span class="sport-badge ${team.sport}">${team.sport}</span>
                         <span>${subInfo}</span>
-                    </div>                  
+                    </div>
                 </div>
             </td>
-            <td>${oddsDisplay}</td> <td>${pctDisplay}</td>
-            <td>${team.lastYearPoints || 'N/A'}</td> <td>${team.adp || 'N/A'}</td>
+            <td>${oddsDisplay}</td>
+            <td>${pctDisplay}</td>
+            <td>${team.lastYearPoints || 'N/A'}</td>
+            <td>${team.adp || 'N/A'}</td>
             <td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>
         `;
-        return row;
     }
+    
+    return row;
+}
 
     function handleSortClick(e) {
         const key = e.currentTarget.dataset.key;
