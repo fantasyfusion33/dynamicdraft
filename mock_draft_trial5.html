@@ -171,72 +171,76 @@
         }
 
         /* MOBILE RESPONSIVE STYLES */
-@media (max-width: 768px) {
-    body { padding: 0 5px; box-sizing: border-box; }
-    .draft-container { grid-template-areas: "header" "sticky-header" "main"; gap: 10px; }
-    .desktop-sidebar-area { display: none; }
-    .site-brand { display: none; }
-    .league-title { font-size: 1.5rem; }
-    .draft-header { padding: 5px; }
+        @media (max-width: 768px) {
+            body { padding: 0 5px; box-sizing: border-box; }
+            .draft-container { grid-template-areas: "header" "sticky-header" "main"; gap: 10px; }
+            .desktop-sidebar-area { display: none; }
+            .site-brand { display: none; }
+            .league-title { font-size: 1.5rem; }
+            .draft-header { padding: 5px; }
+            
+            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; box-sizing: border-box; overflow-x: auto; max-width: 96vw; justify-content: center; }
+            .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; margin-bottom: 10px;}
+            .flow-pick p { font-size: 0.9rem; }
+            .flow-pick.after-that { display: none; }
+            .countdown-clock { font-size: 1.2rem; margin-left: 10px; padding: 5px 8px; text-align: center;}
     
-    .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; }
-    .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; margin-bottom: 10px;}
-    .flow-pick p { font-size: 0.9rem; }
-    .flow-pick.after-that { display: none; }
-    .countdown-clock { font-size: 1.2rem; margin-left: 10px; padding: 5px 8px; text-align: center;}
-
-    .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-    .filters::-webkit-scrollbar { display: none; }
-    .filters .search-bar { min-width: 150px; }
-
-    .mobile-tabs {
-        display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px;
-    }
-    .mobile-tab { padding: 10px; border: none; background: none; color: white; font-size: 1rem; flex-grow: 1; border-radius: 6px; }
-    .mobile-tab.active { background: var(--primary); }
-
-    .main-content > div { display: none; }
-    .main-content > div.active { display: block; }
-
-    .rosters-mobile-container { padding: 10px; }
-    .roster-mobile { display: block; }
-    #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
-
-    .teams-container {
-        padding: 0 10px;
-        box-sizing: border-box; 
-    }
+            .filters { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+            .filters::-webkit-scrollbar { display: none; }
+            .filters .search-bar { min-width: 150px; }
     
-    .draftboard-container {
-        display: grid; /* Use grid layout to control children */
-        grid-template-columns: 100%; /* Ensure the container itself doesn't overflow */
-        padding: 0 10px;
-        box-sizing: border-box;
-    }
-
-    .table-container {
-        overflow-x: auto; 
-        max-height: calc(100vh - 250px);
-        width: 100%;
-        max-width: 96vw;
-    }
+            .mobile-tabs {
+                display: flex; background: var(--gray); padding: 5px; border-radius: 8px; margin-bottom: 15px;
+            }
+            .mobile-tab { padding: 10px; border: none; background: none; color: white; font-size: 1rem; flex-grow: 1; border-radius: 6px; }
+            .mobile-tab.active { background: var(--primary); }
     
-    .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
-    .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; z-index: 1; background: var(--dark); }
-    .draft-table tr:hover td:first-child { background: var(--gray); }
-    .draft-table td:last-child, .draft-table th:last-child { position: sticky; right: 0; z-index: 1; background: var(--dark); }
-    .draft-table tr:hover td:last-child { background: var(--gray); }
-    .draft-table th:first-child, .draft-table th:last-child { z-index: 3; }
+            .main-content > div { display: none; }
+            .main-content > div.active { display: block; }
+    
+            .rosters-mobile-container { padding: 10px; }
+            .roster-mobile { display: block; }
+            #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
+    
+            .table-container {
+                overflow: auto;
+                max-height: calc(100vh - 250px);
+                overflow-x: auto;
+                max-width: 96vw;
+                justify-content: center;
+             }
+            /* For Chrome, Safari, Edge, and Opera */
+            .table-container::-webkit-scrollbar {
+              display: none;
+            }
+            
+            /* For Firefox */
+            .table-container {
+              scrollbar-width: none;
+            }
 
-    .draft-table th, .draft-table td {
-        font-size: 0.7rem; 
-        padding: 6px 8px; 
-    }
-    .draft-table .sport-badge { font-size: 0.6rem; padding: 1px 5px; }
-    .draft-table .team-name-cell { gap: 6px; }
-
-    .roster li { padding-right: 4px; }
-}
+            .draftboard-container, .teams-container {
+                padding: 0 10px;
+                box-sizing: border-box; /* Ensures padding is included in the element's width */
+            }
+    
+            .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
+            .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:first-child { background: var(--gray); }
+            .draft-table td:last-child, .draft-table th:last-child { position: sticky; right: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table th:first-child, .draft-table th:last-child { z-index: 3; }
+    
+            /* MODIFICATION: Further reduce text size for mobile draft board */
+            .draft-table th, .draft-table td {
+                font-size: 0.7rem; /* Even smaller font */
+                padding: 6px 8px; /* Slightly reduced padding */
+            }
+            .draft-table .sport-badge { font-size: 0.6rem; padding: 1px 5px; }
+            .draft-table .team-name-cell { gap: 6px; }
+    
+            .roster li { padding-right: 4px; }
+        }
     </style>
 </head>
 <body>
