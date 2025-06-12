@@ -449,7 +449,8 @@
     }
 
     async function processPick(team) {
-        const draftingTeamName = draft_order[draftState.current_pick];
+        // Corrected line: Accessing draft_order via the draftState object
+        const draftingTeamName = draftState.draft_order[draftState.current_pick];
         
         // Create the object for the last pick. This will be saved to the database.
         const lastPickDetailsForDB = { team: team, drafter: draftingTeamName };
@@ -459,7 +460,7 @@
             team.round = currentRound;
             team.pick = (draftState.current_pick % draftState.team_count) + 1;
             const sportToCredit = (currentRound > 12 && draftState.wildcard_round > 0) ? 'Wildcard' : team.sport;
-            player_rosters[draftingTeamName][sportToCredit].push(team);
+            draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
             DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
         }
         
