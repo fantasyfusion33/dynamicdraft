@@ -345,6 +345,7 @@
             if (error) throw error;
             if (!data || !Array.isArray(data.draft_order)) throw new Error("Invalid draft data. Please create a new draft.");
             
+            // This function now just loads the entire saved state from the DB
             Object.assign(draftState, data);
     
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
@@ -352,25 +353,13 @@
             
             if (!data.player_rosters || Object.keys(data.player_rosters).length === 0) {
                 draftState.player_rosters = initializePlayerRosters(data.team_names);
-            } else {
-                draftState.player_rosters = data.player_rosters;
             }
-    
+            
             draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
     
-            // Restore the "Previous Pick" Display State
-            if (draftState.current_pick > 0) {
-                const prevPickIndex = draftState.current_pick - 1;
-                const prevDrafterName = draftState.draft_order[prevPickIndex];
-                const targetRound = Math.floor(prevPickIndex / draftState.team_count) + 1;
-                const targetPickInRound = (prevPickIndex % draftState.team_count) + 1;
-                const allPickedTeams = Object.values(draftState.player_rosters).flat(2);
-                const lastPickedTeamObject = allPickedTeams.find(t => t.round === targetRound && t.pick === targetPickInRound);
-                draftState.last_pick_details = {
-                    team: lastPickedTeamObject || null,
-                    drafter: prevDrafterName
-                };
-            }
+            // The previous pick display is now automatically handled by loading draftState.last_pick_details
+            // No extra logic is needed here anymore!
+    
         } catch (err) {
             alert(err.message);
             console.error('Init Error:', err);
@@ -460,31 +449,47 @@
     }
 
     async function processPick(team) {
-        const draftingTeamName = draftState.draft_order[draftState.current_pick];
-        draftState.last_pick_details = { team, drafter: draftingTeamName };
+        const draftingTeamName = draft_order[draftState.current_pick];
+        
+        // Create the object for the last pick. This will be saved to the database.
+        const lastPickDetailsForDB = { team: team, drafter: draftingTeamName };
+    
         if (team) {
             const currentRound = Math.floor(draftState.current_pick / draftState.team_count) + 1;
             team.round = currentRound;
             team.pick = (draftState.current_pick % draftState.team_count) + 1;
             const sportToCredit = (currentRound > 12 && draftState.wildcard_round > 0) ? 'Wildcard' : team.sport;
-            draftState.player_rosters[draftingTeamName][sportToCredit].push(team);
+            player_rosters[draftingTeamName][sportToCredit].push(team);
             DraftableTeams = DraftableTeams.filter(t => t.team_id !== team.team_id);
         }
+        
+        // Update the local state immediately for the UI
+        draftState.last_pick_details = lastPickDetailsForDB;
         draftState.current_pick++;
-        await saveDraftProgress();
+        
+        // Now, save all state changes to the database at once.
+        // We also set pick_deadline to null to signify the turn is over.
+        await saveDraftProgress(lastPickDetailsForDB, null);
+        
         updateAfterPick();
         checkForNextPick();
     }
 
-    async function saveDraftProgress() {
+    async function saveDraftProgress(lastPickDetails, pickDeadline) {
         try {
+            const isDraftComplete = draftState.current_pick >= draftState.total_picks;
+            
             await supabase.from('mock_drafts').update({
                 current_pick: draftState.current_pick,
                 player_rosters: draftState.player_rosters,
-                status: draftState.current_pick >= draftState.total_picks ? 'completed' : 'in_progress',
-                completed_at: draftState.current_pick >= draftState.total_picks ? new Date().toISOString() : null
+                last_pick_details: lastPickDetails, // Save the last pick details
+                pick_deadline: pickDeadline, // Save the new deadline (which is null after a pick)
+                status: isDraftComplete ? 'completed' : 'in_progress',
+                completed_at: isDraftComplete ? new Date().toISOString() : null
             }).eq('id', leagueId);
-        } catch(err) { console.error("Save Error", err); }
+        } catch(err) { 
+            console.error("Save Error", err); 
+        }
     }
 
     function endDraft() {
@@ -831,16 +836,13 @@ function createTeamRow(team) {
      * Calculates and saves the current pick's deadline to the database.
      */
     async function setPickDeadline() {
-        // Set deadline to 2 minutes from now
         const deadline = new Date(Date.now() + 2 * 60 * 1000).toISOString();
-        try {
-            await supabase
-                .from('mock_drafts')
-                .update({ pick_deadline: deadline })
-                .eq('id', leagueId);
-        } catch (err) {
-            console.error("Error setting pick deadline:", err);
-        }
+        
+        // Update the local state
+        draftState.pick_deadline = deadline;
+        
+        // Save only the deadline to the database
+        await saveDraftProgress(draftState.last_pick_details, deadline);
     }
     
     function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
