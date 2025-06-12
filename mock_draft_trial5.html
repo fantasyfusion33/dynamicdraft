@@ -467,7 +467,8 @@
         // Update the local state immediately for the UI
         draftState.last_pick_details = lastPickDetailsForDB;
         draftState.current_pick++;
-        
+        // Clear the local deadline state to match what we're about to save to the DB.
+        draftState.pick_deadline = null;
         // Now, save all state changes to the database at once.
         // We also set pick_deadline to null to signify the turn is over.
         await saveDraftProgress(lastPickDetailsForDB, null);
