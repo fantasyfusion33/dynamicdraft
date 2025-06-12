@@ -407,7 +407,7 @@
         return roster[team.sport].length < 2;
     }
 
-    function checkForNextPick() {
+    async function checkForNextPick() {
         if (draftState.current_pick >= draftState.total_picks) {
             endDraft();
             return;
@@ -419,7 +419,7 @@
     
         if (isUserTurn) {
             // This is the key change: set the deadline right before starting the clock
-            setPickDeadline(); // <-- ADD THIS LINE
+            await setPickDeadline(); // <-- ADD THIS LINE
             enableDraftButtons(true);
             startCountdown();
         } else {
