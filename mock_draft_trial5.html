@@ -343,10 +343,26 @@
         try {
             const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
             if (error) throw error;
-            if (!data || !Array.isArray(data.draft_order)) throw new Error("Invalid draft data. Please create a new draft.");
-            
+            // ... (the rest of the function down to assigning draftState properties is the same)
             Object.assign(draftState, data);
-            
+    
+            // --- NEW LOGIC FOR THE CLOCK ---
+            // Check if there's a deadline from the database
+            if (data.pick_deadline) {
+                const deadlineTime = new Date(data.pick_deadline).getTime();
+                const now = Date.now();
+                
+                if (deadlineTime > now) {
+                    // If the deadline is in the future, calculate remaining time
+                    const remainingSeconds = Math.round((deadlineTime - now) / 1000);
+                    startCountdown(remainingSeconds); // Start clock with remaining time
+                } else {
+                    // If deadline is in the past, time expired while page was closed
+                    autoDraftTeam();
+                }
+            }
+            // --- END OF NEW LOGIC ---
+    
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
             draftState.user_team_name = data.team_names[userPosition] || '';
             
@@ -355,7 +371,7 @@
             } else {
                 draftState.player_rosters = data.player_rosters;
             }
-
+    
             draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
         } catch (err) {
             alert(err.message);
@@ -396,13 +412,14 @@
             endDraft();
             return;
         }
-        if (draftState.current_pick === 12 * draftState.team_count && draftState.wildcard_round > 0) {
-            alert(`Welcome to the Wildcard Round(s)!`);
-        }
+        // ... (rest of the function is the same)
         updateOnTheClockUI();
         const currentDrafter = draftState.draft_order[draftState.current_pick];
         isUserTurn = currentDrafter === draftState.user_team_name;
+    
         if (isUserTurn) {
+            // This is the key change: set the deadline right before starting the clock
+            setPickDeadline(); // <-- ADD THIS LINE
             enableDraftButtons(true);
             startCountdown();
         } else {
@@ -798,10 +815,44 @@ function createTeamRow(team) {
             console.error("Non-critical UI error in switchRosterToCurrentPlayer:", err);
         }
     }
+
+        /**
+     * Calculates and saves the current pick's deadline to the database.
+     */
+    async function setPickDeadline() {
+        // Set deadline to 2 minutes from now
+        const deadline = new Date(Date.now() + 2 * 60 * 1000).toISOString();
+        try {
+            await supabase
+                .from('mock_drafts')
+                .update({ pick_deadline: deadline })
+                .eq('id', leagueId);
+        } catch (err) {
+            console.error("Error setting pick deadline:", err);
+        }
+    }
     
     function switchRoster(sanitizedId){document.querySelectorAll(".roster").forEach(r=>r.classList.remove('active'));const el=document.getElementById(`roster-${sanitizedId}`);if(el)el.classList.add('active');}
     function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
-    function startCountdown(){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=120;const el=document.getElementById('countdownClock');el.textContent="2:00";draftState.timer=setInterval(()=>{if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;},1000);}
+    function startCountdown(seconds = 120) { // Default to 120 if no time is provided
+        if(draftState.timer) clearInterval(draftState.timer);
+        let timeLeft = seconds;
+        const el = document.getElementById('countdownClock');
+        const updateClock = () => {
+            if (timeLeft <= 0) {
+                clearInterval(draftState.timer);
+                autoDraftTeam();
+                return;
+            }
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            el.textContent = `${m}:${String(s).padStart(2, '0')}`;
+        };
+    
+        updateClock(); // Call once immediately to show the time
+        draftState.timer = setInterval(updateClock, 1000);
+    }
     function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
     function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
 </script>
