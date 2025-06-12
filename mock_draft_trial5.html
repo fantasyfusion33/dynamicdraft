@@ -311,6 +311,7 @@
     };
     let DraftableTeams = [];
     let isUserTurn = false;
+    let isClockInitialized = false; // <-- ADD THIS NEW LINE
     let isMobile = window.innerWidth <= 768;
     const sortState = { key: 'championship_odds', direction: 'asc' };
     
@@ -348,19 +349,20 @@
     
             // --- NEW LOGIC FOR THE CLOCK ---
             // Check if there's a deadline from the database
-            if (data.pick_deadline) {
-                const deadlineTime = new Date(data.pick_deadline).getTime();
-                const now = Date.now();
-                
-                if (deadlineTime > now) {
-                    // If the deadline is in the future, calculate remaining time
-                    const remainingSeconds = Math.round((deadlineTime - now) / 1000);
-                    startCountdown(remainingSeconds); // Start clock with remaining time
-                } else {
-                    // If deadline is in the past, time expired while page was closed
-                    autoDraftTeam();
+                if (data.pick_deadline) {
+                    const deadlineTime = new Date(data.pick_deadline).getTime();
+                    const now = Date.now();
+                    
+                    if (deadlineTime > now) {
+                        const remainingSeconds = Math.round((deadlineTime - now) / 1000);
+                        startCountdown(remainingSeconds);
+                        isClockInitialized = true; // <-- ADD THIS LINE to set the flag
+                    } else {
+                        // If time expired while away, let the AI pick.
+                        // We don't set the flag here because a new turn will start.
+                        autoDraftTeam();
+                    }
                 }
-            }
             // --- END OF NEW LOGIC ---
     
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
@@ -416,17 +418,24 @@
         updateOnTheClockUI();
         const currentDrafter = draftState.draft_order[draftState.current_pick];
         isUserTurn = currentDrafter === draftState.user_team_name;
-    
-        if (isUserTurn) {
-            // This is the key change: set the deadline right before starting the clock
-            await setPickDeadline(); // <-- ADD THIS LINE
-            enableDraftButtons(true);
-            startCountdown();
-        } else {
-            enableDraftButtons(false);
-            setTimeout(autoDraftTeam, 1500);
+            if (isUserTurn) {
+                    // --- THIS IS THE KEY LOGIC CHANGE ---
+                    if (isClockInitialized) {
+                        // If the clock was already started by the page-load logic,
+                        // we do nothing except make sure the buttons are on.
+                        enableDraftButtons(true);
+                    } else {
+                        // If this is a brand new turn (not a refresh),
+                        // then we set a NEW deadline and start the clock from 2:00.
+                        await setPickDeadline();
+                        enableDraftButtons(true);
+                        startCountdown();
+                    }
+                } else {
+                    enableDraftButtons(false);
+                    setTimeout(autoDraftTeam, 1500);
+                }
         }
-    }
 
     async function draftTeam(teamId) {
         if (!isUserTurn) return;
