@@ -311,7 +311,6 @@
     };
     let DraftableTeams = [];
     let isUserTurn = false;
-    let isClockInitialized = false; // <-- ADD THIS NEW LINE
     let isMobile = window.innerWidth <= 768;
     const sortState = { key: 'championship_odds', direction: 'asc' };
     
@@ -344,26 +343,9 @@
         try {
             const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
             if (error) throw error;
-            // ... (the rest of the function down to assigning draftState properties is the same)
+            if (!data || !Array.isArray(data.draft_order)) throw new Error("Invalid draft data. Please create a new draft.");
+            
             Object.assign(draftState, data);
-    
-            // --- NEW LOGIC FOR THE CLOCK ---
-            // Check if there's a deadline from the database
-                if (data.pick_deadline) {
-                    const deadlineTime = new Date(data.pick_deadline).getTime();
-                    const now = Date.now();
-                    
-                    if (deadlineTime > now) {
-                        const remainingSeconds = Math.round((deadlineTime - now) / 1000);
-                        startCountdown(remainingSeconds);
-                        isClockInitialized = true; // <-- ADD THIS LINE to set the flag
-                    } else {
-                        // If time expired while away, let the AI pick.
-                        // We don't set the flag here because a new turn will start.
-                        autoDraftTeam();
-                    }
-                }
-            // --- END OF NEW LOGIC ---
     
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
             draftState.user_team_name = data.team_names[userPosition] || '';
@@ -375,6 +357,20 @@
             }
     
             draftState.total_picks = data.team_count * (12 + (data.wildcard_round || 0));
+    
+            // Restore the "Previous Pick" Display State
+            if (draftState.current_pick > 0) {
+                const prevPickIndex = draftState.current_pick - 1;
+                const prevDrafterName = draftState.draft_order[prevPickIndex];
+                const targetRound = Math.floor(prevPickIndex / draftState.team_count) + 1;
+                const targetPickInRound = (prevPickIndex % draftState.team_count) + 1;
+                const allPickedTeams = Object.values(draftState.player_rosters).flat(2);
+                const lastPickedTeamObject = allPickedTeams.find(t => t.round === targetRound && t.pick === targetPickInRound);
+                draftState.last_pick_details = {
+                    team: lastPickedTeamObject || null,
+                    drafter: prevDrafterName
+                };
+            }
         } catch (err) {
             alert(err.message);
             console.error('Init Error:', err);
@@ -414,28 +410,34 @@
             endDraft();
             return;
         }
-        // ... (rest of the function is the same)
         updateOnTheClockUI();
         const currentDrafter = draftState.draft_order[draftState.current_pick];
         isUserTurn = currentDrafter === draftState.user_team_name;
-            if (isUserTurn) {
-                    // --- THIS IS THE KEY LOGIC CHANGE ---
-                    if (isClockInitialized) {
-                        // If the clock was already started by the page-load logic,
-                        // we do nothing except make sure the buttons are on.
-                        enableDraftButtons(true);
-                    } else {
-                        // If this is a brand new turn (not a refresh),
-                        // then we set a NEW deadline and start the clock from 2:00.
-                        await setPickDeadline();
-                        enableDraftButtons(true);
-                        startCountdown();
-                    }
-                } else {
-                    enableDraftButtons(false);
-                    setTimeout(autoDraftTeam, 1500);
-                }
+    
+        if (isUserTurn) {
+            enableDraftButtons(true);
+            const deadline = draftState.pick_deadline ? new Date(draftState.pick_deadline).getTime() : 0;
+            const now = Date.now();
+    
+            if (deadline > now) {
+                // CASE 1: A valid deadline exists in the future (this is a page refresh).
+                // Start the clock with the time remaining.
+                const remainingSeconds = Math.round((deadline - now) / 1000);
+                startCountdown(remainingSeconds);
+            } else {
+                // CASE 2: No deadline exists, or the deadline has passed.
+                // This is a brand new turn, so set a new deadline and start the clock from 2:00.
+                await setPickDeadline();
+                startCountdown();
+            }
+        } else {
+            // AI's turn
+            enableDraftButtons(false);
+            // Clear any lingering user timers, just in case
+            if (draftState.timer) clearInterval(draftState.timer);
+            setTimeout(autoDraftTeam, 1500);
         }
+    }
 
     async function draftTeam(teamId) {
         if (!isUserTurn) return;
