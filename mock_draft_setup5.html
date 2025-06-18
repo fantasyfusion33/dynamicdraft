@@ -23,7 +23,7 @@
             border-radius: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 500px;
+            max-width: 550px;
             width: 100%;
             position: relative;
         }
@@ -260,6 +260,8 @@
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 15px;
+            box-sizing: border-box;
         }
         .modal-overlay.active {
             opacity: 1;
@@ -270,17 +272,24 @@
             padding: 30px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             transform: scale(0.95);
             transition: transform 0.3s ease;
+            color: rgba(255, 255, 255, 0.85);
+            /* MOBILE FIX: Allow vertical scrolling on small screens */
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
-        .modal-content h2 { margin-top: 0; }
-        .modal-content ul { padding-left: 20px; }
-        .modal-content li { margin-bottom: 10px; }
+        .modal-content h2 { margin-top: 0; color: #fff;}
+        .modal-content h4 { color: #fff; margin-bottom: 8px; margin-top: 20px;}
+        .modal-content p { line-height: 1.6; margin-top: 0;}
+        .modal-content ul { padding-left: 20px; line-height: 1.7; }
+        .modal-content li { margin-bottom: 12px; }
+        .modal-content button { margin-top: 15px;}
 
         .help-icon {
             position: absolute;
@@ -310,18 +319,18 @@
     <div class="modal-overlay" id="welcomeModal">
         <div class="modal-content">
             <h2>Welcome to the Fantasy Fusion Mock Draft!</h2>
-            <p>Before your can start your mock draft, we need to let you know how the draft works and set up the details of your league.</p>
-            <h4>How the Mock Draft Works:</h4>
+            <p>Before you start your mock draft, here's a quick guide to how the game works and how to set up your league.</p>
+            
+            <h4>How the Mock Draft Works</h4>
+            <p><strong>The Point of the Game:</strong> In Fantasy Fusion, instead of drafting individual players, you draft entire teams from across the 6 major US Sports (MLB, NBA, NFL, NHL, NCAAB, and NCAAF). Each roster has 2 slots per sport, with optional Wildcard slots for extra flexibility.</p>
+            <p><strong>The Draft Format:</strong> The draft follows a standard "snake" format where the pick order reverses each round. This means the team picking last in one round will pick first in the next.</p>
+            <p><strong>Mock Draft Details:</strong> You will decide your draft position on this screen. During the draft, you'll have 2 minutes to make your pick, while all other teams will auto-draft.</p>
+            
+            <h4>How to Set Up Your Mock Draft</h4>
             <ul>
-                <p><strong>The Point of the Game:</strong></p> <p>In Fantasy Fusion, instead of drafting players from one sport, you draft teams from across the 6 major US Sports (MLB, NBA, NFL, NHL, NCAAB, NCAAF). Each roster has 2 slots for teams from each sport to fill, with the potential to add additional Wildcard slots.</p>
-                <p><strong>The Draft Format:</strong></p><p>The draft is a standard snake draft format. In a snake draft, the draft order reverses each round, meaning the team that picks first in one round picks last in the next, creating a "snaking" pattern of selection.</p>
-                <p><strong>Mock Draft Details:</strong></p><p>On the next screen you will decide which pick you will have in the draft. You will have 2 minutes to make your selection. All other picks will be auto-drafted.</p>
-            </ul>
-            <h4>How to Set Up Your Mock Draft:</h4>
-            <ul>
-                <p><strong>1. Create Your League:</strong> Give your league a name and choose the number of teams in your mock draft.</p>
-                <p><strong>2. Set Your Draft Position:</strong> Find 'My Team' in the list below and use the arrow buttons to select your draft position.</p>
-                <p><strong>3. Add Wildcards (Optional):</strong> Choose the number of wildcard slots to include in your draft. Each slot adds an extra roster spot to draft an additional team from any sport.</p>
+                <li><strong>1. Create Your League:</strong> Give your league a name and use the slider to choose the number of teams.</li>
+                <li><strong>2. Set Your Draft Position:</strong> Find 'My Team' in the list below and use the arrows to move it to your desired spot.</li>
+                <li><strong>3. Add Wildcards (Optional):</strong> Choose to add extra rounds for bonus picks from any sport.</li>
             </ul>
             <button id="closeModalBtn">Get Started</button>
         </div>
@@ -346,10 +355,10 @@
             </div>
             <div class="form-group" id="teamNamesGroup">
                 <div class="form-group-header">
-                    <label>Set Draft Order</label>
+                    <label>Set Your Draft Order</label>
                     <button class="randomize-btn" id="randomizeBtn" type="button"><i class="fas fa-random"></i> Randomize</button>
                 </div>
-                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any of the team names.</p>
+                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any team name.</p>
                 <div id="teamNamesContainer">
                     <!-- Team name inputs will be dynamically added here -->
                 </div>
@@ -417,7 +426,7 @@
         const wildcardValue = parseInt(document.querySelector('input[name="wildcard"]:checked').value, 10);
         
         const teamItems = document.querySelectorAll('.team-item .team-name-input input');
-        const teamNames = Array.from(teamItems).map(input => input.value || input.placeholder);
+        const teamNames = Array.from(teamItems).map(input => input.value.trim() || input.placeholder);
         
         const userTeamIndex = Array.from(document.querySelectorAll('.team-item')).findIndex(item => item.classList.contains('user-team'));
         
@@ -478,21 +487,15 @@
     function updateTeamNameInputs(teamCount) {
         const teamNamesContainer = document.getElementById('teamNamesContainer');
         const currentItems = Array.from(teamNamesContainer.children);
+        // Preserve any custom names when the slider changes
         const teamsData = currentItems.map(item => ({
-            name: item.querySelector('input').value || item.querySelector('input').placeholder,
+            name: item.querySelector('input').value,
             isUser: item.classList.contains('user-team')
         }));
 
         let userTeamIndex = teamsData.findIndex(t => t.isUser);
-
-        if (userTeamIndex === -1) {
-            userTeamIndex = 0; // Default user to first position if not found
-        }
-        
-        // Adjust user index if team count shrinks
-        if (userTeamIndex >= teamCount) {
-            userTeamIndex = teamCount - 1;
-        }
+        if (userTeamIndex === -1) userTeamIndex = 0;
+        if (userTeamIndex >= teamCount) userTeamIndex = teamCount - 1;
 
         teamNamesContainer.innerHTML = '';
     
@@ -500,16 +503,21 @@
             const isUserTeam = i === userTeamIndex;
             const teamItem = document.createElement('div');
             teamItem.className = `team-item ${isUserTeam ? 'user-team' : ''}`;
-            teamItem.dataset.position = i;
             
-            // MODIFICATION: Use placeholder for non-user teams, make all editable
-            const teamNameValue = isUserTeam ? userTeamName : (teamsData[i]?.name || `Team ${i + 1}`);
             const placeholderValue = `Team ${i + 1}`;
+            let teamNameValue = '';
+
+            if (isUserTeam) {
+                teamNameValue = userTeamName;
+            } else {
+                // Use a preserved name if it exists, otherwise use the default
+                teamNameValue = teamsData[i]?.name || placeholderValue;
+            }
 
             teamItem.innerHTML = `
                 <span class="draft-order">${i + 1}</span>
                 <div class="team-name-input">
-                    <input type="text" id="team${i}Name" placeholder="${placeholderValue}" value="${isUserTeam ? userTeamName : ''}" required>
+                    <input type="text" placeholder="${placeholderValue}" value="${teamNameValue}" required>
                 </div>
                 <div class="arrow-buttons">
                     ${isUserTeam ? `
@@ -550,13 +558,11 @@
         const container = document.getElementById('teamNamesContainer');
         const items = Array.from(container.children);
         
-        // Fisher-Yates shuffle algorithm
         for (let i = items.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [items[i], items[j]] = [items[j], items[i]];
         }
         
-        // Re-append shuffled items
         items.forEach(item => container.appendChild(item));
         refreshTeamDisplay();
     }
@@ -566,12 +572,8 @@
         let userPosition = -1;
 
         items.forEach((item, index) => {
-            // Update draft number
             item.querySelector('.draft-order').textContent = index + 1;
-            
-            // Update CPU team placeholders
-            const input = item.querySelector('input');
-            input.placeholder = `Team ${index + 1}`;
+            item.querySelector('input').placeholder = `Team ${index + 1}`;
             
             if (item.classList.contains('user-team')) {
                 userPosition = index;
