@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create League</title>
+    <title>Create League - Fantasy Fusion</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
@@ -19,12 +19,13 @@
         }
         .league-creation-container {
             background: rgba(26, 26, 26, 0.8);
-            padding: 30px;
+            padding: 30px 40px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             max-width: 500px;
             width: 100%;
+            position: relative;
         }
         h1 {
             text-align: center;
@@ -39,6 +40,12 @@
         }
         .form-group {
             margin-bottom: 25px;
+        }
+        .form-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
         }
         label {
             display: block;
@@ -95,7 +102,8 @@
         .subheading {
             font-size: 14px;
             color: rgba(255, 255, 255, 0.7);
-            margin-top: 8px;
+            margin-top: 0;
+            margin-bottom: 10px;
             line-height: 1.4;
         }
         button {
@@ -109,6 +117,10 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         button:hover:not(:disabled) {
             background: #B00326;
@@ -118,6 +130,16 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .team-item {
             display: flex;
             align-items: center;
@@ -158,7 +180,7 @@
             display: flex;
             gap: 8px;
         }
-        .arrow-btn {
+        .arrow-btn, .randomize-btn {
             width: 36px;
             height: 36px;
             border-radius: 6px;
@@ -171,7 +193,8 @@
             justify-content: center;
             transition: all 0.2s ease;
         }
-        .arrow-btn:hover:not(:disabled) {
+        .randomize-btn { width: auto; padding: 0 12px; font-size: 12px; gap: 6px; }
+        .arrow-btn:hover:not(:disabled), .randomize-btn:hover:not(:disabled) {
             background: rgba(210, 4, 45, 0.3);
             border-color: #D2042D;
         }
@@ -179,95 +202,168 @@
             opacity: 0.4;
             cursor: not-allowed;
         }
-        #wildcardRadios input[type="radio"] {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            border: 2px solid #fff;
-            border-radius: 50%;
-            display: inline-block;
+        
+        /* Tooltip Styles */
+        .tooltip-container {
             position: relative;
-            margin-right: 6px;
-            vertical-align: middle;
-            transition: border-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tooltip-icon {
             cursor: pointer;
-        }
-        #wildcardRadios input[type="radio"]:checked {
-            border: 2px solid #D2042D;
-            background: #D2042D;
-        }
-        #wildcardRadios input[type="radio"]:checked::before {
-            content: '';
-            display: block;
-            width: 10px;
-            height: 10px;
-            margin: 3px auto;
+            font-size: 12px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
-            background: #fff;
-        }
-        #wildcardRadios label {
+            border: 1px solid #777;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #fff;
-            cursor: pointer;
+            justify-content: center;
         }
+        .tooltip-text {
+            visibility: hidden;
+            width: 250px;
+            background-color: #2a2a2a;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: #1A1A1A;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 500px;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+        .modal-content h2 { margin-top: 0; }
+        .modal-content ul { padding-left: 20px; }
+        .modal-content li { margin-bottom: 10px; }
+
+        .help-icon {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 28px;
+            height: 28px;
+            border: 1px solid #555;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .help-icon:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
     </style>
 </head>
 <body>
+    <!-- Welcome Modal -->
+    <div class="modal-overlay" id="welcomeModal">
+        <div class="modal-content">
+            <h2>Welcome to the Fantasy Fusion Draft!</h2>
+            <p>Get ready for a new kind of challenge where you draft entire pro and college teams across six different sports!</p>
+            <h4>How to Set Up Your Mock Draft:</h4>
+            <ul>
+                <li><strong>1. Create Your League:</strong> Give your league a name and choose the number of teams.</li>
+                <li><strong>2. Set Your Draft Spot:</strong> Find 'My Team' in the list below and use the arrow buttons to select your draft position.</li>
+                <li><strong>3. Add Wildcards (Optional):</strong> Choose extra rounds to draft bonus teams from any sport.</li>
+            </ul>
+            <button id="closeModalBtn">Let's Get Started</button>
+        </div>
+    </div>
+    
     <div class="league-creation-container">
-        <h1>Welcome to Fantasy Fusion!</h1>
+        <div class="help-icon" id="helpIcon">?</div>
         <h1>Create Your Mock Draft</h1>
         <form id="leagueForm">
             <div class="form-group">
-                <label for="leagueName">Name Mock League</label>
-                <p class="subheading">
-                    Type the name of your mock league below.            
-                </p>
+                <label for="leagueName">League Name</label>
                 <input type="text" id="leagueName" placeholder="Enter league name" required>
             </div>
             <div class="form-group">
-                <label>Select League Size</label>
-                <p class="subheading">
-                   Choose how many players to include in your league. Each league must include at least 2 players and at most 12.          
-                </p>
+                <label>League Size</label>
                 <div class="slider-container">
                     <span>2</span>
-                    <input type="range" id="leagueSize" min="2" max="12" step="1" value="6">
+                    <input type="range" id="leagueSize" min="2" max="12" step="1" value="8">
                     <span class="slider-value">8</span>
                     <span>12</span>
                 </div>
             </div>
             <div class="form-group" id="teamNamesGroup">
-                <label>Set Draft Order</label>
-                <p class="subheading">
-                    Your team is highlighted in red. Use the arrow buttons to move yourself up or down to your desired draft position.                
-                </p>
+                <div class="form-group-header">
+                    <label>Set Your Draft Order</label>
+                    <button class="randomize-btn" id="randomizeBtn" type="button"><i class="fas fa-random"></i> Randomize</button>
+                </div>
+                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any team name.</p>
                 <div id="teamNamesContainer">
                     <!-- Team name inputs will be dynamically added here -->
                 </div>
             </div>
             <div class="form-group">
-                <label>Add Wildcard Slots</label>
-                <p class="subheading">
-                    Choose the number of wildcard slots to include in your draft. Each slot adds an extra roster spot to draft an additional team from any sport.
-                </p>
-                <div id="wildcardRadios" style="display: flex; gap: 16px;">
-                    <label>
-                        <input type="radio" name="wildcard" value="0" checked> None
-                    </label>
-                    <label>
-                        <input type="radio" name="wildcard" value="1"> 1 Round
-                    </label>
-                    <label>
-                        <input type="radio" name="wildcard" value="2"> 2 Rounds
-                    </label>
+                <div class="tooltip-container">
+                    <label>Wildcard Rounds</label>
+                    <span class="tooltip-icon">i</span>
+                    <span class="tooltip-text">Wildcard picks are bonus choices at the end of the draft. You can use them to select a team from ANY sport, even if you've already filled that sport's roster slots.</span>
+                </div>
+                <div id="wildcardRadios" style="display: flex; gap: 16px; margin-top: 10px;">
+                    <label><input type="radio" name="wildcard" value="0" checked> None</label>
+                    <label><input type="radio" name="wildcard" value="1"> 1 Round</label>
+                    <label><input type="radio" name="wildcard" value="2"> 2 Rounds</label>
                 </div>
             </div>
-            <button type="submit">Create League & Start Draft</button>
+            <button type="submit" id="submitBtn">
+                <span id="buttonText">Create League & Start Draft</span>
+                <span class="spinner" id="submitSpinner" style="display: none;"></span>
+            </button>
         </form>
     </div>
 
@@ -279,71 +375,61 @@
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // =========================================================================
-    // SNAKE DRAFT ORDER GENERATION
+    // MODAL & UI ELEMENTS
     // =========================================================================
+    const welcomeModal = document.getElementById('welcomeModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const helpIcon = document.getElementById('helpIcon');
 
-    /**
-     * Generates a full snake draft order for all rounds.
-     * @param {string[]} teamNames - The array of team names in their draft positions.
-     * @param {number} wildcardRounds - The number of wildcard rounds (0, 1, or 2).
-     * @returns {string[]} A flat array representing the full snake draft order.
-     */
-    function generateSnakeDraftOrder(teamNames, wildcardRounds) {
-        const draftOrder = [];
-        const teamCount = teamNames.length;
-        const totalRounds = 12 + parseInt(wildcardRounds, 10);
-
-        for (let i = 0; i < totalRounds; i++) {
-            const round = i + 1;
-            // Create a copy of team names for the current round's order
-            let roundOrder = [...teamNames]; 
-
-            // Reverse the order for even-numbered rounds (the "snake" part)
-            if (round % 2 === 0) { 
-                roundOrder.reverse();
-            }
-            // Add the round's order to the full draft order
-            draftOrder.push(...roundOrder);
-        }
-        return draftOrder;
-    }
-
+    window.addEventListener('load', () => {
+        welcomeModal.classList.add('active');
+    });
+    closeModalBtn.addEventListener('click', () => {
+        welcomeModal.classList.remove('active');
+    });
+    helpIcon.addEventListener('click', () => {
+        welcomeModal.classList.add('active');
+    });
 
     // =========================================================================
     // FORM SUBMISSION
     // =========================================================================
-    document.getElementById('leagueForm').addEventListener('submit', async (e) => {
+    const leagueForm = document.getElementById('leagueForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const buttonText = document.getElementById('buttonText');
+    const submitSpinner = document.getElementById('submitSpinner');
+
+    leagueForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        document.querySelector('button[type="submit"]').disabled = true;
+        
+        // Show loading state on button
+        submitBtn.disabled = true;
+        buttonText.textContent = 'Creating...';
+        submitSpinner.style.display = 'block';
 
         const teamCount = parseInt(document.getElementById('leagueSize').value);
         const wildcardValue = parseInt(document.querySelector('input[name="wildcard"]:checked').value, 10);
         
-        // Get the final, re-ordered list of team names from the UI
         const teamItems = document.querySelectorAll('.team-item .team-name-input input');
-        const teamNames = Array.from(teamItems).map(input => input.value);
+        const teamNames = Array.from(teamItems).map(input => input.value || input.placeholder);
         
-        // Find the final position of the user's team (0-indexed)
         const userTeamIndex = Array.from(document.querySelectorAll('.team-item')).findIndex(item => item.classList.contains('user-team'));
         
-        // ***Generate the correct snake draft order with team names***
         const snakeDraftOrder = generateSnakeDraftOrder(teamNames, wildcardValue);
 
-        // Prepare the complete data object for Supabase
         const leagueData = {
             league_name: document.getElementById('leagueName').value.trim(),
             team_count: teamCount,
             wildcard_round: wildcardValue,
             team_names: teamNames, 
-            draft_order: snakeDraftOrder, // ***Saves the correct snake order***
-            user_team_position: userTeamIndex + 1, // Convert to 1-based index for DB
-            player_rosters: {}, // Initialize as an empty object
+            draft_order: snakeDraftOrder,
+            user_team_position: userTeamIndex + 1,
+            player_rosters: {},
             status: 'not_started',
             current_pick: 0
         };
 
         try {
-            // Insert data into the mock_drafts table
             const { data, error } = await supabase
                 .from('mock_drafts')
                 .insert([leagueData])
@@ -352,49 +438,72 @@
 
             if (error) throw error;
             
-            // Redirect to the draft page
             window.location.href = `mock_draft_trial5.html?leagueId=${data.id}`;
 
         } catch (err) {
             console.error('Error creating league:', err);
             alert('League creation failed. Please check the console for details and try again.');
-            document.querySelector('button[type="submit"]').disabled = false;
+            // Revert button state on error
+            submitBtn.disabled = false;
+            buttonText.textContent = 'Create League & Start Draft';
+            submitSpinner.style.display = 'none';
         }
     });
 
     // =========================================================================
-    // UI HELPER FUNCTIONS
+    // DRAFT ORDER & UI LOGIC
     // =========================================================================
     
-    // Global state for UI management
-    let user_team_position = 0; // Tracks user team position (0-indexed)
     let userTeamName = "My Team";
 
     const leagueSizeSlider = document.getElementById('leagueSize');
     const sliderValue = document.querySelector('.slider-value');
+    const randomizeBtn = document.getElementById('randomizeBtn');
 
     leagueSizeSlider.addEventListener('input', (e) => {
         sliderValue.textContent = e.target.value;
         updateTeamNameInputs(parseInt(e.target.value, 10));
     });
 
+    randomizeBtn.addEventListener('click', () => {
+        randomizeOrder();
+    });
+
     function updateTeamNameInputs(teamCount) {
         const teamNamesContainer = document.getElementById('teamNamesContainer');
-        // Reset the position if team count shrinks below it
-        if (user_team_position >= teamCount) {
-            user_team_position = teamCount - 1;
+        const currentItems = Array.from(teamNamesContainer.children);
+        const teamsData = currentItems.map(item => ({
+            name: item.querySelector('input').value || item.querySelector('input').placeholder,
+            isUser: item.classList.contains('user-team')
+        }));
+
+        let userTeamIndex = teamsData.findIndex(t => t.isUser);
+
+        if (userTeamIndex === -1) {
+            userTeamIndex = 0; // Default user to first position if not found
         }
+        
+        // Adjust user index if team count shrinks
+        if (userTeamIndex >= teamCount) {
+            userTeamIndex = teamCount - 1;
+        }
+
         teamNamesContainer.innerHTML = '';
     
         for (let i = 0; i < teamCount; i++) {
-            const isUserTeam = i === user_team_position;
+            const isUserTeam = i === userTeamIndex;
             const teamItem = document.createElement('div');
             teamItem.className = `team-item ${isUserTeam ? 'user-team' : ''}`;
             teamItem.dataset.position = i;
+            
+            // MODIFICATION: Use placeholder for non-user teams, make all editable
+            const teamNameValue = isUserTeam ? userTeamName : (teamsData[i]?.name || `Team ${i + 1}`);
+            const placeholderValue = `Team ${i + 1}`;
+
             teamItem.innerHTML = `
                 <span class="draft-order">${i + 1}</span>
                 <div class="team-name-input">
-                    <input type="text" id="team${i}Name" value="${isUserTeam ? userTeamName : 'Team ' + (i + 1)}" ${isUserTeam ? '' : 'readonly'} required>
+                    <input type="text" id="team${i}Name" placeholder="${placeholderValue}" value="${isUserTeam ? userTeamName : ''}" required>
                 </div>
                 <div class="arrow-buttons">
                     ${isUserTeam ? `
@@ -406,7 +515,6 @@
             teamNamesContainer.appendChild(teamItem);
         }
     
-        // Add listener to the user's input field to update their team name
         const userTeamInput = document.querySelector('.user-team input');
         if (userTeamInput) {
             userTeamInput.addEventListener('input', (e) => { userTeamName = e.target.value; });
@@ -414,47 +522,81 @@
         refreshTeamDisplay();
     }
 
-    // Prevents default form submission when arrow buttons are clicked
     function moveUserTeamUp(e) {
-        e.preventDefault(); 
-        const container = document.getElementById('teamNamesContainer');
-        const items = Array.from(container.querySelectorAll('.team-item'));
-        if (user_team_position > 0) {
-            container.insertBefore(items[user_team_position], items[user_team_position - 1]);
+        e.preventDefault();
+        const userTeamElement = document.querySelector('.user-team');
+        if (userTeamElement.previousElementSibling) {
+            userTeamElement.parentNode.insertBefore(userTeamElement, userTeamElement.previousElementSibling);
             refreshTeamDisplay();
         }
     }
 
-    // Prevents default form submission when arrow buttons are clicked
     function moveUserTeamDown(e) {
         e.preventDefault();
-        const container = document.getElementById('teamNamesContainer');
-        const items = Array.from(container.querySelectorAll('.team-item'));
-        if (user_team_position < items.length - 1) {
-            container.insertBefore(items[user_team_position + 1], items[user_team_position]);
+        const userTeamElement = document.querySelector('.user-team');
+        if (userTeamElement.nextElementSibling) {
+            userTeamElement.parentNode.insertBefore(userTeamElement.nextElementSibling, userTeamElement);
             refreshTeamDisplay();
         }
+    }
+
+    function randomizeOrder() {
+        const container = document.getElementById('teamNamesContainer');
+        const items = Array.from(container.children);
+        
+        // Fisher-Yates shuffle algorithm
+        for (let i = items.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [items[i], items[j]] = [items[j], items[i]];
+        }
+        
+        // Re-append shuffled items
+        items.forEach(item => container.appendChild(item));
+        refreshTeamDisplay();
     }
 
     function refreshTeamDisplay() {
-        const container = document.getElementById('teamNamesContainer');
-        const items = Array.from(container.querySelectorAll('.team-item'));
+        const items = document.querySelectorAll('.team-item');
+        let userPosition = -1;
+
         items.forEach((item, index) => {
             // Update draft number
             item.querySelector('.draft-order').textContent = index + 1;
-            // Update CPU team names based on new position
-            if (!item.classList.contains('user-team')) {
-                item.querySelector('input').value = `Team ${index + 1}`;
-            }
-            // Update button states and user position tracker
+            
+            // Update CPU team placeholders
+            const input = item.querySelector('input');
+            input.placeholder = `Team ${index + 1}`;
+            
             if (item.classList.contains('user-team')) {
-                user_team_position = index;
-                const upButton = item.querySelector('.arrow-btn:first-child');
-                const downButton = item.querySelector('.arrow-btn:last-child');
-                if (upButton) upButton.disabled = index === 0;
-                if (downButton) downButton.disabled = index === items.length - 1;
+                userPosition = index;
             }
         });
+
+        if (userPosition !== -1) {
+            const userItem = items[userPosition];
+            const upButton = userItem.querySelector('.arrow-btn:first-child');
+            const downButton = userItem.querySelector('.arrow-btn:last-child');
+            if (upButton) upButton.disabled = userPosition === 0;
+            if (downButton) downButton.disabled = userPosition === items.length - 1;
+        }
+    }
+    
+    // =========================================================================
+    // DRAFT ORDER GENERATION
+    // =========================================================================
+    function generateSnakeDraftOrder(teamNames, wildcardRounds) {
+        const draftOrder = [];
+        const teamCount = teamNames.length;
+        const totalRounds = 12 + parseInt(wildcardRounds, 10);
+        for (let i = 0; i < totalRounds; i++) {
+            const round = i + 1;
+            let roundOrder = [...teamNames]; 
+            if (round % 2 === 0) { 
+                roundOrder.reverse();
+            }
+            draftOrder.push(...roundOrder);
+        }
+        return draftOrder;
     }
 
     // Initial call to populate team names on page load
