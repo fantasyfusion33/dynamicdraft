@@ -243,6 +243,11 @@
             visibility: visible;
             opacity: 1;
         }
+        /* MOBILE FIX: Show on mobile tap (via JS class toggle) */
+        .tooltip-container.active .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
 
         /* Modal Styles */
         .modal-overlay {
@@ -254,8 +259,8 @@
             background: rgba(0, 0, 0, 0.7);
             backdrop-filter: blur(5px);
             z-index: 1000;
-            display: grid; /* MOBILE FIX: Use grid for more robust centering */
-            place-items: center; /* Vertically and horizontally center content */
+            display: grid; 
+            place-items: center;
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, visibility 0.3s ease;
@@ -276,7 +281,6 @@
             transform: scale(0.95);
             transition: transform 0.3s ease;
             color: rgba(255, 255, 255, 0.85);
-            /* MOBILE FIX: Use max-height of 100% of the PARENT's grid cell, which respects padding */
             max-height: 100%;
             overflow-y: auto;
         }
@@ -404,6 +408,21 @@
     });
     helpIcon.addEventListener('click', () => {
         welcomeModal.classList.add('active');
+    });
+    // MOBILE FIX: Add click listener for tooltip
+    document.querySelectorAll('.tooltip-icon').forEach(icon => {
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents the window click from firing immediately
+            const parentContainer = e.target.closest('.tooltip-container');
+            parentContainer.classList.toggle('active');
+        });
+    });
+
+    // Close tooltip if user clicks anywhere else on the page
+    window.addEventListener('click', () => {
+        document.querySelectorAll('.tooltip-container.active').forEach(container => {
+            container.classList.remove('active');
+        });
     });
 
     // =========================================================================
