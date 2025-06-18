@@ -223,26 +223,38 @@
         <h1>Create Your Mock Draft</h1>
         <form id="leagueForm">
             <div class="form-group">
-                <label for="leagueName">League Name</label>
+                <label for="leagueName">Name Mock League</label>
+                <p class="subheading">
+                    Type the name of your mock league below.            
+                </p>
                 <input type="text" id="leagueName" placeholder="Enter league name" required>
             </div>
             <div class="form-group">
-                <label>League Size</label>
+                <label>Select League Size</label>
+                <p class="subheading">
+                   Choose how many players to include in your league. Each league must include at least 2 players and at most 12.          
+                </p>
                 <div class="slider-container">
                     <span>2</span>
-                    <input type="range" id="leagueSize" min="2" max="12" step="1" value="8">
+                    <input type="range" id="leagueSize" min="2" max="12" step="1" value="6">
                     <span class="slider-value">8</span>
                     <span>12</span>
                 </div>
             </div>
             <div class="form-group" id="teamNamesGroup">
-                <label>Team Names</label>
+                <label>Set Draft Order</label>
+                <p class="subheading">
+                    Your team is highlighted in red. Use the arrow buttons to move yourself up or down to your desired draft position.                
+                </p>
                 <div id="teamNamesContainer">
                     <!-- Team name inputs will be dynamically added here -->
                 </div>
             </div>
             <div class="form-group">
-                <label>Wildcard Rounds</label>
+                <label>Add Wildcard Slots</label>
+                <p class="subheading">
+                    Choose the number of wildcard slots to include in your draft. Each slot adds an extra roster spot to draft an additional team from any sport.
+                </p>
                 <div id="wildcardRadios" style="display: flex; gap: 16px;">
                     <label>
                         <input type="radio" name="wildcard" value="0" checked> None
@@ -254,9 +266,6 @@
                         <input type="radio" name="wildcard" value="2"> 2 Rounds
                     </label>
                 </div>
-                <p class="subheading">
-                    Choose the number of wildcard rounds (extra roster spots to draft teams from any sport).
-                </p>
             </div>
             <button type="submit">Create League & Start Draft</button>
         </form>
