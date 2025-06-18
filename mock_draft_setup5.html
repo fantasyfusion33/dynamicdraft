@@ -309,15 +309,21 @@
     <!-- Welcome Modal -->
     <div class="modal-overlay" id="welcomeModal">
         <div class="modal-content">
-            <h2>Welcome to the Fantasy Fusion Draft!</h2>
-            <p>Get ready for a new kind of challenge where you draft entire pro and college teams across six different sports!</p>
+            <h2>Welcome to the Fantasy Fusion Mock Draft!</h2>
+            <p>Before your can start your mock draft, we need to let you know how the draft works and set up the details of your league.</p>
+            <h4>How the Mock Draft Works:</h4>
+            <ul>
+                <li><strong>The Point of the Game</strong> In Fantasy Fusion, instead of drafting players from one sport, you draft teams from across the 6 major US Sports (MLB, NBA, NFL, NHL, NCAAB, NCAAF). Each roster has 2 slots for teams from each sport to fill, with the potential to add additional Wildcard slots.</li>
+                <li><strong>The Draft Format</strong> The draft is a standard snake draft format. In a snake draft, the draft order reverses each round, meaning the team that picks first in one round picks last in the next, creating a "snaking" pattern of selection.  </li>
+                <li><strong>Mock Draft Details</strong> On the next screen you will decide which pick you will have in the draft. You will have 2 minutes to make your selection. All other picks will be auto-drafted.</li>
+            </ul>
             <h4>How to Set Up Your Mock Draft:</h4>
             <ul>
-                <li><strong>1. Create Your League:</strong> Give your league a name and choose the number of teams.</li>
-                <li><strong>2. Set Your Draft Spot:</strong> Find 'My Team' in the list below and use the arrow buttons to select your draft position.</li>
-                <li><strong>3. Add Wildcards (Optional):</strong> Choose extra rounds to draft bonus teams from any sport.</li>
+                <li><strong>1. Create Your League:</strong> Give your league a name and choose the number of teams in your mock draft.</li>
+                <li><strong>2. Set Your Draft Position:</strong> Find 'My Team' in the list below and use the arrow buttons to select your draft position.</li>
+                <li><strong>3. Add Wildcards (Optional):</strong> Choose the number of wildcard slots to include in your draft. Each slot adds an extra roster spot to draft an additional team from any sport.</li>
             </ul>
-            <button id="closeModalBtn">Let's Get Started</button>
+            <button id="closeModalBtn">Get Started</button>
         </div>
     </div>
     
@@ -340,10 +346,10 @@
             </div>
             <div class="form-group" id="teamNamesGroup">
                 <div class="form-group-header">
-                    <label>Set Your Draft Order</label>
+                    <label>Set Draft Order</label>
                     <button class="randomize-btn" id="randomizeBtn" type="button"><i class="fas fa-random"></i> Randomize</button>
                 </div>
-                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any team name.</p>
+                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any of the team names.</p>
                 <div id="teamNamesContainer">
                     <!-- Team name inputs will be dynamically added here -->
                 </div>
