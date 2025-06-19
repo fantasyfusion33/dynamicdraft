@@ -225,7 +225,7 @@
 
         /* MOBILE RESPONSIVE STYLES */
         @media (max-width: 768px) {
-            body { padding: 10px; }
+            body { padding: 0 5px; box-sizing: border-box; }
             .draft-container { grid-template-areas: "header" "sticky-header" "main"; gap: 10px; }
             .desktop-sidebar-area { display: none; }
             .site-brand { display: none; }
@@ -233,7 +233,7 @@
             .draft-header { padding: 5px; }
             .help-icon { top: 0; right: 5px; }
             
-            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; }
+            .sticky-header { grid-area: sticky-header; position: sticky; top: 0; z-index: 100; background: var(--dark); padding-top: 10px; box-sizing: border-box; overflow-x: auto; max-width: 96vw; justify-content: center; }
             .draft-flow-tracker { padding: 10px; gap: 5px; flex-wrap: nowrap; align-items: center; margin-bottom: 10px;}
             .flow-pick p { font-size: 0.9rem; }
             .flow-pick.after-that { display: none; }
@@ -259,8 +259,12 @@
                 padding: 0 5px; box-sizing: border-box;
             }
             .table-container {
-                overflow-x: auto; max-height: calc(100vh - 250px); width: 100%;
-            }
+                max-height: calc(100vh - 250px);
+                max-width: 96vw;
+                justify-content: center;
+                overflow: auto;
+                overflow-x: auto;
+             }
             .table-container::-webkit-scrollbar { display: none; }
             .table-container { scrollbar-width: none; }
 
