@@ -166,12 +166,12 @@
         .modal-content button.start-draft-button { 
             margin-top: 15px; 
             background: var(--primary);
+            border-radius: 6px;
             padding: 16px;
             font-size: 1.1rem;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(210, 4, 45, 0.3);
         }
         .modal-close-btn {
             position: absolute;
@@ -573,7 +573,7 @@
     // =================================================================================
     function setupInitialUI() {
         document.querySelector('.league-title').textContent = `${draftState.league_name} Mock Draft`;
-        document.getElementById('modalLeagueTitle').textContent = `Welcome to the ${draftState.league_name} Draft!`;
+        document.getElementById('modalLeagueTitle').textContent = `Welcome to the ${draftState.league_name} Mock Draft!`;
         updateDraftFlowTracker();
         createTeamSidebar();
         populateSportFilter();
