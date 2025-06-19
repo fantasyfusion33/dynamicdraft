@@ -279,11 +279,10 @@
     </style>
 </head>
 <body>
-    <!-- NEW: Draft Directions Modal -->
     <div class="modal-overlay" id="draftDirectionsModal">
         <div class="modal-content">
             <button class="modal-close-btn" id="modalCloseX" style="display: none;">&times;</button>
-            <h2>Welcome to the <span id="league-title">League Name</span>!</h2>
+            <h2 id="modalLeagueTitle">Welcome to the Draft!</h2>
             <p>Here’s a quick guide on how the draft room works.</p>
             
             <h4>The Draft Flow</h4>
@@ -407,7 +406,6 @@
         addEventListeners();
         showLoadingState(false);
         
-        // Show the directions modal instead of starting the draft immediately
         document.getElementById('draftDirectionsModal').classList.add('active');
     });
 
@@ -464,7 +462,7 @@
         await saveDraftProgress(draftState.last_pick_details, deadline);
     }
 
-    function checkForNextPick() {
+    async function checkForNextPick() {
         if (draftState.current_pick >= draftState.total_picks) {
             endDraft();
             return;
@@ -482,7 +480,7 @@
                 const remainingSeconds = Math.round((deadline - now) / 1000);
                 startCountdown(remainingSeconds);
             } else {
-                setPickDeadline();
+               await setPickDeadline();
                 startCountdown();
             }
         } else {
@@ -509,7 +507,6 @@
         const roster = draftState.player_rosters[draftingTeamName];
         const eligibleTeams = DraftableTeams.filter(team => isPickValid(team, roster));
         
-        // AI always drafts based on best odds, regardless of UI sort state
         const sortedForAI = [...eligibleTeams].sort((a, b) => {
             const oddsA = parseFloat(a.championship_odds) || Infinity;
             const oddsB = parseFloat(b.championship_odds) || Infinity;
@@ -576,6 +573,7 @@
     // =================================================================================
     function setupInitialUI() {
         document.querySelector('.league-title').textContent = `${draftState.league_name} Mock Draft`;
+        document.getElementById('modalLeagueTitle').textContent = `Welcome to the ${draftState.league_name} Draft!`;
         updateDraftFlowTracker();
         createTeamSidebar();
         populateSportFilter();
