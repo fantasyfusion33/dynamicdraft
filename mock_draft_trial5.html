@@ -314,54 +314,39 @@
             <h1 class="league-title">League Name</h1>
         </header>
 
-        <div class="draft-flow-tracker">
-            <div class="flow-pick-container">
-                <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
-                <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
-                <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
-                <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+        <div class="sticky-header">
+            <div class="draft-flow-tracker">
+                <div class="flow-pick-container">
+                    <div class="flow-pick previous"><h4>Prev Pick</h4><p id="previous-pick-info">--</p></div>
+                    <div class="flow-pick on-the-clock"><h4>On The Clock</h4><p id="current-pick-info">Loading...</p></div>
+                    <div class="flow-pick upcoming"><h4>Next Up</h4><p id="upcoming-pick-1">--</p></div>
+                    <div class="flow-pick upcoming after-that"><h4>After That</h4><p id="upcoming-pick-2">--</p></div>
+                </div>
+                 <div class="countdown-clock" id="countdownClock">2:00</div>
             </div>
-            <div class="countdown-clock" id="countdownClock">2:00</div>
+            <div class="mobile-tabs">
+                <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
+                <button class="mobile-tab" data-view="teams">Teams</button>
+            </div>
         </div>
         
         <main class="main-content">
-            <div class="draft-status-bar"><div class="draft-progress"></div></div>
+             <div class="draft-status-bar"><div class="draft-progress"></div></div>
+
             <div class="draftboard-container active">
-                <div class="sticky-header">
-                    <div class="mobile-tabs">
-                        <button class="mobile-tab active" data-view="draftboard">Draft Board</button>
-                        <button class="mobile-tab" data-view="teams">Teams</button>
-                    </div>
                     <div class="filters">
                         <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
                         <select id="sportFilter"><option value="all">All Sports</option></select>
-                        <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
+                        <select id="conferenceFilter" disabled><option value="all">Conferences</option></select>
                     </div>
-                </div>
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
                 </div>
             </div>
             <div class="teams-container">
-                 <div class="sticky-header">
-                    <div class="mobile-tabs">
-                        <button class="mobile-tab" data-view="draftboard">Draft Board</button>
-                        <button class="mobile-tab active" data-view="teams">Teams</button>
-                    </div>
-                </div>
                  <div id="rosters-mobile"></div>
             </div>
         </main>
-
-        <aside class="desktop-sidebar-area">
-             <div class="roster-container-desktop">
-                <div class="team-selector">
-                    <select id="teamSelector" onchange="switchRoster(this.value)"></select>
-                </div>
-                <div class="roster-container" id="roster-container"></div>
-             </div>
-        </aside>
-    </div>
     
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
