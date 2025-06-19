@@ -350,6 +350,14 @@
                  <div id="rosters-mobile"></div>
             </div>
         </main>
+        <aside class="desktop-sidebar-area">
+             <div class="roster-container-desktop">
+                <div class="team-selector">
+                    <select id="teamSelector" onchange="switchRoster(this.value)"></select>
+                </div>
+                <div class="roster-container" id="roster-container"></div>
+             </div>
+        </aside>
     
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
