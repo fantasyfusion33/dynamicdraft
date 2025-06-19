@@ -269,14 +269,11 @@
             .table-container { scrollbar-width: none; }
 
             .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
-            /* Sticky cell wrapper logic for mobile */
-            .draft-table td:first-child, .draft-table th:first-child,
-            .draft-table td:last-child, .draft-table th:last-child { padding: 0; }
-            .sticky-cell-content { position: sticky; background: var(--dark); display: flex; align-items: center; padding: 6px 8px; }
-            .draft-table td:first-child .sticky-cell-content, .draft-table th:first-child .sticky-cell-content { left: 0; z-index: 1; }
-            .draft-table td:last-child .sticky-cell-content, .draft-table th:last-child .sticky-cell-content { right: 0; z-index: 1; justify-content: center; }
-            .draft-table th:first-child .sticky-cell-content, .draft-table th:last-child .sticky-cell-content { z-index: 3; }
-            .draft-table tr:hover td:first-child .sticky-cell-content, .draft-table tr:hover td:last-child .sticky-cell-content { background: var(--gray); }
+            .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:first-child { background: var(--gray); }
+            .draft-table td:last-child, .draft-table th:last-child { position: sticky; right: 0; background: var(--dark); z-index: 1; }
+            .draft-table tr:hover td:last-child { background: var(--gray); }
+            .draft-table th:first-child, .draft-table th:last-child { z-index: 3; }
             
             .draft-table th, .draft-table td { font-size: 0.7rem; padding: 6px 8px; }
             .draft-table .sport-badge { font-size: 0.6rem; padding: 1px 5px; }
