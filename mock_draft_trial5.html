@@ -269,11 +269,14 @@
             .table-container { scrollbar-width: none; }
 
             .draft-table th { position: sticky; top: 0; z-index: 2; background: var(--dark); }
-            .draft-table td:first-child, .draft-table th:first-child { position: sticky; left: 0; background: var(--dark); z-index: 1; }
-            .draft-table tr:hover td:first-child { background: var(--gray); }
-            .draft-table td:last-child, .draft-table th:last-child { position: sticky; right: 0; background: var(--dark); z-index: 1; }
-            .draft-table tr:hover td:last-child { background: var(--gray); }
-            .draft-table th:first-child, .draft-table th:last-child { z-index: 3; }
+            /* Sticky cell wrapper logic for mobile */
+            .draft-table td:first-child, .draft-table th:first-child,
+            .draft-table td:last-child, .draft-table th:last-child { padding: 0; }
+            .sticky-cell-content { position: sticky; background: var(--dark); display: flex; align-items: center; padding: 6px 8px; }
+            .draft-table td:first-child .sticky-cell-content, .draft-table th:first-child .sticky-cell-content { left: 0; z-index: 1; }
+            .draft-table td:last-child .sticky-cell-content, .draft-table th:last-child .sticky-cell-content { right: 0; z-index: 1; justify-content: center; }
+            .draft-table th:first-child .sticky-cell-content, .draft-table th:last-child .sticky-cell-content { z-index: 3; }
+            .draft-table tr:hover td:first-child .sticky-cell-content, .draft-table tr:hover td:last-child .sticky-cell-content { background: var(--gray); }
             
             .draft-table th, .draft-table td { font-size: 0.7rem; padding: 6px 8px; }
             .draft-table .sport-badge { font-size: 0.6rem; padding: 1px 5px; }
@@ -469,7 +472,7 @@
                 const remainingSeconds = Math.round((deadline - now) / 1000);
                 startCountdown(remainingSeconds);
             } else {
-               await setPickDeadline();
+                await setPickDeadline();
                 startCountdown();
             }
         } else {
@@ -562,7 +565,7 @@
     // =================================================================================
     function setupInitialUI() {
         document.querySelector('.league-title').textContent = `${draftState.league_name} Mock Draft`;
-        document.getElementById('modalLeagueTitle').textContent = `Welcome to the ${draftState.league_name} Mock Draft!`;
+        document.getElementById('modalLeagueTitle').textContent = `Welcome to the ${draftState.league_name} Draft!`;
         updateDraftFlowTracker();
         createTeamSidebar();
         populateSportFilter();
@@ -651,7 +654,11 @@
     function createTeamSidebar() {
         const rosterContainer = document.getElementById('roster-container');
         const teamSelector = document.getElementById('teamSelector');
-        rosterContainer.innerHTML = ''; teamSelector.innerHTML = '';
+        if (!rosterContainer || !teamSelector) {
+            return;
+        }
+        rosterContainer.innerHTML = '';
+        teamSelector.innerHTML = '';
         draftState.team_names.forEach(name => {
             const sanitizedId = name.replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '');
             const option = document.createElement('option');
