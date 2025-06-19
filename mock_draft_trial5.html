@@ -151,6 +151,7 @@
         }
         .modal-overlay.active { opacity: 1; visibility: visible; }
         .modal-content {
+            position: relative; /* Needed for the close button */
             background: #1A1A1A; padding: 30px; border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1); width: 100%;
             max-width: 600px; transform: scale(0.95); transition: transform 0.3s ease;
@@ -162,7 +163,30 @@
         .modal-content p { line-height: 1.6; margin-top: 0; margin-bottom: 1em; }
         .modal-content ul { padding-left: 20px; line-height: 1.7; }
         .modal-content li { margin-bottom: 12px; }
-        .modal-content button { margin-top: 15px; background: var(--primary);}
+        .modal-content button.start-draft-button { 
+            margin-top: 15px; 
+            background: var(--primary);
+            padding: 16px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(210, 4, 45, 0.3);
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
         .help-icon {
             position: absolute; top: -10px; right: 0; width: 28px; height: 28px;
             border: 1px solid #555; border-radius: 50%; display: flex;
@@ -258,7 +282,8 @@
     <!-- NEW: Draft Directions Modal -->
     <div class="modal-overlay" id="draftDirectionsModal">
         <div class="modal-content">
-            <h2>Welcome to your Mock Draft!</h2>
+            <button class="modal-close-btn" id="modalCloseX" style="display: none;">&times;</button>
+            <h2>Welcome to the <h1 class="league-title">League Name</h1> Mock Draft!</h2>
             <p>Here’s a quick guide on how the draft room works.</p>
             
             <h4>The Draft Flow</h4>
@@ -275,7 +300,7 @@
             <p>You can draft a maximum of **two teams** from each of the six main sports. During **Wildcard** rounds, you can draft a team from any sport, even if you've already filled that sport's two main slots.</p>
             <p>To view rosters, use the sidebar on desktop or the "Teams" tab if you are drafting on a mobile device.</p>
 
-            <button id="startDraftBtn">Start Draft</button>
+            <button id="startDraftBtn" class="start-draft-button">Start Draft</button>
         </div>
     </div>
 
@@ -412,8 +437,6 @@
         }
     }
     
-    // All other JavaScript functions remain the same as the last provided version.
-    // The only changes are the new modal listeners and the deferred start of the draft.
     async function fetchDraftableTeamsFromDB() {
         try {
             const { data, error } = await supabase.from('SportTeamDatabase').select('*');
@@ -485,7 +508,15 @@
         const draftingTeamName = draftState.draft_order[draftState.current_pick];
         const roster = draftState.player_rosters[draftingTeamName];
         const eligibleTeams = DraftableTeams.filter(team => isPickValid(team, roster));
-        const teamToPick = eligibleTeams.length > 0 ? sortTeams(eligibleTeams)[0] : null;
+        
+        // AI always drafts based on best odds, regardless of UI sort state
+        const sortedForAI = [...eligibleTeams].sort((a, b) => {
+            const oddsA = parseFloat(a.championship_odds) || Infinity;
+            const oddsB = parseFloat(b.championship_odds) || Infinity;
+            return oddsA - oddsB;
+        });
+        const teamToPick = sortedForAI.length > 0 ? sortedForAI[0] : null;
+
         processPick(teamToPick);
     }
     
@@ -559,15 +590,18 @@
         const draftModal = document.getElementById('draftDirectionsModal');
         const startDraftBtn = document.getElementById('startDraftBtn');
         const helpIcon = document.getElementById('helpIcon');
+        const modalCloseX = document.getElementById('modalCloseX');
 
         startDraftBtn.addEventListener('click', () => {
             draftModal.classList.remove('active');
+            startDraftBtn.style.display = 'none'; // Hide start button
+            modalCloseX.style.display = 'block'; // Show X button
             checkForNextPick(); // This now starts the draft
         });
-
-        helpIcon.addEventListener('click', () => {
-            draftModal.classList.add('active');
-        });
+        
+        const closeDraftModal = () => draftModal.classList.remove('active');
+        modalCloseX.addEventListener('click', closeDraftModal);
+        helpIcon.addEventListener('click', () => draftModal.classList.add('active'));
 
         // Other Listeners
         document.getElementById("sportFilter").addEventListener("change", () => {
