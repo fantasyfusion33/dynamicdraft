@@ -412,9 +412,18 @@
     async function initializeDraftState() {
         try {
             const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
-            if (error) throw error;
-            if (!data || !Array.isArray(data.draft_order)) throw new Error("Invalid draft data. Please create a new draft.");
-            
+            if (error) {
+                // This will pass along specific database errors, which are very helpful
+                throw new Error(`Database error: ${error.message}`);
+            }
+            if (!data) {
+                // This case handles when the leagueId is invalid and no record is found
+                throw new Error("Draft not found. Please create a new draft.");
+            }
+            if (!data.draft_order || !Array.isArray(data.draft_order) || data.draft_order.length === 0) {
+                // This specifically checks if the draft_order is missing, not an array, or empty
+                throw new Error("Draft data is corrupt (invalid draft order). Please create a new draft.");
+            }           
             Object.assign(draftState, data);
 
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
