@@ -134,7 +134,7 @@
             text-align: center;
             border-radius: 6px; 
             cursor: pointer; 
-            transition: background-color 0.2s ease; 
+            transition: background-color 0.2s ease, font-size 0.2s ease; 
         }
         .draft-table .draft-button.confirm-state {
             background-color: #28a745; /* Green for confirm state */
@@ -636,13 +636,27 @@
     }
 
     function adjustUIForMobile() {
+        // Shorten text for mobile filter bar
         const sportFilter = document.getElementById('sportFilter');
         if (sportFilter && sportFilter.options[0]) {
-            sportFilter.options[0].textContent = "Sports"; // Shorten "All Sports"
+            sportFilter.options[0].textContent = "Sports";
+        }
+        const conferenceFilter = document.getElementById('conferenceFilter');
+        if (conferenceFilter && conferenceFilter.options[0]) {
+            conferenceFilter.options[0].textContent = "Conferences";
+        }
+        const teamSearch = document.getElementById('teamSearch');
+        if (teamSearch) {
+            teamSearch.placeholder = "Search";
         }
         const clearAllBtn = document.getElementById('clearAllFiltersBtn');
         if (clearAllBtn) {
-            clearAllBtn.textContent = "Clear"; // Shorten "Clear All"
+            clearAllBtn.innerHTML = "&times;";
+            clearAllBtn.style.color = '#aaa';
+            clearAllBtn.style.fontSize = '1.5rem';
+            clearAllBtn.style.padding = '0 10px';
+            clearAllBtn.style.width = '38px';
+            clearAllBtn.title = "Clear All Filters";
         }
     }
 
@@ -889,14 +903,15 @@
     function populateSportFilter() {
         const sportFilter = document.getElementById("sportFilter");
         const sports = [...new Set(DraftableTeams.map(t => t.sport).filter(s => s))].sort();
-        sportFilter.innerHTML = `<option value="all">${isMobile ? 'Sports' : 'All Sports'}</option>`;
+        // Set default text that will be adjusted for mobile in adjustUIForMobile()
+        sportFilter.innerHTML = `<option value="all">All Sports</option>`;
         sports.forEach(sport => sportFilter.add(new Option(sport, sport)));
     }
 
     function populateConferenceFilter() {
         const confFilter = document.getElementById("conferenceFilter");
         const selectedSport = document.getElementById("sportFilter").value;
-        confFilter.innerHTML = '<option value="all">Conferences</option>';
+        confFilter.innerHTML = '<option value="all">All Conferences</option>';
         if (selectedSport !== 'all' && conferenceData[selectedSport]) {
             confFilter.disabled = false;
             conferenceData[selectedSport].forEach(conf => confFilter.add(new Option(conf, conf)));
