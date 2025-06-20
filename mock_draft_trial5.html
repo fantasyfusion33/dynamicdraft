@@ -138,7 +138,6 @@
         }
         .draft-table .draft-button.confirm-state {
             background-color: #28a745; /* Green for confirm state */
-            font-size: 0.9em; /* Slightly smaller font for "Confirm" */
         }
         .draft-table .draft-button:disabled { background: #555; cursor: not-allowed; }
         
@@ -628,6 +627,7 @@
         updateDraftFlowTracker();
         createTeamSidebar();
         populateSportFilter();
+        populateConferenceFilter();
         renderTeams();
         if (isMobile) {
             adjustUIForMobile();
@@ -911,7 +911,7 @@
     function populateConferenceFilter() {
         const confFilter = document.getElementById("conferenceFilter");
         const selectedSport = document.getElementById("sportFilter").value;
-        confFilter.innerHTML = '<option value="all">All Conferences</option>';
+        confFilter.innerHTML = `<option value="all">${isMobile ? 'Conferences' : 'All Conferences'}</option>`;
         if (selectedSport !== 'all' && conferenceData[selectedSport]) {
             confFilter.disabled = false;
             conferenceData[selectedSport].forEach(conf => confFilter.add(new Option(conf, conf)));
