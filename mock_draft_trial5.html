@@ -125,9 +125,9 @@
         .draft-table .team-name-cell { display: flex; align-items: center; gap: 15px; white-space: normal; }
         .draft-table .team-sub-info {  font-size: 0.8rem; color: #aaa; display: flex; align-items: center; gap: 8px; margin-top: 4px; }
         .draft-table .sport-badge { padding: 3px 8px; border-radius: 12px; color: white; font-size: 0.8rem; font-weight: bold; }
-        .draft-table .draft-button { background: var(--primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .draft-table .draft-button { background: var(--primary); border: none; color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: background-color 0.2s ease; }
         .draft-table .draft-button:disabled { background: #555; cursor: not-allowed; }
-    
+        
         .roster ul { list-style: none; padding: 0; }
         .roster li { display: flex; align-items: center; gap: 10px; padding: 8px; margin-bottom: 5px; background: rgba(255, 255, 255, 0.05); border-radius: 4px; }
         .team-icon { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -175,6 +175,7 @@
             letter-spacing: 1px;
             cursor: pointer;
             color: white;
+            width: 100%;
         }
         .modal-close-btn {
             position: absolute;
@@ -197,6 +198,27 @@
             cursor: pointer; transition: all 0.2s ease; z-index: 100;
         }
         .help-icon:hover { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
+        
+        /* New Style for Select Dropdown Arrow */
+        .select-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        .select-wrapper::after {
+            content: '▼';
+            font-size: 12px;
+            color: #aaa;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none; /* Allows clicks to pass through to the select element */
+        }
+        .select-wrapper select {
+            width: 100%;
+            box-sizing: border-box;
+        }
 
         /* Desktop Specific Layout */
         @media (min-width: 769px) {
@@ -216,7 +238,7 @@
              }
             .roster { display: none; }
             .roster.active { display: block; }
-            #teamSelector { width: 100%; margin-bottom: 15px; }
+            .team-selector { margin-bottom: 15px; }
             .main-content .table-container {
                 max-height: calc(100vh - 320px);
                 overflow: auto;
@@ -225,7 +247,7 @@
 
         /* MOBILE RESPONSIVE STYLES */
         @media (max-width: 768px) {
-            body { padding: 0 5px; box-sizing: border-box; }
+            body { padding: 10px 5px; box-sizing: border-box; }
             .draft-container { grid-template-areas: "header" "sticky-header" "main"; gap: 10px; }
             .desktop-sidebar-area { display: none; }
             .site-brand { display: none; }
@@ -252,7 +274,6 @@
             
             .rosters-mobile-container { padding: 10px; }
             .roster-mobile { display: block; }
-            #mobileTeamSelector { width: 100%; margin-bottom: 15px; }
             
             .draftboard-container, .teams-container {
                 display: grid; grid-template-columns: 100%;
@@ -294,9 +315,14 @@
             
             <h4>Using the Draft Board</h4>
             <ul>
-                <li><strong>Find Teams:</strong> Use the search bar and filters to narrow down the list of available teams.</li>
-                <li><strong>Sort Data:</strong> Click any column header (like "Odds" or "ADP") to sort the table by that stat.</li>
-                <li><strong>Select a Team:</strong> Click the red "Draft" button in a team's row to make your pick.</li>
+              <li><strong>Find Teams:</strong> Use the search bar and filters to narrow down the list of available teams.</li>
+              <ul style="margin-top: 10px;">
+                <li><strong>Search Bar:</strong> Type in any part of a team’s name to instantly narrow the list.</li>
+                <li><strong>Filters:</strong> Use the "Sport" dropdown to choose a sport (NFL, NBA, etc.), and the "Conference" dropdown to further refine results within that sport.</li>
+                <li><strong>Combined Filtering:</strong> When a filter is selected, the search bar will only match teams within the selected filters.</li>
+              </ul>
+              <li><strong>Sort Data:</strong> Click any column header (like "Odds" or "ADP") to sort the table by that stat.</li>
+              <li><strong>Select a Team:</strong> Click the red "Draft" button next to the team you want to add. The button will change to green and say "Confirm". Click it again to make your pick.</li>
             </ul>
 
             <h4>Roster Rules</h4>
@@ -334,11 +360,12 @@
              <div class="draft-status-bar"><div class="draft-progress"></div></div>
 
             <div class="draftboard-container active">
-                    <div class="filters">
-                        <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
-                        <select id="sportFilter"><option value="all">All Sports</option></select>
-                        <select id="conferenceFilter" disabled><option value="all">Conferences</option></select>
-                    </div>
+                 <div class="filters">
+                     <div class="search-bar"><input type="text" id="teamSearch" placeholder="Search teams..."><button id="clearSearch" title="Clear">&times;</button></div>
+                     <select id="sportFilter"><option value="all">All Sports</option></select>
+                     <select id="conferenceFilter" disabled><option value="all">Conferences</option></select>
+                     <button id="clearAllFiltersBtn" title="Clear All Filters" style="background:none; border:1px solid #555; color:#fff; border-radius:6px; padding: 0 10px; cursor:pointer; height: 38px;">Clear All</button>
+                 </div>
                 <div class="table-container">
                     <table class="draft-table" id="draftable-teams-table"></table>
                 </div>
@@ -350,7 +377,9 @@
         <aside class="desktop-sidebar-area">
              <div class="roster-container-desktop">
                 <div class="team-selector">
-                    <select id="teamSelector" onchange="switchRoster(this.value)"></select>
+                    <div class="select-wrapper">
+                        <select id="teamSelector" onchange="switchRoster(this.value)"></select>
+                    </div>
                 </div>
                 <div class="roster-container" id="roster-container"></div>
              </div>
@@ -378,6 +407,7 @@
     let isUserTurn = false;
     let isMobile = window.innerWidth <= 768;
     const sortState = { key: 'championship_odds', direction: 'asc' };
+    let pendingDraftTeamId = null; // For 2-click draft confirmation
     
     const conferenceData = {
         NFL: ["AFC", "NFC"], NBA: ["Eastern", "Western"], MLB: ["AL", "NL"], NHL: ["Eastern", "Western"],
@@ -412,18 +442,17 @@
     async function initializeDraftState() {
         try {
             const { data, error } = await supabase.from('mock_drafts').select('*').eq('id', leagueId).single();
+            
             if (error) {
-                // This will pass along specific database errors, which are very helpful
                 throw new Error(`Database error: ${error.message}`);
             }
             if (!data) {
-                // This case handles when the leagueId is invalid and no record is found
                 throw new Error("Draft not found. Please create a new draft.");
             }
             if (!data.draft_order || !Array.isArray(data.draft_order) || data.draft_order.length === 0) {
-                // This specifically checks if the draft_order is missing, not an array, or empty
                 throw new Error("Draft data is corrupt (invalid draft order). Please create a new draft.");
-            }           
+            }
+            
             Object.assign(draftState, data);
 
             const userPosition = data.user_team_position > 0 ? data.user_team_position - 1 : 0;
@@ -502,9 +531,11 @@
         if (!team) return;
         if (!isPickValid(team, draftState.player_rosters[draftState.user_team_name])) {
             alert(`Roster full for this sport. Please select a different team.`);
+            resetPendingDraftButton();
             return;
         }
         if (draftState.timer) clearInterval(draftState.timer);
+        resetPendingDraftButton();
         await processPick(team);
     }
 
@@ -598,16 +629,16 @@
 
         startDraftBtn.addEventListener('click', () => {
             draftModal.classList.remove('active');
-            startDraftBtn.style.display = 'none'; // Hide start button
-            modalCloseX.style.display = 'block'; // Show X button
-            checkForNextPick(); // This now starts the draft
+            startDraftBtn.style.display = 'none';
+            modalCloseX.style.display = 'block';
+            checkForNextPick();
         });
         
         const closeDraftModal = () => draftModal.classList.remove('active');
         modalCloseX.addEventListener('click', closeDraftModal);
         helpIcon.addEventListener('click', () => draftModal.classList.add('active'));
 
-        // Other Listeners
+        // Filter Listeners
         document.getElementById("sportFilter").addEventListener("change", () => {
             populateConferenceFilter(); renderTeams();
         });
@@ -616,6 +647,14 @@
         document.getElementById("clearSearch").addEventListener("click", () => {
             document.getElementById("teamSearch").value = ""; renderTeams();
         });
+        document.getElementById('clearAllFiltersBtn').addEventListener('click', () => {
+            document.getElementById("teamSearch").value = "";
+            document.getElementById("sportFilter").value = "all";
+            populateConferenceFilter(); 
+            renderTeams();
+        });
+        
+        // Window Listeners
         window.addEventListener('resize', () => { 
             const newIsMobile = window.innerWidth <= 768;
             if (isMobile !== newIsMobile) { window.location.reload(); }
@@ -623,6 +662,13 @@
         });
         document.querySelectorAll('.mobile-tab').forEach(tab => {
             tab.addEventListener('click', (e) => showMobileView(e.currentTarget.dataset.view));
+        });
+
+        // Add listener to reset pending draft button if user clicks elsewhere
+        document.body.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('draft-button')) {
+                resetPendingDraftButton();
+            }
         });
     }
     
@@ -667,10 +713,11 @@
     
     function createTeamSidebar() {
         const rosterContainer = document.getElementById('roster-container');
+        const teamSelectorParent = document.querySelector('.team-selector .select-wrapper');
         const teamSelector = document.getElementById('teamSelector');
-        if (!rosterContainer || !teamSelector) {
-            return;
-        }
+        
+        if (!rosterContainer || !teamSelectorParent || !teamSelector) return;
+
         rosterContainer.innerHTML = '';
         teamSelector.innerHTML = '';
         draftState.team_names.forEach(name => {
@@ -758,15 +805,23 @@
 
     function createTeamRow(team) {
         const row = document.createElement('tr');
-        const oddsDisplay = team.championship_odds ? `+${team.championship_odds}` : 'N/A';
+        
+        let oddsDisplay = 'N/A';
+        if (team.championship_odds !== null && typeof team.championship_odds !== 'undefined') {
+            const oddsValue = parseFloat(team.championship_odds);
+            oddsDisplay = oddsValue > 0 ? `+${oddsValue}` : `${oddsValue}`;
+        }
+
         const pctDisplay = team.championshipPct ? `${team.championshipPct.toFixed(1)}%` : 'N/A';
         const subInfo = `${team.conference || ''} ${team.division && team.division !== 'N/A' ? `| ${team.division}` : ''}`;
+        const buttonHTML = `<button class="draft-button" data-team-id="${team.team_id}" onclick="event.stopPropagation(); handleDraftButtonClick(this, '${team.team_id}')">Draft</button>`;
+
         if (isMobile) {
             const firstCellHTML = `<td><div class="sticky-cell-content team-name-cell"><div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div><div> ${team.name} <div class="team-sub-info"><span class="sport-badge ${team.sport}">${team.sport}</span><span>${subInfo}</span></div></div></div></td>`;
-            const lastCellHTML = `<td><div class="sticky-cell-content"><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></div></td>`;
+            const lastCellHTML = `<td><div class="sticky-cell-content">${buttonHTML}</div></td>`;
             row.innerHTML = `${firstCellHTML}<td>${oddsDisplay}</td><td>${pctDisplay}</td><td>${team.lastYearPoints || 'N/A'}</td><td>${team.adp || 'N/A'}</td>${lastCellHTML}`;
         } else {
-            row.innerHTML = `<td class="team-name-cell"><div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div><div> ${team.name} <div class="team-sub-info"><span class="sport-badge ${team.sport}">${team.sport}</span><span>${subInfo}</span></div></div></td><td>${oddsDisplay}</td><td>${pctDisplay}</td><td>${team.lastYearPoints || 'N/A'}</td><td>${team.adp || 'N/A'}</td><td><button class="draft-button" onclick="draftTeam('${team.team_id}')">Draft</button></td>`;
+            row.innerHTML = `<td class="team-name-cell"><div class="team-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team)}" style="color:${team.secondaryColor};"></i></div><div> ${team.name} <div class="team-sub-info"><span class="sport-badge ${team.sport}">${team.sport}</span><span>${subInfo}</span></div></div></td><td>${oddsDisplay}</td><td>${pctDisplay}</td><td>${team.lastYearPoints || 'N/A'}</td><td>${team.adp || 'N/A'}</td><td>${buttonHTML}</td>`;
         }
         return row;
     }
@@ -780,6 +835,29 @@
             sortState.direction = (key === 'championship_odds' || key === 'adp') ? 'asc' : 'desc';
         }
         renderTeams();
+    }
+    
+    function resetPendingDraftButton() {
+        if (!pendingDraftTeamId) return;
+        const pendingButton = document.querySelector(`button[data-team-id="${pendingDraftTeamId}"]`);
+        if (pendingButton) {
+            pendingButton.style.backgroundColor = 'var(--primary)';
+            pendingButton.textContent = 'Draft';
+        }
+        pendingDraftTeamId = null;
+    }
+
+    function handleDraftButtonClick(buttonElement, teamId) {
+        if (pendingDraftTeamId && pendingDraftTeamId !== teamId) {
+            resetPendingDraftButton();
+        }
+        if (pendingDraftTeamId === teamId) {
+            draftTeam(teamId);
+        } else {
+            pendingDraftTeamId = teamId;
+            buttonElement.style.backgroundColor = '#28a745'; // Green for confirm
+            buttonElement.textContent = 'Confirm';
+        }
     }
 
     function populateSportFilter() {
@@ -813,11 +891,11 @@
     }
     function renderMobileRosters(selectedTeamName = draftState.user_team_name) {
         const container = document.getElementById('rosters-mobile');
-        let selectHTML = `<select id="mobileTeamSelector" onchange="renderMobileRosters(this.value)">`;
+        let selectHTML = `<div class="select-wrapper"><select id="mobileTeamSelector" onchange="renderMobileRosters(this.value)">`;
         draftState.team_names.forEach(name => {
             selectHTML += `<option value="${name}" ${name === selectedTeamName ? 'selected' : ''}>${name}</option>`;
         });
-        selectHTML += `</select>`;
+        selectHTML += `</select></div>`;
         container.innerHTML = `${selectHTML}<div class="roster active"><h2>${selectedTeamName}</h2><ul id="mobile-roster-list"></ul></div>`;
         updateRosterDisplay(selectedTeamName, 'mobile-roster-list');
     }
@@ -865,7 +943,7 @@
     function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
     function startCountdown(seconds = 120){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=seconds;const el=document.getElementById('countdownClock');function updateClock(){if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;};updateClock();draftState.timer=setInterval(updateClock,1000);}
     function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
-    function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
+    function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;padding:20px;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
 </script>
 </body>
 </html>
