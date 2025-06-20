@@ -896,7 +896,7 @@
     function populateConferenceFilter() {
         const confFilter = document.getElementById("conferenceFilter");
         const selectedSport = document.getElementById("sportFilter").value;
-        confFilter.innerHTML = '<option value="all">All Conferences</option>';
+        confFilter.innerHTML = '<option value="all">Conferences</option>';
         if (selectedSport !== 'all' && conferenceData[selectedSport]) {
             confFilter.disabled = false;
             conferenceData[selectedSport].forEach(conf => confFilter.add(new Option(conf, conf)));
