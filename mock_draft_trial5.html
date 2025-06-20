@@ -154,7 +154,7 @@
         .draft-pick-circle.NCAAB, .sport-badge.NCAAB { background-color: var(--ncaab-color); }
         .mobile-tabs { display: none; }
         
-        /* Modal & Help Icon Styles */
+        /* Modal, Help Icon, and Notification Styles */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
@@ -211,6 +211,25 @@
             cursor: pointer; transition: all 0.2s ease; z-index: 100;
         }
         .help-icon:hover { background: var(--primary); border-color: var(--primary); transform: scale(1.1); }
+        
+        .wildcard-toast {
+            position: fixed;
+            top: -100px; /* Start off-screen */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--primary);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            font-weight: 500;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: top 0.5s ease-in-out;
+        }
+        .wildcard-toast.show {
+            top: 20px;
+        }
         
         /* New Style for Select Dropdown Arrow */
         .select-wrapper {
@@ -414,13 +433,14 @@
         league_name: '', team_names: [], team_count: 0, wildcard_round: 0,
         user_team_name: '', current_pick: 0, draft_order: [],
         player_rosters: {}, total_picks: 0, timer: null,
-        last_pick_details: null, pick_deadline: null
+        last_pick_details: null, pick_deadline: null, status: 'not_started'
     };
     let DraftableTeams = [];
     let isUserTurn = false;
     let isMobile = window.innerWidth <= 768;
     const sortState = { key: 'championship_odds', direction: 'asc' };
     let pendingDraftTeamId = null; // For 2-click draft confirmation
+    let wildcardNotificationShown = false; // To show wildcard alert only once
     
     const conferenceData = {
         NFL: ["AFC", "NFC"], NBA: ["Eastern", "Western"], MLB: ["AL", "NL"], NHL: ["Eastern", "Western"],
@@ -440,13 +460,27 @@
         showLoadingState(true);
         
         await initializeDraftState();
+        
+        // If draft is already completed, show final view immediately
+        if (draftState.status === 'completed') {
+            endDraft();
+            showLoadingState(false);
+            return;
+        }
+        
         await fetchDraftableTeamsFromDB();
 
         setupInitialUI();
         addEventListeners();
         showLoadingState(false);
         
-        document.getElementById('draftDirectionsModal').classList.add('active');
+        // Only show the start modal if the draft hasn't started
+        if (draftState.status === 'not_started') {
+            document.getElementById('draftDirectionsModal').classList.add('active');
+        } else {
+            // If draft is in progress, just start the logic
+            checkForNextPick();
+        }
     });
 
     // =================================================================================
@@ -515,6 +549,14 @@
             endDraft();
             return;
         }
+
+        // Wildcard round notification
+        const isFirstWildcardPick = draftState.current_pick === (12 * draftState.team_count);
+        if (draftState.wildcard_round > 0 && isFirstWildcardPick && !wildcardNotificationShown) {
+            showWildcardNotification();
+            wildcardNotificationShown = true;
+        }
+
         updateOnTheClockUI();
         const currentDrafter = draftState.draft_order[draftState.current_pick];
         isUserTurn = currentDrafter === draftState.user_team_name;
@@ -614,7 +656,6 @@
 
     function endDraft() {
         if (draftState.timer) clearInterval(draftState.timer);
-        alert("Draft Complete!");
         document.body.innerHTML = createFinalRosterView();
     }
 
@@ -676,7 +717,14 @@
         
         const closeDraftModal = () => draftModal.classList.remove('active');
         modalCloseX.addEventListener('click', closeDraftModal);
-        helpIcon.addEventListener('click', () => draftModal.classList.add('active'));
+        helpIcon.addEventListener('click', () => {
+            // Re-show the modal without the start button if draft is in progress
+            if(draftState.status !== 'not_started'){
+                startDraftBtn.style.display = 'none';
+                modalCloseX.style.display = 'block';
+            }
+            draftModal.classList.add('active');
+        });
 
         // Filter Listeners
         document.getElementById("sportFilter").addEventListener("change", () => {
@@ -743,7 +791,14 @@
             const teamName = draft_order[current_pick];
             const round = Math.floor(current_pick / team_count) + 1;
             const pick = (current_pick % team_count) + 1;
-            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">Round ${round}, Pick ${pick}</span>`;
+            
+            let roundDisplay = `Round ${round}`;
+            if (round > 12 && draftState.wildcard_round > 0) {
+                const wildcardRoundNum = round - 12;
+                roundDisplay = `Wildcard ${wildcardRoundNum}`;
+            }
+
+            currentPickInfo.innerHTML = `${teamName} <br> <span class="round-pick-info">${roundDisplay}, Pick ${pick}</span>`;
         } else {
             currentPickInfo.innerHTML = 'Draft Complete';
         }
@@ -920,6 +975,26 @@
         }
     }
     
+    function showWildcardNotification() {
+        const toast = document.createElement('div');
+        toast.className = 'wildcard-toast';
+        toast.textContent = "You have started the wildcard round(s). You can now add teams from any sport to your final roster spot(s).";
+        document.body.appendChild(toast);
+
+        // Animate in
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 100);
+
+        // Animate out and remove after a delay
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 500);
+        }, 5000); // Notification stays for 5 seconds
+    }
+
     function showMobileView(viewName) {
         document.querySelectorAll('.main-content > div').forEach(div => div.classList.remove('active'));
         document.querySelector(`.main-content .${viewName}-container`).classList.add('active');
@@ -984,7 +1059,47 @@
     function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
     function startCountdown(seconds = 120){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=seconds;const el=document.getElementById('countdownClock');function updateClock(){if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;};updateClock();draftState.timer=setInterval(updateClock,1000);}
     function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
-    function createFinalRosterView(){ let html='';draftState.team_names.forEach(name=>{const r=draftState.player_rosters[name];html+=`<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;for(const sport in r){if(r[sport]&&r[sport].length>0){html+=`<strong>${sport}</strong>`;r[sport].forEach(t=>{html+=`<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;});}}html+=`</ul></div>`;});const s=`<style>body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;padding:20px;}.final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;}.roster{width:300px;border:1px solid #333}.roster h2{text-align:center;color:#D2042D;}.roster ul{list-style:none;padding:0;}.roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}.roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}.draft-pick-circle{margin-left:auto;}</style>`;return`${s}<h1>Draft Complete!</h1><div class="final-container">${html}</div>`; }
+    
+    function createFinalRosterView(){ 
+        let html = '';
+        draftState.team_names.forEach(name => {
+            const r = draftState.player_rosters[name];
+            html += `<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;
+            for(const sport in r){
+                if(r[sport] && r[sport].length > 0){
+                    html += `<strong>${sport}</strong>`;
+                    r[sport].forEach(t => {
+                        html += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
+                    });
+                }
+            }
+            html += `</ul></div>`;
+        });
+        const style = `
+        <style>
+            body{display:flex;flex-direction:column;align-items:center;background:#0A0A0A;color:#FFF;font-family:'Inter',sans-serif;padding:20px;}
+            .final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;width:100%;}
+            .roster{width:300px;border:1px solid #333}
+            .roster h2{text-align:center;color:#D2042D;}
+            .roster ul{list-style:none;padding:0;}
+            .roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}
+            .roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}
+            .draft-pick-circle{margin-left:auto;}
+            .return-home-btn { 
+                display: inline-block; 
+                margin-top: 30px; 
+                padding: 12px 24px; 
+                background: var(--primary); 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 8px; 
+                font-weight: bold; 
+                transition: background 0.2s ease;
+            }
+            .return-home-btn:hover { background: #B00326; }
+        </style>`;
+        return `${style}<h1>${draftState.league_name} - Final Results</h1><div class="final-container">${html}</div><a href="https://fantasyfusionsports.com" class="return-home-btn">Return to Homepage</a>`; 
+    }
 </script>
 </body>
 </html>
