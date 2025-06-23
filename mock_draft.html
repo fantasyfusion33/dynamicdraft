@@ -443,9 +443,9 @@
     let wildcardNotificationShown = false; // To show wildcard alert only once
     
     const conferenceData = {
-        NFL: ["AFC", "NFC"], NBA: ["Eastern", "Western"], MLB: ["AL", "NL"], NHL: ["Eastern", "Western"],
-        NCAAF: ["AAC", "ACC", "Big 12", "Big Ten", "C-USA", "Independents", "MAC", "Mountain West", "Pac-12", "SEC", "Sun Belt"],
-        NCAAB: ["AAC", "ACC", "Big 12", "Big East", "Big Ten", "Pac-12", "SEC", "Other"]
+        NFL: ["AFC", "NFC"], NBA: ["East", "West"], MLB: ["AL", "NL"], NHL: ["East", "West"],
+        NCAAF: ["AAC", "ACC", "B10", "B12", "Independent", "MAC", "MWC", "Pac-12", "SEC", "Sun Belt", "USA"],
+        NCAAB: ["A-10", "AAC", "ACC", "America East", "ASUN", "B10", "B12", "Big East", "Big Sky", "Big South", "Big West", "CAA", "Horizon", "Ivy", "MAAC", "MAC", "MEAC", "MVC", "MWC", "NEC", "OVC", "Patriot", "SEC", "SoCon", "Southland", "Summit", "Sun Belt", "SWAC", "USA", "WAC", "WCC"]
     };
 
     // =================================================================================
@@ -519,7 +519,7 @@
     
     async function fetchDraftableTeamsFromDB() {
         try {
-            const { data, error } = await supabase.from('SportTeamDatabase').select('*');
+            const { data, error } = await supabase.from('SportTeamDatabase_6_23_25').select('*');
             if (error) throw error;
             const pickedTeamIds = new Set(
                 Object.values(draftState.player_rosters)
