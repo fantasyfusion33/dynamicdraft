@@ -149,7 +149,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 6px;
         }
-        .user-team {
+        .user-team { /* This can still be used for styling "My Team" if desired */
             background: rgba(210, 4, 45, 0.1);
             border-left: 3px solid #D2042D;
         }
@@ -283,21 +283,40 @@
             color: rgba(255, 255, 255, 0.85);
             max-height: 100%;
             overflow-y: auto;
-            scrollbar-width: none;       /* Firefox */
-            -ms-overflow-style: none;    /* IE and Edge */
+            scrollbar-width: none;     /* Firefox */
+            -ms-overflow-style: none;   /* IE and Edge */
+            position: relative; /* For close button */
         }
         .modal-content::-webkit-scrollbar {
-            display: none;               /* Chrome, Safari, Opera */
+            display: none;              /* Chrome, Safari, Opera */
         }
         .modal-overlay.active .modal-content {
             transform: scale(1);
         }
-        .modal-content h2 { margin-top: 0; color: #fff;}
+        .modal-content h2 { 
+            margin-top: 10px; /* Added margin to prevent overlap with X button */
+            color: #fff;
+        }
         .modal-content h4 { color: #fff; margin-bottom: 8px; margin-top: 20px;}
         .modal-content p { line-height: 1.6; margin-top: 0;}
         .modal-content ul { padding-left: 20px; line-height: 1.7; }
         .modal-content li { margin-bottom: 12px; }
         .modal-content button { margin-top: 15px;}
+        .modal-close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 2rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            text-align: center;
+        }
+        .modal-close-btn:hover { color: #fff; }
 
         .help-icon {
             position: absolute;
@@ -315,8 +334,8 @@
             transition: all 0.2s ease;
         }
         .help-icon:hover {
-            background: var(--primary);
-            border-color: var(--primary);
+            background: #D2042D;
+            border-color: #D2042D;
             transform: scale(1.1);
         }
 
@@ -326,20 +345,21 @@
     <!-- Welcome Modal -->
     <div class="modal-overlay" id="welcomeModal">
         <div class="modal-content">
+            <button class="modal-close-btn" id="modalCloseX">&times;</button>
             <h2>Welcome to the Fantasy Fusion Mock Draft!</h2>
             <p>Before you start your mock draft, here's a quick guide to how the game works and how to set up your league.</p>
             
             <h4>How the Mock Draft Works</h4>
             <p><strong>The Point of the Game:</strong> In Fantasy Fusion, instead of drafting individual players, you draft entire teams from across the 6 major US sports (MLB, NBA, NFL, NHL, NCAAB, and NCAAF). Each roster has 2 slots per sport, with optional wildcard slots for extra flexibility.</p>
             <p><strong>The Draft Format:</strong> The draft follows a standard "snake" format where the pick order reverses each round. This means the team picking last in one round will pick first in the next.</p>
-            <p><strong>Mock Draft Details:</strong> You will decide your draft position on this screen. During the draft, you'll have 2 minutes to make your pick, while all other teams will auto-draft.</p>
+            <p><strong>Mock Draft Details:</strong> The difference between a mock draft and real draft, is that for this mock draft you will only make picks for your team, and all other picks will be selected by AI. You will decide your draft position on the next screen. During the draft, you'll have 2 minutes to make your pick, while all other teams will auto-draft.</p>
             
             <h4>How to Set Up Your Mock Draft</h4>
             <ul>
-                <p><strong>1. Create Your League:</strong> Give your league a name and use the slider to choose the number of teams.</p>
-                <p><strong>2. Set Your Draft Position:</strong> Find 'My Team' in the list below and use the arrows or order randomizer to move it to your desired spot.</p>
-                <p><strong>3. Name Your Team:</strong> Change your team's name and the other teams to whatever you'd like.</p>
-                <p><strong>4. Add Wildcards (Optional):</strong> Choose to add extra rounds for bonus picks from any sport.</p>
+                <li><strong>1. Create Your League:</strong> Give your league a name and use the slider to choose the number of teams.</li>
+                <li><strong>2. Set Your Draft Position:</strong> Find 'My Team' highlighted in red in the list below, and use the arrows or order randomizer to move it to your desired draft position.</li>
+                <li><strong>3. Name Your Team:</strong> Change your team's name and the other teams to whatever you'd like.</li>
+                <li><strong>4. Add Wildcards (Optional):</strong> Choose to add extra rounds for bonus picks from any sport.</li>
             </ul>
             <button id="closeModalBtn">Get Started</button>
         </div>
@@ -367,7 +387,7 @@
                     <label>Set Your Draft Order</label>
                     <button class="randomize-btn" id="randomizeBtn" type="button"><i class="fas fa-random"></i> Randomize</button>
                 </div>
-                <p class="subheading">This list represents the draft order. Use the arrows to move your team to your desired draft position. You can also edit any team name.</p>
+                <p class="subheading">This list represents the draft order. Use the arrows to move any team to a new draft position. You can also edit any team name.</p>
                 <div id="teamNamesContainer">
                     <!-- Team name inputs will be dynamically added here -->
                 </div>
@@ -403,14 +423,16 @@
     // =========================================================================
     const welcomeModal = document.getElementById('welcomeModal');
     const closeModalBtn = document.getElementById('closeModalBtn');
+    const modalCloseX = document.getElementById('modalCloseX');
     const helpIcon = document.getElementById('helpIcon');
+
+    const closeModal = () => welcomeModal.classList.remove('active');
 
     window.addEventListener('load', () => {
         welcomeModal.classList.add('active');
     });
-    closeModalBtn.addEventListener('click', () => {
-        welcomeModal.classList.remove('active');
-    });
+    closeModalBtn.addEventListener('click', closeModal);
+    modalCloseX.addEventListener('click', closeModal);
     helpIcon.addEventListener('click', () => {
         welcomeModal.classList.add('active');
     });
@@ -511,15 +533,16 @@
     function updateTeamNameInputs(teamCount) {
         const teamNamesContainer = document.getElementById('teamNamesContainer');
         const currentItems = Array.from(teamNamesContainer.children);
-        // Preserve any custom names when the slider changes
+        // Preserve any custom names and states when the slider changes
         const teamsData = currentItems.map(item => ({
             name: item.querySelector('input').value,
-            isUser: item.classList.contains('user-team')
+            isUser: item.classList.contains('user-team'),
+            isCustom: item.querySelector('input').dataset.isCustom === 'true'
         }));
 
         let userTeamIndex = teamsData.findIndex(t => t.isUser);
-        if (userTeamIndex === -1) userTeamIndex = 0;
-        if (userTeamIndex >= teamCount) userTeamIndex = teamCount - 1;
+        if (userTeamIndex === -1) userTeamIndex = 0; // Default to first spot if not found
+        if (userTeamIndex >= teamCount) userTeamIndex = teamCount - 1; // Adjust if user is out of new bounds
 
         teamNamesContainer.innerHTML = '';
     
@@ -528,60 +551,91 @@
             const teamItem = document.createElement('div');
             teamItem.className = `team-item ${isUserTeam ? 'user-team' : ''}`;
             
-            const placeholderValue = `Team ${i + 1}`;
-            let teamNameValue = '';
-
-            if (isUserTeam) {
-                teamNameValue = userTeamName;
+            const teamInput = document.createElement('input');
+            teamInput.type = 'text';
+            teamInput.required = true;
+            
+            // Restore data or set defaults
+            const existingTeam = teamsData[i];
+            if (existingTeam && existingTeam.isCustom) {
+                teamInput.value = existingTeam.name;
+                teamInput.dataset.isCustom = 'true';
             } else {
-                // Use a preserved name if it exists, otherwise use the default
-                teamNameValue = teamsData[i]?.name || placeholderValue;
+                teamInput.value = `Team ${i + 1}`;
+                teamInput.dataset.isCustom = 'false';
             }
+            teamInput.placeholder = `Team ${i + 1}`;
+            
+            if (isUserTeam) {
+                teamInput.value = userTeamName;
+                teamInput.dataset.isCustom = 'true'; // The user's team name is always custom
+            }
+
+            addInputListeners(teamInput);
 
             teamItem.innerHTML = `
                 <span class="draft-order">${i + 1}</span>
                 <div class="team-name-input">
-                    <input type="text" placeholder="${placeholderValue}" value="${teamNameValue}" required>
+                    <!-- Input will be appended here -->
                 </div>
                 <div class="arrow-buttons">
-                    ${isUserTeam ? `
-                        <button class="arrow-btn" onclick="moveUserTeamUp(event)"><i class="fas fa-chevron-up"></i></button>
-                        <button class="arrow-btn" onclick="moveUserTeamDown(event)"><i class="fas fa-chevron-down"></i></button>
-                    ` : ''}
+                    <button class="arrow-btn" onclick="moveTeam(event, 'up')"><i class="fas fa-chevron-up"></i></button>
+                    <button class="arrow-btn" onclick="moveTeam(event, 'down')"><i class="fas fa-chevron-down"></i></button>
                 </div>
             `;
+            teamItem.querySelector('.team-name-input').appendChild(teamInput);
             teamNamesContainer.appendChild(teamItem);
         }
     
-        const userTeamInput = document.querySelector('.user-team input');
-        if (userTeamInput) {
-            userTeamInput.addEventListener('input', (e) => { userTeamName = e.target.value; });
-        }
         refreshTeamDisplay();
     }
+    
+    function addInputListeners(input) {
+        // When user focuses, if it's a default name, clear it for typing
+        input.addEventListener('focus', (e) => {
+            if (e.target.dataset.isCustom === 'false') {
+                e.target.value = '';
+            }
+        });
+        
+        // When user blurs, if it's empty, restore default placeholder
+        input.addEventListener('blur', (e) => {
+            if (e.target.value.trim() === '') {
+                e.target.value = e.target.placeholder;
+                e.target.dataset.isCustom = 'false';
+            }
+        });
 
-    function moveUserTeamUp(e) {
-        e.preventDefault();
-        const userTeamElement = document.querySelector('.user-team');
-        if (userTeamElement.previousElementSibling) {
-            userTeamElement.parentNode.insertBefore(userTeamElement, userTeamElement.previousElementSibling);
-            refreshTeamDisplay();
-        }
+        // When user types, mark it as custom
+        input.addEventListener('input', (e) => {
+            if (e.target.value.trim() !== '' && e.target.value !== e.target.placeholder) {
+                e.target.dataset.isCustom = 'true';
+            }
+            // If it's the user's team, update the global name
+            if(e.target.closest('.user-team')) {
+                userTeamName = e.target.value;
+            }
+        });
     }
 
-    function moveUserTeamDown(e) {
+    function moveTeam(e, direction) {
         e.preventDefault();
-        const userTeamElement = document.querySelector('.user-team');
-        if (userTeamElement.nextElementSibling) {
-            userTeamElement.parentNode.insertBefore(userTeamElement.nextElementSibling, userTeamElement);
-            refreshTeamDisplay();
+        const teamItem = e.target.closest('.team-item');
+        if (!teamItem) return;
+
+        if (direction === 'up' && teamItem.previousElementSibling) {
+            teamItem.parentNode.insertBefore(teamItem, teamItem.previousElementSibling);
+        } else if (direction === 'down' && teamItem.nextElementSibling) {
+            teamItem.parentNode.insertBefore(teamItem.nextElementSibling, teamItem);
         }
+        refreshTeamDisplay();
     }
 
     function randomizeOrder() {
         const container = document.getElementById('teamNamesContainer');
         const items = Array.from(container.children);
         
+        // Fisher-Yates shuffle algorithm
         for (let i = items.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [items[i], items[j]] = [items[j], items[i]];
@@ -593,24 +647,24 @@
 
     function refreshTeamDisplay() {
         const items = document.querySelectorAll('.team-item');
-        let userPosition = -1;
-
         items.forEach((item, index) => {
-            item.querySelector('.draft-order').textContent = index + 1;
-            item.querySelector('input').placeholder = `Team ${index + 1}`;
+            const position = index + 1;
+            item.querySelector('.draft-order').textContent = position;
             
-            if (item.classList.contains('user-team')) {
-                userPosition = index;
+            const input = item.querySelector('input');
+            input.placeholder = `Team ${position}`;
+            
+            // If the name is not custom, update its value to match its new position
+            if (input.dataset.isCustom === 'false') {
+                input.value = `Team ${position}`;
             }
-        });
 
-        if (userPosition !== -1) {
-            const userItem = items[userPosition];
-            const upButton = userItem.querySelector('.arrow-btn:first-child');
-            const downButton = userItem.querySelector('.arrow-btn:last-child');
-            if (upButton) upButton.disabled = userPosition === 0;
-            if (downButton) downButton.disabled = userPosition === items.length - 1;
-        }
+            // Handle arrow button disabling
+            const upButton = item.querySelector('.arrow-btn:first-child');
+            const downButton = item.querySelector('.arrow-btn:last-child');
+            if(upButton) upButton.disabled = (index === 0);
+            if(downButton) downButton.disabled = (index === items.length - 1);
+        });
     }
     
     // =========================================================================
