@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            background: #0C2340;
+            background: #0a0a0a;
             color: #FFFFFF;
             margin: 0;
             padding: 20px;
@@ -18,7 +18,7 @@
             min-height: 100vh;
         }
         .league-creation-container {
-            background: rgba(26, 26, 26, 0.8);
+            background: #0C2340;
             padding: 30px 40px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
@@ -68,7 +68,7 @@
         #leagueName:focus {
             border-color: #0C2340;
             background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0px 0px 8px rgba(210, 4, 45, 0.5);
+            box-shadow: 0px 0px 8px #0C2340;
         }
         .slider-container {
             display: flex;
@@ -88,7 +88,7 @@
             -webkit-appearance: none;
             width: 20px;
             height: 20px;
-            background: #0C2340;
+            background: #FA4616;
             border-radius: 50%;
             cursor: pointer;
             transition: background 0.2s ease;
@@ -109,7 +109,7 @@
         button {
             width: 100%;
             padding: 14px;
-            background: #0C2340;
+            background: #FA4616;
             color: #FFFFFF;
             border: none;
             border-radius: 8px;
@@ -123,7 +123,7 @@
             gap: 8px;
         }
         button:hover:not(:disabled) {
-            background: #B00326;
+            background: #FF3400;
         }
         button:disabled {
             background: #555;
@@ -150,13 +150,13 @@
             border-radius: 6px;
         }
         .user-team { /* This can still be used for styling "My Team" if desired */
-            background: rgba(210, 4, 45, 0.1);
-            border-left: 3px solid #0C2340;
+            background: #FA4616;
+            border-left: 3px solid #FA4616;
         }
         .draft-order {
             width: 30px;
             font-weight: 600;
-            color: #0C2340;
+            color: #FA4616;
             text-align: center;
         }
         .team-name-input {
@@ -195,8 +195,8 @@
         }
         .randomize-btn { width: auto; padding: 0 12px; font-size: 12px; gap: 6px; }
         .arrow-btn:hover:not(:disabled), .randomize-btn:hover:not(:disabled) {
-            background: rgba(210, 4, 45, 0.3);
-            border-color: #0C2340;
+            background: #FA4616;
+            border-color: #FFFFFF;
         }
         .arrow-btn:disabled {
             opacity: 0.4;
