@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy Fusion - Draft Results</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #D2042D;
+            --dark: #0A0A0A;
+            --light: #FFFFFF;
+            --gray: #1A1A1A;
+            --glass: rgba(26, 26, 26, 0.8);
+            --gold: #FFD700;
+        }
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .results-container {
+            max-width: 1200px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        .results-header {
+            text-align: center;
+        }
+        .results-header h1 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 0;
+        }
+        .results-header h2 {
+            font-size: 1.5rem;
+            color: var(--light);
+            margin: 5px 0 0 0;
+            font-weight: 400;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .power-rankings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .power-rankings-table th, .power-rankings-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        .power-rankings-table th {
+            color: #aaa;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .power-rankings-table .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            width: 50px;
+        }
+        .power-rankings-table .grade {
+            font-weight: bold;
+        }
+
+        .awards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .award-card {
+            background: #222;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid #444;
+        }
+        .award-card .icon {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        .award-card h4 {
+            margin: 0 0 10px 0;
+            font-size: 1.2rem;
+        }
+        .award-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .email-form-container {
+            text-align: center;
+        }
+        #emailForm {
+            display: flex;
+            gap: 10px;
+            max-width: 500px;
+            margin: 15px auto 0 auto;
+        }
+        #emailAddress {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+        }
+        #emailForm button {
+            padding: 12px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        #emailStatus {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #28a745;
+        }
+
+        .team-breakdown-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        .team-card {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .team-card h3 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin: 0 0 20px 0;
+        }
+        .roster-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+        }
+        .roster-list li {
+            background: #2a2a2a;
+            padding: 10px 15px;
+            border-radius: 6px;
+        }
+        .roster-list .sport-header {
+            font-weight: bold;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        @media (min-width: 768px) {
+            .team-card {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="loadingState" style="text-align: center; padding-top: 50px;">
+        <h1>Calculating Draft Results...</h1>
+        <p>This may take a moment.</p>
+    </div>
+
+    <div class="results-container" id="resultsContainer" style="display: none;">
+        <header class="results-header">
+            <h1 id="leagueName"></h1>
+            <h2>Final Draft Report</h2>
+        </header>
+
+        <div class="card">
+            <h3>Overall Power Rankings</h3>
+            <table class="power-rankings-table" id="powerRankingsTable">
+                <!-- Rankings will be populated here -->
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Draft Superlatives</h3>
+            <div class="awards-grid" id="awardsGrid">
+                <!-- Awards will be populated here -->
+            </div>
+        </div>
+        
+        <div class="card email-form-container">
+             <h3>Share Your Results</h3>
+             <p>Enter an email address to send a copy of the draft board.</p>
+             <form id="emailForm">
+                <input type="email" id="emailAddress" placeholder="friend@example.com" required>
+                <button type="submit">Send Email</button>
+             </form>
+             <p id="emailStatus"></p>
+        </div>
+
+        <div class="card">
+            <h3>Team Breakdowns</h3>
+            <div class="team-breakdown-grid" id="teamBreakdownsGrid">
+                <!-- Individual team cards will be populated here -->
+            </div>
+        </div>
+         <a href="https://fantasyfusionsports.com" style="display: block; margin: 20px auto; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.2s ease; text-align: center;">Return to Homepage</a>
+    </div>
+
+<script>
+    // Supabase Initialization
+    const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const leagueId = urlParams.get('leagueId');
+
+        if (!leagueId) {
+            document.body.innerHTML = '<h1>Error: No League ID provided.</h1>';
+            return;
+        }
+
+        try {
+            // Fetch all necessary data
+            const { data: draftData, error: draftError } = await supabase
+                .from('mock_drafts')
+                .select('*')
+                .eq('id', leagueId)
+                .single();
+
+            if (draftError) throw draftError;
+            if (!draftData || draftData.status !== 'completed') {
+                throw new Error("This draft is not yet complete or does not exist.");
+            }
+            
+            const { data: allTeams, error: teamsError } = await supabase
+                .from('SportTeamDatabase')
+                .select('team_id, name, adp, championship_odds');
+            
+            if(teamsError) throw teamsError;
+
+            // Perform analysis
+            const analysisResults = calculateAnalysis(draftData, allTeams);
+
+            // Render all components
+            renderPage(draftData, analysisResults);
+
+        } catch (error) {
+            document.getElementById('loadingState').innerHTML = `<h1>Error loading results:</h1><p>${error.message}</p>`;
+            console.error(error);
+        }
+    });
+
+    function calculateAnalysis(draft, allTeams) {
+        const teamAnalysis = {};
+        const allTeamsMap = new Map(allTeams.map(t => [t.team_id, t]));
+
+        // Initialize analysis object for each team
+        draft.team_names.forEach(name => {
+            teamAnalysis[name] = {
+                roster: draft.player_rosters[name],
+                sportRanks: {},
+                avgOverallOdds: 0
+            };
+        });
+
+        // 1. Calculate Sport-Specific Power Rankings
+        const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+        sports.forEach(sport => {
+            const sportAverages = [];
+            draft.team_names.forEach(name => {
+                const teamsInSport = draft.player_rosters[name][sport];
+                if (teamsInSport && teamsInSport.length > 0) {
+                    const totalOdds = teamsInSport.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
+                    const avgOdds = totalOdds / teamsInSport.length;
+                    sportAverages.push({ name, avgOdds });
+                }
+            });
+            // Sort by lowest average odds (best)
+            sportAverages.sort((a, b) => a.avgOdds - b.avgOdds);
+            // Assign ranks
+            sportAverages.forEach((team, index) => {
+                teamAnalysis[team.name].sportRanks[sport] = index + 1;
+            });
+        });
+        
+        // 2. Calculate Overall Power Ranking
+        const overallAverages = [];
+        draft.team_names.forEach(name => {
+            const allPicks = Object.values(draft.player_rosters[name]).flat();
+            const totalOdds = allPicks.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
+            teamAnalysis[name].avgOverallOdds = totalOdds / allPicks.length;
+            overallAverages.push({ name, avgOdds: teamAnalysis[name].avgOverallOdds });
+        });
+        overallAverages.sort((a,b) => a.avgOdds - b.avgOdds);
+        
+        // 3. Find Superlatives (Steal and Reach)
+        let steal = { value: -Infinity, pick: null };
+        let reach = { value: -Infinity, pick: null };
+        
+        draft.draft_order.forEach((drafter, pickIndex) => {
+            const pickNumber = pickIndex + 1;
+            const allPicks = Object.values(draft.player_rosters).flat(2);
+            const pickDetails = allPicks.find(p => p.round * draft.team_count - (draft.team_count - p.pick) === pickNumber);
+
+            if (pickDetails && allTeamsMap.has(pickDetails.team_id)) {
+                const teamData = allTeamsMap.get(pickDetails.team_id);
+                const adp = teamData.adp || pickNumber; // Default ADP to pick number if null
+                const value = adp - pickNumber;
+                
+                if (value > steal.value) {
+                    steal = { value, pick: { ...pickDetails, drafter } };
+                }
+                if (-value > reach.value) {
+                    reach = { value: -value, pick: { ...pickDetails, drafter } };
+                }
+            }
+        });
+
+        return {
+            powerRankings: overallAverages,
+            teamDetails: teamAnalysis,
+            awards: { steal, reach }
+        };
+    }
+    
+    function renderPage(draft, analysis) {
+        // Hide loading and show results
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('resultsContainer').style.display = 'flex';
+        
+        // Header
+        document.getElementById('leagueName').textContent = draft.league_name;
+
+        // Render sections
+        renderPowerRankings(analysis.powerRankings);
+        renderAwards(analysis.awards);
+        renderTeamBreakdowns(draft.team_names, analysis.teamDetails);
+        
+        // Add email form listener
+        document.getElementById('emailForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('emailAddress').value;
+            const statusEl = document.getElementById('emailStatus');
+            statusEl.textContent = `Simulating email send to ${email}... (Check console for payload)`;
+            console.log("Email Payload:", {
+                recipient: email,
+                subject: `Fantasy Fusion Draft Results for: ${draft.league_name}`,
+                body: "Formatted draft results would go here."
+            });
+            setTimeout(() => statusEl.textContent = "", 4000);
+        });
+    }
+
+    function renderPowerRankings(rankings) {
+        const tableBody = document.createElement('tbody');
+        rankings.forEach((team, index) => {
+            const row = document.createElement('tr');
+            const grade = getDraftGrade(index + 1, rankings.length);
+            row.innerHTML = `
+                <td class="rank">#${index + 1}</td>
+                <td>${team.name}</td>
+                <td>+${Math.round(team.avgOdds)}</td>
+                <td class="grade" style="color: ${grade.color}">${grade.letter}</td>
+            `;
+            tableBody.appendChild(row);
+        });
+        document.getElementById('powerRankingsTable').appendChild(tableBody);
+    }
+    
+    function renderAwards(awards) {
+        const container = document.getElementById('awardsGrid');
+        let html = '';
+        if (awards.steal.pick) {
+            html += `
+            <div class="award-card">
+                <div class="icon"><i class="fas fa-gem"></i></div>
+                <h4>Steal of the Draft</h4>
+                <p><b>${awards.steal.pick.drafter}</b> drafted <b>${awards.steal.pick.name}</b> at pick #${awards.steal.pick.round}.${awards.steal.pick.pick}, a value of ${awards.steal.value.toFixed(1)} spots better than their ADP.</p>
+            </div>`;
+        }
+        if (awards.reach.pick) {
+            html += `
+            <div class="award-card">
+                <div class="icon"><i class="fas fa-hand-paper"></i></div>
+                <h4>Biggest Reach</h4>
+                <p><b>${awards.reach.pick.drafter}</b> took <b>${awards.reach.pick.name}</b> at pick #${awards.reach.pick.round}.${awards.reach.pick.pick}, about ${awards.reach.value.toFixed(1)} spots earlier than expected.</p>
+            </div>`;
+        }
+         html += `
+            <div class="award-card">
+                <div class="icon"><i class="fas fa-brain"></i></div>
+                <h4>Mr. Automatic</h4>
+                <p>This award goes to the top-performing auto-drafted team. (Calculation logic pending).</p>
+            </div>`;
+        container.innerHTML = html;
+    }
+
+    function renderTeamBreakdowns(teamNames, teamDetails) {
+        const container = document.getElementById('teamBreakdownsGrid');
+        container.innerHTML = '';
+        teamNames.forEach(name => {
+            const details = teamDetails[name];
+            const card = document.createElement('div');
+            card.className = 'card team-card';
+            
+            let rosterHtml = '';
+            for(const sport in details.roster) {
+                if (details.roster[sport].length > 0) {
+                    rosterHtml += `<div><div class="sport-header">${sport} (Rank: #${details.sportRanks[sport] || 'N/A'})</div>`;
+                    details.roster[sport].forEach(team => {
+                        rosterHtml += `<li>${team.name}</li>`;
+                    });
+                    rosterHtml += `</div>`;
+                }
+            }
+
+            card.innerHTML = `
+                <div>
+                    <h3>${name}</h3>
+                    <canvas id="chart-${name.replace(/\s+/g, '-')}" width="300" height="300"></canvas>
+                </div>
+                <div>
+                    <h4>Final Roster</h4>
+                    <ul class="roster-list">${rosterHtml}</ul>
+                </div>
+            `;
+            container.appendChild(card);
+            
+            // Generate Radar Chart
+            const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
+            createRadarChart(`chart-${name.replace(/\s+/g, '-')}`, ranks, teamNames.length);
+        });
+    }
+
+    function getDraftGrade(rank, totalTeams) {
+        const percentile = (totalTeams - rank + 1) / totalTeams;
+        if (percentile >= 0.9) return { letter: 'A+', color: '#28a745' };
+        if (percentile >= 0.8) return { letter: 'A', color: '#28a745' };
+        if (percentile >= 0.7) return { letter: 'B+', color: '#90ee90' };
+        if (percentile >= 0.6) return { letter: 'B', color: '#90ee90' };
+        if (percentile >= 0.5) return { letter: 'C+', color: '#ffff00' };
+        if (percentile >= 0.4) return { letter: 'C', color: '#ffff00' };
+        if (percentile >= 0.3) return { letter: 'D', color: '#ffc107' };
+        return { letter: 'F', color: '#dc3545' };
+    }
+    
+    function createRadarChart(canvasId, data, teamCount) {
+        const ctx = document.getElementById(canvasId);
+        if(!ctx) return;
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'],
+                datasets: [{
+                    label: 'Sport Power Ranking',
+                    // We invert the data so that a rank of #1 is at the edge and a low rank is near the center
+                    data: data.map(rank => teamCount - rank + 1),
+                    fill: true,
+                    backgroundColor: 'rgba(210, 4, 45, 0.2)',
+                    borderColor: 'rgb(210, 4, 45)',
+                    pointBackgroundColor: 'rgb(210, 4, 45)',
+                    pointBorderColor: '#fff',
+                    pointHoverBackgroundColor: '#fff',
+                    pointHoverBorderColor: 'rgb(210, 4, 45)'
+                }]
+            },
+            options: {
+                elements: {
+                    line: {
+                        borderWidth: 3
+                    }
+                },
+                scales: {
+                    r: {
+                        angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
+                        grid: { color: 'rgba(255, 255, 255, 0.2)' },
+                        pointLabels: { color: '#fff', font: { size: 14 } },
+                        ticks: {
+                            display: false, // Hide the numeric labels on the spokes
+                            stepSize: teamCount / 4,
+                            max: teamCount,
+                            min: 0,
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: teamCount
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
