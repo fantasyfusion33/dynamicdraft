@@ -674,7 +674,7 @@
     function endDraft() {
         if (draftState.timer) clearInterval(draftState.timer);
         alert("Draft Complete!");
-        document.body.innerHTML = createFinalRosterView();
+        window.location.href = `mock_draft_results.html?leagueId=${leagueId}`;
     }
 
     // =================================================================================
@@ -1077,47 +1077,7 @@
     function enableDraftButtons(isEnabled){document.querySelectorAll('.draft-button').forEach(b=>b.disabled=!isEnabled);}
     function startCountdown(seconds = 120){if(draftState.timer)clearInterval(draftState.timer);let timeLeft=seconds;const el=document.getElementById('countdownClock');function updateClock(){if(timeLeft<=0){clearInterval(draftState.timer);autoDraftTeam();return;}timeLeft--;const m=Math.floor(timeLeft/60);const s=timeLeft%60;el.textContent=`${m}:${String(s).padStart(2,'0')}`;};updateClock();draftState.timer=setInterval(updateClock,1000);}
     function updateDraftProgress(){const p=document.querySelector('.draft-progress');if(p){p.style.width=`${(draftState.current_pick/draftState.total_picks)*100}%`;}}
-    
-    function createFinalRosterView(){ 
-        let html = '';
-        draftState.team_names.forEach(name => {
-            const r = draftState.player_rosters[name];
-            html += `<div class="roster" style="display:block;background:rgba(26,26,26,0.8);padding:20px;border-radius:12px;"><h2>${name}</h2><ul>`;
-            for(const sport in r){
-                if(r[sport] && r[sport].length > 0){
-                    html += `<strong>${sport}</strong>`;
-                    r[sport].forEach(t => {
-                        html += `<li class="${t.sport}"><div class="team-icon" style="background-color:${t.primaryColor};"><i class="${getSportIcon(t)}" style="color:${t.secondaryColor};"></i></div>${t.name}<div class="draft-pick-circle ${t.sport}">${t.round}.${t.pick}</div></li>`;
-                    });
-                }
-            }
-            html += `</ul></div>`;
-        });
-        const style = `
-        <style>
-            body{display:flex;flex-direction:column;align-items:center;background:#0C2340;color:#FFF;font-family:'Inter',sans-serif;padding:20px;}
-            .final-container{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;padding:20px;max-width:1400px;width:100%;}
-            .roster{width:300px;border:1px solid #333}
-            .roster h2{text-align:center;color:#FA4616;}
-            .roster ul{list-style:none;padding:0;}
-            .roster li{display:flex;align-items:center;gap:10px;background:#1A1A1A;padding:8px;border-radius:4px;margin-bottom:5px;}
-            .roster strong{display:block;margin-top:10px;color:#aaa;font-size:0.9em;}
-            .draft-pick-circle{margin-left:auto;}
-            .return-home-btn { 
-                display: inline-block; 
-                margin-top: 30px; 
-                padding: 12px 24px; 
-                background: var(--primary); 
-                color: white; 
-                text-decoration: none; 
-                border-radius: 8px; 
-                font-weight: bold; 
-                transition: background 0.2s ease;
-            }
-            .return-home-btn:hover { background: #FA4616; }
-        </style>`;
-        return `${style}<h1>${draftState.league_name} - Final Results</h1><div class="final-container">${html}</div><a href="//fantasyfusionsports.com" class="return-home-btn">Return to Homepage</a>`; 
-    }
+
 </script>
 </body>
 </html>
