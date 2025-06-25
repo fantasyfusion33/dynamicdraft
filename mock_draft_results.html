@@ -284,7 +284,10 @@
         .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon, .sport-header.NCAAB { background-color: var(--ncaab-color); }
         
         .chart-container {
-            max-width: 100%; /* For mobile responsiveness */
+            position: relative;
+            max-width: 450px; /* Constrain width to prevent it from becoming too large */
+            margin: 0 auto; /* Center the chart container */
+            width: 100%;
         }
         .chart-container p {
             font-size: 0.9rem;
@@ -292,10 +295,6 @@
             text-align: center;
             margin-top: 15px;
             line-height: 1.5;
-        }
-        .chart-container canvas {
-             max-width: 100%;
-             height: auto !important;
         }
 
         @media (min-width: 900px) {
@@ -615,7 +614,7 @@
                 <div class="card team-card">
                     <div class="chart-container">
                         <h3>${name}<span class="overall-rank">Overall Rank: #${overallRank}</span></h3>
-                        <canvas id="chart-${name.replace(/\s+/g, '-')}" width="300" height="300"></canvas>
+                        <canvas id="chart-${name.replace(/\s+/g, '-')}"></canvas>
                         <p>This chart shows your team's power ranking for each sport. A point closer to the edge means a better rank in that category.</p>
                     </div>
                     <div>
@@ -699,7 +698,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
                 elements: { line: { borderWidth: 3 } },
                 scales: {
                     r: {
