@@ -283,12 +283,12 @@
         .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon, .sport-header.NCAAF { background-color: var(--ncaaf-color); }
         .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon, .sport-header.NCAAB { background-color: var(--ncaab-color); }
         
+        /* -- CHART CONTAINER FIX -- */
         .chart-container {
-            position: relative;
-            max-width: 100vw;
+            position: relative; /* Required for Chart.js responsiveness */
             margin: 0 auto;
             width: 100%;
-            aspect-ratio: 1 / 1; 
+            max-width: 450px; /* A sensible max size for desktop */
         }
         .chart-container p {
             font-size: 0.9rem;
@@ -297,6 +297,7 @@
             margin-top: 15px;
             line-height: 1.5;
         }
+        /* -- END FIX -- */
 
         @media (min-width: 900px) {
             .team-card {
@@ -305,28 +306,6 @@
             .roster-list {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
-        }
-
-        @media (max-width: 768px) {
-          .team-card {
-            padding: 12px;
-            /* Optional: adjust card padding for small screens */
-          }
-          .radar-chart {
-            width: 100% !important;
-            max-width: 320px;
-            height: auto !important;
-            margin: 0 auto;
-            display: block;
-          }
-          /* If your chart is a canvas element, target it directly: */
-          .radar-chart canvas {
-            width: 100% !important;
-            height: auto !important;
-            max-width: 320px;
-            display: block;
-            margin: 0 auto;
-          }
         }
     </style>
 </head>
@@ -347,7 +326,8 @@
             <p style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 20px;">Rankings are determined by the average championship odds of all teams in your portfolio. Lower is better!</p>
             <div style="overflow-x:auto;">
                 <table class="power-rankings-table" id="powerRankingsTable">
-                    </table>
+                    <!-- Rankings will be populated here -->
+                </table>
             </div>
         </div>
 
@@ -355,7 +335,8 @@
             <h3>Draft Superlatives</h3>
             <div class="awards-container">
                 <div class="awards-grid" id="awardsGrid">
-                    </div>
+                    <!-- Awards will be populated here -->
+                </div>
             </div>
         </div>
         
@@ -373,9 +354,11 @@
             <h3>Team Breakdowns</h3>
             <div id="teamBreakdownContainer">
                 <div class="team-tabs" id="teamTabsContainer">
-                    </div>
+                    <!-- Tabs will be populated here -->
+                </div>
                 <div class="team-breakdown-grid" id="teamBreakdownsGrid">
-                    </div>
+                    <!-- Individual team cards will be populated here -->
+                </div>
             </div>
         </div>
          <a href="https://fantasyfusionsports.com" style="display: block; margin: 20px auto; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.2s ease; text-align: center;">Return to Homepage</a>
@@ -741,6 +724,7 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: true, // This is the key fix
                 elements: { line: { borderWidth: 3 } },
                 scales: {
                     r: {
