@@ -288,7 +288,6 @@
             position: relative; /* Required for Chart.js responsiveness */
             margin: 0 auto;
             width: 100%;
-            max-width: 450px; /* A sensible max size for desktop */
         }
         .chart-container p {
             font-size: 0.9rem;
@@ -305,6 +304,9 @@
             }
             .roster-list {
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+            .chart-container {
+                max-width: 350px; /* Allow a slightly larger chart on desktop */
             }
         }
     </style>
