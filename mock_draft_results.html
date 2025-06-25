@@ -306,6 +306,28 @@
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
         }
+
+        @media (max-width: 768px) {
+          .team-card {
+            padding: 12px;
+            /* Optional: adjust card padding for small screens */
+          }
+          .radar-chart {
+            width: 100% !important;
+            max-width: 320px;
+            height: auto !important;
+            margin: 0 auto;
+            display: block;
+          }
+          /* If your chart is a canvas element, target it directly: */
+          .radar-chart canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-width: 320px;
+            display: block;
+            margin: 0 auto;
+          }
+        }
     </style>
 </head>
 <body>
