@@ -90,9 +90,10 @@
         }
         .rank-bubble {
             display: inline-flex;
-            width: 28px;
+            min-width: 40px; /* Wider bubble */
             height: 28px;
-            border-radius: 50%;
+            padding: 0 8px;
+            border-radius: 14px; /* Rounded edges */
             align-items: center;
             justify-content: center;
             font-weight: bold;
@@ -168,10 +169,19 @@
 
         .team-tabs {
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
             border-bottom: 1px solid #333;
             margin-bottom: 20px;
+            overflow-x: auto; /* Scroll instead of wrap */
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        .team-tabs::-webkit-scrollbar {
+             height: 4px;
+        }
+        .team-tabs::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 2px;
         }
         .team-tab {
             padding: 10px 15px;
@@ -182,6 +192,7 @@
             font-size: 1rem;
             border-bottom: 2px solid transparent;
             transition: all 0.2s ease;
+            flex-shrink: 0;
         }
         .team-tab:hover {
             color: white;
@@ -227,7 +238,6 @@
             align-items: center;
             gap: 8px;
             color: white;
-            background-color: #333;
             padding: 4px 10px;
             border-radius: 15px;
             margin-bottom: 8px;
@@ -273,12 +283,19 @@
         .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon, .sport-header.NCAAF { background-color: var(--ncaaf-color); }
         .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon, .sport-header.NCAAB { background-color: var(--ncaab-color); }
         
+        .chart-container {
+            max-width: 100%; /* For mobile responsiveness */
+        }
         .chart-container p {
             font-size: 0.9rem;
             color: #ccc;
             text-align: center;
             margin-top: 15px;
             line-height: 1.5;
+        }
+        .chart-container canvas {
+             max-width: 100%;
+             height: auto !important;
         }
 
         @media (min-width: 900px) {
@@ -630,17 +647,35 @@
         if (percentile >= 0.8) return { letter: 'A', color: '#28a745' };
         if (percentile >= 0.7) return { letter: 'B+', color: '#90ee90' };
         if (percentile >= 0.6) return { letter: 'B', color: '#90ee90' };
-        if (percentile >= 0.5) return { letter: 'C+', color: '#ffff00' };
-        if (percentile >= 0.4) return { letter: 'C', color: '#ffff00' };
-        if (percentile >= 0.3) return { letter: 'D', color: '#ffc107' };
+        if (percentile >= 0.5) return { letter: 'C+', color: '#ffc107' };
+        if (percentile >= 0.4) return { letter: 'C', color: '#ffc107' };
+        if (percentile >= 0.3) return { letter: 'D', color: '#dc3545' };
         return { letter: 'F', color: '#dc3545' };
     }
     
     function getRankColor(rank, totalTeams) {
-        const percentile = (totalTeams - rank) / (totalTeams - 1);
-        const red = Math.round(255 * (1 - percentile));
-        const green = Math.round(255 * percentile);
-        return `rgb(${red}, ${green}, 0)`;
+        const percentile = (totalTeams > 1) ? (totalTeams - rank) / (totalTeams - 1) : 1;
+        
+        const red = [220, 53, 69]; // F/D Grade
+        const yellow = [255, 193, 7]; // C Grade
+        const green = [40, 167, 69]; // A/B Grade
+
+        let r, g, b;
+
+        if (percentile < 0.5) {
+            // Red to Yellow
+            const p = percentile * 2;
+            r = Math.round(red[0] + p * (yellow[0] - red[0]));
+            g = Math.round(red[1] + p * (yellow[1] - red[1]));
+            b = Math.round(red[2] + p * (yellow[2] - red[2]));
+        } else {
+            // Yellow to Green
+            const p = (percentile - 0.5) * 2;
+            r = Math.round(yellow[0] + p * (green[0] - yellow[0]));
+            g = Math.round(yellow[1] + p * (green[1] - yellow[1]));
+            b = Math.round(yellow[2] + p * (green[2] - yellow[2]));
+        }
+        return `rgb(${r}, ${g}, ${b})`;
     }
 
     function createRadarChart(canvasId, data, teamCount) {
@@ -663,17 +698,22 @@
                 }]
             },
             options: {
+                responsive: true,
+                maintainAspectRatio: false,
                 elements: { line: { borderWidth: 3 } },
                 scales: {
                     r: {
                         angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
                         grid: { color: 'rgba(255, 255, 255, 0.2)' },
                         pointLabels: { 
-                            font: { size: 14, weight: 'bold' },
-                            color: function(context) {
+                            font: { size: 12, weight: 'bold' },
+                            color: '#fff',
+                            padding: 15,
+                            backgroundColor: function(context) {
                                 const label = context.label;
-                                return sportColors[label] || '#fff';
-                            }
+                                return sportColors[label] || '#333';
+                            },
+                            borderRadius: 12,
                         },
                         ticks: { display: false, stepSize: teamCount / 4 },
                         suggestedMin: 0,
