@@ -59,7 +59,6 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 25px;
-            overflow-x: auto;
         }
 
         .power-rankings-table {
@@ -89,13 +88,26 @@
         .power-rankings-table .grade {
             font-weight: bold;
         }
-        .power-rankings-table .sport-rank {
-            font-weight: 600;
+        .rank-bubble {
+            display: inline-flex;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.9rem;
         }
 
+        .awards-container {
+            overflow-x: auto;
+            padding-bottom: 15px; /* For scrollbar */
+        }
         .awards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-auto-flow: column;
+            grid-auto-columns: minmax(220px, 1fr);
             gap: 15px;
         }
         .award-card {
@@ -103,6 +115,7 @@
             border-radius: 8px;
             padding: 15px;
             text-align: center;
+            flex-shrink: 0;
         }
         .award-card .icon {
             font-size: 2rem;
@@ -153,10 +166,36 @@
             color: #28a745;
         }
 
-        .team-breakdown-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 25px;
+        .team-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 1px solid #333;
+            margin-bottom: 20px;
+        }
+        .team-tab {
+            padding: 10px 15px;
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .team-tab:hover {
+            color: white;
+        }
+        .team-tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: bold;
+        }
+        .team-breakdown-content {
+            display: none;
+        }
+        .team-breakdown-content.active {
+            display: block;
         }
         .team-card {
             display: grid;
@@ -180,16 +219,20 @@
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: 1fr;
             gap: 15px;
         }
         .roster-list .sport-header {
-            font-weight: bold;
-            color: #ccc;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            background-color: #333;
+            padding: 4px 10px;
+            border-radius: 15px;
             margin-bottom: 8px;
-            font-size: 1rem;
-            border-bottom: 1px solid #444;
-            padding-bottom: 5px;
+            font-size: 0.9rem;
+            font-weight: bold;
         }
         .roster-list li {
             background: #2a2a2a;
@@ -223,12 +266,12 @@
             font-weight: bold;
             color: white;
         }
-        .draft-pick-circle.NFL, .team-icon.NFL-icon { background-color: var(--nfl-color); }
-        .draft-pick-circle.NBA, .team-icon.NBA-icon { background-color: var(--nba-color); }
-        .draft-pick-circle.MLB, .team-icon.MLB-icon { background-color: var(--mlb-color); }
-        .draft-pick-circle.NHL, .team-icon.NHL-icon { background-color: var(--nhl-color); }
-        .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon { background-color: var(--ncaaf-color); }
-        .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon { background-color: var(--ncaab-color); }
+        .draft-pick-circle.NFL, .team-icon.NFL-icon, .sport-header.NFL { background-color: var(--nfl-color); }
+        .draft-pick-circle.NBA, .team-icon.NBA-icon, .sport-header.NBA { background-color: var(--nba-color); }
+        .draft-pick-circle.MLB, .team-icon.MLB-icon, .sport-header.MLB { background-color: var(--mlb-color); }
+        .draft-pick-circle.NHL, .team-icon.NHL-icon, .sport-header.NHL { background-color: var(--nhl-color); }
+        .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon, .sport-header.NCAAF { background-color: var(--ncaaf-color); }
+        .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon, .sport-header.NCAAB { background-color: var(--ncaab-color); }
         
         .chart-container p {
             font-size: 0.9rem;
@@ -241,6 +284,9 @@
         @media (min-width: 900px) {
             .team-card {
                 grid-template-columns: 400px 1fr;
+            }
+            .roster-list {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
         }
     </style>
@@ -269,8 +315,10 @@
 
         <div class="card">
             <h3>Draft Superlatives</h3>
-            <div class="awards-grid" id="awardsGrid">
-                <!-- Awards will be populated here -->
+            <div class="awards-container">
+                <div class="awards-grid" id="awardsGrid">
+                    <!-- Awards will be populated here -->
+                </div>
             </div>
         </div>
         
@@ -286,8 +334,13 @@
 
         <div class="card">
             <h3>Team Breakdowns</h3>
-            <div class="team-breakdown-grid" id="teamBreakdownsGrid">
-                <!-- Individual team cards will be populated here -->
+            <div id="teamBreakdownContainer">
+                <div class="team-tabs" id="teamTabsContainer">
+                    <!-- Tabs will be populated here -->
+                </div>
+                <div class="team-breakdown-grid" id="teamBreakdownsGrid">
+                    <!-- Individual team cards will be populated here -->
+                </div>
             </div>
         </div>
          <a href="https://fantasyfusionsports.com" style="display: block; margin: 20px auto; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.2s ease; text-align: center;">Return to Homepage</a>
@@ -328,7 +381,7 @@
             
             const { data: allTeamsData, error: teamsError } = await supabase
                 .from('SportTeamDatabase_6_23_25')
-                .select('team_id, name, adp, championship_odds, primaryColor, secondaryColor');
+                .select('team_id, sport, name, adp, championship_odds, primaryColor, secondaryColor');
             
             if(teamsError) throw teamsError;
 
@@ -375,7 +428,7 @@
                     const avgOdds = totalOdds / teamsInSport.length;
                     sportAverages.push({ name, avgOdds });
                 } else {
-                     sportAverages.push({ name, avgOdds: Infinity }); // Handle cases where a team has no picks in a sport
+                     sportAverages.push({ name, avgOdds: Infinity }); 
                 }
             });
             sportAverages.sort((a, b) => a.avgOdds - b.avgOdds);
@@ -407,16 +460,15 @@
             const teamData = allTeamsMap.get(pick.team_id);
             if (!teamData) return;
 
-            // Steal & Reach
-            const adp = teamData.adp || pick.round * draft.team_count;
-            const value = adp - (pick.round * draft.team_count - (draft.team_count - pick.pick));
+            const adp = teamData.adp || (pick.round * draft.team_count);
+            const pickNumber = (pick.round - 1) * draft.team_count + pick.pick;
+            const value = adp - pickNumber;
             
-            const drafterName = draft.draft_order[pick.round * draft.team_count - (draft.team_count - pick.pick) -1];
+            const drafterName = draft.draft_order[pickNumber - 1];
 
             if (value > steal.value) steal = { value, pick: { ...pick, drafter: drafterName } };
             if (-value > reach.value) reach = { value: -value, pick: { ...pick, drafter: drafterName } };
 
-            // Best Wildcard
             if (pick.round > 12) {
                 const odds = parseFloat(pick.championship_odds);
                 if (odds < bestWildcard.odds) {
@@ -425,8 +477,7 @@
             }
         });
 
-        // Mr. Automatic
-        const cpuTeams = draft.team_names.filter(name => name !== draft.team_names[draft.user_team_position - 1]);
+        const cpuTeams = draft.team_names.filter((name, index) => (index + 1) !== draft.user_team_position);
         const cpuRankings = overallAverages.filter(r => cpuTeams.includes(r.name));
         const mrAutomatic = cpuRankings.length > 0 ? cpuRankings[0] : null;
 
@@ -451,7 +502,7 @@
             e.preventDefault();
             const email = document.getElementById('emailAddress').value;
             const statusEl = document.getElementById('emailStatus');
-            statusEl.textContent = `Simulating email send to ${email}... (Check console for details)`;
+            statusEl.textContent = `Simulating email send to ${email}... (Check console for payload)`;
             console.log("Email Payload:", {
                 recipient: email,
                 subject: `Fantasy Fusion Draft Results for: ${draft.league_name}`,
@@ -477,7 +528,7 @@
                 <td>${team.name}</td>
                 <td>+${Math.round(team.avgOdds)}</td>
                 <td class="grade" style="color: ${grade.color}">${grade.letter}</td>
-                ${sports.map(s => `<td class="sport-rank">#${details.sportRanks[s]}</td>`).join('')}
+                ${sports.map(s => `<td><span class="rank-bubble" style="background-color:${getRankColor(details.sportRanks[s], rankings.length)}">#${details.sportRanks[s]}</span></td>`).join('')}
             </tr>`;
         });
         bodyHTML += '</tbody>';
@@ -498,47 +549,78 @@
         }
         if (awards.mrAutomatic) {
             const autoRank = powerRankings.findIndex(r => r.name === awards.mrAutomatic.name) + 1;
-            html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing auto-drafted team, finishing with an overall rank of #${autoRank}.</p></div>`;
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing CPU, finishing #${autoRank} overall.</p></div>`;
         }
+        // Add more placeholders
+        html += `<div class="award-card"><div class="icon"><i class="fas fa-chart-line"></i></div><h4>Most Consistent</h4><p>Awarded to the drafter with the smallest variance in odds. (Logic pending)</p></div>`;
+        html += `<div class="award-card"><div class="icon"><i class="fas fa-bomb"></i></div><h4>High Risk/Reward</h4><p>Awarded to the drafter with the wildest swings in odds. (Logic pending)</p></div>`;
+
         container.innerHTML = html;
     }
 
     function renderTeamBreakdowns(teamNames, teamDetails, powerRankings) {
-        const container = document.getElementById('teamBreakdownsGrid');
-        container.innerHTML = '';
-        teamNames.forEach(name => {
+        const tabsContainer = document.getElementById('teamTabsContainer');
+        const breakdownsContainer = document.getElementById('teamBreakdownsGrid');
+        tabsContainer.innerHTML = '';
+        breakdownsContainer.innerHTML = '';
+
+        teamNames.forEach((name, index) => {
+            // Create Tab
+            const tab = document.createElement('button');
+            tab.className = 'team-tab';
+            tab.textContent = name;
+            tab.dataset.target = `breakdown-${index}`;
+            if (index === 0) tab.classList.add('active');
+            tabsContainer.appendChild(tab);
+
+            // Create Content
             const details = teamDetails[name];
             const overallRank = powerRankings.findIndex(r => r.name === name) + 1;
-            const card = document.createElement('div');
-            card.className = 'card team-card';
+            const contentDiv = document.createElement('div');
+            contentDiv.id = `breakdown-${index}`;
+            contentDiv.className = 'team-breakdown-content';
+            if (index === 0) contentDiv.classList.add('active');
             
             let rosterHtml = '';
             const sportsAndWildcard = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'Wildcard'];
             sportsAndWildcard.forEach(sport => {
                 if (details.roster[sport] && details.roster[sport].length > 0) {
-                    rosterHtml += `<div><div class="sport-header">${sport} ${sport !== 'Wildcard' ? `(Rank: #${details.sportRanks[sport] || 'N/A'})` : ''}</div><ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">`;
+                    const rankText = sport !== 'Wildcard' ? `(Rank: #${details.sportRanks[sport] || 'N/A'})` : '';
+                    rosterHtml += `<div><div class="sport-header ${sport}">${sport} ${rankText}</div><ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">`;
                     details.roster[sport].forEach(team => {
-                        rosterHtml += `<li><div class="team-icon ${team.sport}-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team.sport)}" style="color:${team.secondaryColor};"></i></div>${team.name}<div class="draft-pick-circle ${team.sport}">${team.round}.${team.pick}</div></li>`;
+                        rosterHtml += `<li><div class="team-icon" style="background-color:${team.primaryColor || '#555'};"><i class="${getSportIcon(team.sport)}" style="color:${team.secondaryColor || '#fff'};"></i></div>${team.name}<div class="draft-pick-circle ${team.sport}">${team.round}.${team.pick}</div></li>`;
                     });
                     rosterHtml += `</ul></div>`;
                 }
             });
 
-            card.innerHTML = `
-                <div class="chart-container">
-                    <h3>${name}<span class="overall-rank">Overall Rank: #${overallRank}</span></h3>
-                    <canvas id="chart-${name.replace(/\s+/g, '-')}" width="300" height="300"></canvas>
-                    <p>This chart shows your team's power ranking for each sport. A point closer to the edge means a better rank in that category.</p>
-                </div>
-                <div>
-                    <h4>Final Roster</h4>
-                    <div class="roster-list">${rosterHtml}</div>
-                </div>
-            `;
-            container.appendChild(card);
+            contentDiv.innerHTML = `
+                <div class="card team-card">
+                    <div class="chart-container">
+                        <h3>${name}<span class="overall-rank">Overall Rank: #${overallRank}</span></h3>
+                        <canvas id="chart-${name.replace(/\s+/g, '-')}" width="300" height="300"></canvas>
+                        <p>This chart shows your team's power ranking for each sport. A point closer to the edge means a better rank in that category.</p>
+                    </div>
+                    <div>
+                        <h4>Final Roster</h4>
+                        <div class="roster-list">${rosterHtml}</div>
+                    </div>
+                </div>`;
+            breakdownsContainer.appendChild(contentDiv);
             
             const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
             createRadarChart(`chart-${name.replace(/\s+/g, '-')}`, ranks, teamNames.length);
+        });
+
+        // Add event listener for tabs
+        tabsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('team-tab')) {
+                tabsContainer.querySelectorAll('.team-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+
+                breakdownsContainer.querySelectorAll('.team-breakdown-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(e.target.dataset.target).classList.add('active');
+            }
         });
     }
 
@@ -554,6 +636,13 @@
         return { letter: 'F', color: '#dc3545' };
     }
     
+    function getRankColor(rank, totalTeams) {
+        const percentile = (totalTeams - rank) / (totalTeams - 1);
+        const red = Math.round(255 * (1 - percentile));
+        const green = Math.round(255 * percentile);
+        return `rgb(${red}, ${green}, 0)`;
+    }
+
     function createRadarChart(canvasId, data, teamCount) {
         const ctx = document.getElementById(canvasId);
         if(!ctx) return;
