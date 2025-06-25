@@ -288,6 +288,7 @@
             position: relative; /* Required for Chart.js responsiveness */
             margin: 0 auto;
             width: 100%;
+            max-width: 251px; /* The fix: constrain the container width */
         }
         .chart-container p {
             font-size: 0.9rem;
@@ -306,7 +307,7 @@
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
             .chart-container {
-                max-width: 350px; /* Allow a slightly larger chart on desktop */
+                max-width: 450px; /* Allow a slightly larger chart on desktop */
             }
         }
     </style>
