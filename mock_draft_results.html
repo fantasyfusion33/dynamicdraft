@@ -15,6 +15,13 @@
             --gray: #1A1A1A;
             --glass: rgba(26, 26, 26, 0.8);
             --gold: #FFD700;
+            /* Sport Colors */
+            --nfl-color: #00338D;
+            --nba-color: #FF671F;
+            --mlb-color: #009688;
+            --nhl-color: #8E44AD;
+            --ncaaf-color: #D32F2F;
+            --ncaab-color: #FBC02D;
         }
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -52,58 +59,65 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 25px;
+            overflow-x: auto;
         }
 
         .power-rankings-table {
             width: 100%;
             border-collapse: collapse;
+            white-space: nowrap;
         }
         .power-rankings-table th, .power-rankings-table td {
-            padding: 15px;
-            text-align: left;
+            padding: 12px;
+            text-align: center;
             border-bottom: 1px solid #333;
         }
         .power-rankings-table th {
             color: #aaa;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
         }
+        .power-rankings-table td:first-child, .power-rankings-table td:nth-child(2) {
+             text-align: left;
+        }
         .power-rankings-table .rank {
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--primary);
-            width: 50px;
+            width: 40px;
         }
         .power-rankings-table .grade {
             font-weight: bold;
         }
+        .power-rankings-table .sport-rank {
+            font-weight: 600;
+        }
 
         .awards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
         }
         .award-card {
             background: #222;
             border-radius: 8px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
-            border: 1px solid #444;
         }
         .award-card .icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: var(--gold);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
         .award-card h4 {
-            margin: 0 0 10px 0;
-            font-size: 1.2rem;
+            margin: 0 0 8px 0;
+            font-size: 1rem;
         }
         .award-card p {
             margin: 0;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #ccc;
-            line-height: 1.5;
+            line-height: 1.4;
         }
 
         .email-form-container {
@@ -153,28 +167,80 @@
             border-bottom: 2px solid var(--primary);
             padding-bottom: 10px;
             margin: 0 0 20px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .team-card h3 .overall-rank {
+            font-size: 1rem;
+            color: #ccc;
+            font-weight: 500;
         }
         .roster-list {
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 10px;
-        }
-        .roster-list li {
-            background: #2a2a2a;
-            padding: 10px 15px;
-            border-radius: 6px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
         }
         .roster-list .sport-header {
             font-weight: bold;
-            color: #aaa;
-            margin-bottom: 5px;
+            color: #ccc;
+            margin-bottom: 8px;
+            font-size: 1rem;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        .roster-list li {
+            background: #2a2a2a;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+        .team-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 14px;
+        }
+        .draft-pick-circle {
+            margin-left: auto;
+            width: 36px;
+            height: 24px;
+            font-size: 0.8em;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-weight: bold;
+            color: white;
+        }
+        .draft-pick-circle.NFL, .team-icon.NFL-icon { background-color: var(--nfl-color); }
+        .draft-pick-circle.NBA, .team-icon.NBA-icon { background-color: var(--nba-color); }
+        .draft-pick-circle.MLB, .team-icon.MLB-icon { background-color: var(--mlb-color); }
+        .draft-pick-circle.NHL, .team-icon.NHL-icon { background-color: var(--nhl-color); }
+        .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon { background-color: var(--ncaaf-color); }
+        .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon { background-color: var(--ncaab-color); }
+        
+        .chart-container p {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-align: center;
+            margin-top: 15px;
+            line-height: 1.5;
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 900px) {
             .team-card {
-                grid-template-columns: 350px 1fr;
+                grid-template-columns: 400px 1fr;
             }
         }
     </style>
@@ -193,9 +259,12 @@
 
         <div class="card">
             <h3>Overall Power Rankings</h3>
-            <table class="power-rankings-table" id="powerRankingsTable">
-                <!-- Rankings will be populated here -->
-            </table>
+            <p style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 20px;">Rankings are determined by the average championship odds of all teams in your portfolio. Lower is better!</p>
+            <div style="overflow-x:auto;">
+                <table class="power-rankings-table" id="powerRankingsTable">
+                    <!-- Rankings will be populated here -->
+                </table>
+            </div>
         </div>
 
         <div class="card">
@@ -230,6 +299,11 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+    const sportColors = {
+        'NFL': '#00338D', 'NBA': '#FF671F', 'MLB': '#009688',
+        'NHL': '#8E44AD', 'NCAAF': '#D32F2F', 'NCAAB': '#FBC02D'
+    };
+    
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const leagueId = urlParams.get('leagueId');
@@ -248,18 +322,18 @@
                 .single();
 
             if (draftError) throw draftError;
-            if (!draftData || draftData.status !== 'completed') {
+            if (draftData.status !== 'completed') {
                 throw new Error("This draft is not yet complete or does not exist.");
             }
             
-            const { data: allTeams, error: teamsError } = await supabase
+            const { data: allTeamsData, error: teamsError } = await supabase
                 .from('SportTeamDatabase_6_23_25')
-                .select('team_id, name, adp, championship_odds');
+                .select('team_id, name, adp, championship_odds, primaryColor, secondaryColor');
             
             if(teamsError) throw teamsError;
 
             // Perform analysis
-            const analysisResults = calculateAnalysis(draftData, allTeams);
+            const analysisResults = calculateAnalysis(draftData, allTeamsData);
 
             // Render all components
             renderPage(draftData, analysisResults);
@@ -270,9 +344,14 @@
         }
     });
 
-    function calculateAnalysis(draft, allTeams) {
+    function getSportIcon(sport){ 
+        const i = {'NBA':'fas fa-basketball-ball','NCAAB':'fas fa-basketball-ball','NFL':'fas fa-football-ball','NCAAF':'fas fa-football-ball','MLB':'fas fa-baseball-ball','NHL':'fas fa-hockey-puck'}; 
+        return i[sport] || ''; 
+    }
+
+    function calculateAnalysis(draft, allTeamsData) {
         const teamAnalysis = {};
-        const allTeamsMap = new Map(allTeams.map(t => [t.team_id, t]));
+        const allTeamsMap = new Map(allTeamsData.map(t => [t.team_id, t]));
 
         // Initialize analysis object for each team
         draft.team_names.forEach(name => {
@@ -282,6 +361,8 @@
                 avgOverallOdds: 0
             };
         });
+        
+        const allPicksWithDetails = Object.values(draft.player_rosters).flat(2);
 
         // 1. Calculate Sport-Specific Power Rankings
         const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
@@ -293,75 +374,84 @@
                     const totalOdds = teamsInSport.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
                     const avgOdds = totalOdds / teamsInSport.length;
                     sportAverages.push({ name, avgOdds });
+                } else {
+                     sportAverages.push({ name, avgOdds: Infinity }); // Handle cases where a team has no picks in a sport
                 }
             });
-            // Sort by lowest average odds (best)
             sportAverages.sort((a, b) => a.avgOdds - b.avgOdds);
-            // Assign ranks
             sportAverages.forEach((team, index) => {
                 teamAnalysis[team.name].sportRanks[sport] = index + 1;
             });
         });
         
-        // 2. Calculate Overall Power Ranking
+        // 2. Calculate Overall Power Ranking (including wildcards)
         const overallAverages = [];
         draft.team_names.forEach(name => {
-            const allPicks = Object.values(draft.player_rosters[name]).flat();
-            const totalOdds = allPicks.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
-            teamAnalysis[name].avgOverallOdds = totalOdds / allPicks.length;
+            const allManagerPicks = Object.values(draft.player_rosters[name]).flat();
+            if (allManagerPicks.length > 0) {
+                const totalOdds = allManagerPicks.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
+                teamAnalysis[name].avgOverallOdds = totalOdds / allManagerPicks.length;
+            } else {
+                teamAnalysis[name].avgOverallOdds = Infinity;
+            }
             overallAverages.push({ name, avgOdds: teamAnalysis[name].avgOverallOdds });
         });
         overallAverages.sort((a,b) => a.avgOdds - b.avgOdds);
         
-        // 3. Find Superlatives (Steal and Reach)
+        // 3. Find Superlatives
         let steal = { value: -Infinity, pick: null };
         let reach = { value: -Infinity, pick: null };
-        
-        draft.draft_order.forEach((drafter, pickIndex) => {
-            const pickNumber = pickIndex + 1;
-            const allPicks = Object.values(draft.player_rosters).flat(2);
-            const pickDetails = allPicks.find(p => p.round * draft.team_count - (draft.team_count - p.pick) === pickNumber);
+        let bestWildcard = { odds: Infinity, pick: null };
 
-            if (pickDetails && allTeamsMap.has(pickDetails.team_id)) {
-                const teamData = allTeamsMap.get(pickDetails.team_id);
-                const adp = teamData.adp || pickNumber; // Default ADP to pick number if null
-                const value = adp - pickNumber;
-                
-                if (value > steal.value) {
-                    steal = { value, pick: { ...pickDetails, drafter } };
-                }
-                if (-value > reach.value) {
-                    reach = { value: -value, pick: { ...pickDetails, drafter } };
+        allPicksWithDetails.forEach(pick => {
+            const teamData = allTeamsMap.get(pick.team_id);
+            if (!teamData) return;
+
+            // Steal & Reach
+            const adp = teamData.adp || pick.round * draft.team_count;
+            const value = adp - (pick.round * draft.team_count - (draft.team_count - pick.pick));
+            
+            const drafterName = draft.draft_order[pick.round * draft.team_count - (draft.team_count - pick.pick) -1];
+
+            if (value > steal.value) steal = { value, pick: { ...pick, drafter: drafterName } };
+            if (-value > reach.value) reach = { value: -value, pick: { ...pick, drafter: drafterName } };
+
+            // Best Wildcard
+            if (pick.round > 12) {
+                const odds = parseFloat(pick.championship_odds);
+                if (odds < bestWildcard.odds) {
+                    bestWildcard = { odds, pick: { ...pick, drafter: drafterName } };
                 }
             }
         });
 
+        // Mr. Automatic
+        const cpuTeams = draft.team_names.filter(name => name !== draft.team_names[draft.user_team_position - 1]);
+        const cpuRankings = overallAverages.filter(r => cpuTeams.includes(r.name));
+        const mrAutomatic = cpuRankings.length > 0 ? cpuRankings[0] : null;
+
         return {
             powerRankings: overallAverages,
             teamDetails: teamAnalysis,
-            awards: { steal, reach }
+            awards: { steal, reach, bestWildcard, mrAutomatic }
         };
     }
     
     function renderPage(draft, analysis) {
-        // Hide loading and show results
         document.getElementById('loadingState').style.display = 'none';
         document.getElementById('resultsContainer').style.display = 'flex';
         
-        // Header
         document.getElementById('leagueName').textContent = draft.league_name;
 
-        // Render sections
-        renderPowerRankings(analysis.powerRankings);
+        renderPowerRankings(analysis.powerRankings, analysis.teamDetails);
         renderAwards(analysis.awards);
-        renderTeamBreakdowns(draft.team_names, analysis.teamDetails);
+        renderTeamBreakdowns(draft.team_names, analysis.teamDetails, analysis.powerRankings);
         
-        // Add email form listener
         document.getElementById('emailForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('emailAddress').value;
             const statusEl = document.getElementById('emailStatus');
-            statusEl.textContent = `Simulating email send to ${email}... (Check console for payload)`;
+            statusEl.textContent = `Simulating email send to ${email}... (Check console for details)`;
             console.log("Email Payload:", {
                 recipient: email,
                 subject: `Fantasy Fusion Draft Results for: ${draft.league_name}`,
@@ -371,82 +461,81 @@
         });
     }
 
-    function renderPowerRankings(rankings) {
-        const tableBody = document.createElement('tbody');
+    function renderPowerRankings(rankings, teamDetails) {
+        const table = document.getElementById('powerRankingsTable');
+        const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
+        let headHTML = '<thead><tr><th>Rank</th><th>Team</th><th>Avg Odds</th><th>Grade</th>';
+        sports.forEach(s => headHTML += `<th>${s} Rank</th>`);
+        headHTML += '</tr></thead>';
+
+        let bodyHTML = '<tbody>';
         rankings.forEach((team, index) => {
-            const row = document.createElement('tr');
             const grade = getDraftGrade(index + 1, rankings.length);
-            row.innerHTML = `
+            const details = teamDetails[team.name];
+            bodyHTML += `<tr>
                 <td class="rank">#${index + 1}</td>
                 <td>${team.name}</td>
                 <td>+${Math.round(team.avgOdds)}</td>
                 <td class="grade" style="color: ${grade.color}">${grade.letter}</td>
-            `;
-            tableBody.appendChild(row);
+                ${sports.map(s => `<td class="sport-rank">#${details.sportRanks[s]}</td>`).join('')}
+            </tr>`;
         });
-        document.getElementById('powerRankingsTable').appendChild(tableBody);
+        bodyHTML += '</tbody>';
+        table.innerHTML = headHTML + bodyHTML;
     }
     
     function renderAwards(awards) {
         const container = document.getElementById('awardsGrid');
         let html = '';
         if (awards.steal.pick) {
-            html += `
-            <div class="award-card">
-                <div class="icon"><i class="fas fa-gem"></i></div>
-                <h4>Steal of the Draft</h4>
-                <p><b>${awards.steal.pick.drafter}</b> drafted <b>${awards.steal.pick.name}</b> at pick #${awards.steal.pick.round}.${awards.steal.pick.pick}, a value of ${awards.steal.value.toFixed(1)} spots better than their ADP.</p>
-            </div>`;
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-gem"></i></div><h4>Steal of the Draft</h4><p><b>${awards.steal.pick.drafter}</b> drafted <b>${awards.steal.pick.name}</b>, a value of ${awards.steal.value.toFixed(0)} spots better than ADP.</p></div>`;
         }
         if (awards.reach.pick) {
-            html += `
-            <div class="award-card">
-                <div class="icon"><i class="fas fa-hand-paper"></i></div>
-                <h4>Biggest Reach</h4>
-                <p><b>${awards.reach.pick.drafter}</b> took <b>${awards.reach.pick.name}</b> at pick #${awards.reach.pick.round}.${awards.reach.pick.pick}, about ${awards.reach.value.toFixed(1)} spots earlier than expected.</p>
-            </div>`;
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-hand-paper"></i></div><h4>Biggest Reach</h4><p><b>${awards.reach.pick.drafter}</b> took <b>${awards.reach.pick.name}</b> about ${awards.reach.value.toFixed(0)} spots earlier than expected.</p></div>`;
         }
-         html += `
-            <div class="award-card">
-                <div class="icon"><i class="fas fa-brain"></i></div>
-                <h4>Mr. Automatic</h4>
-                <p>This award goes to the top-performing auto-drafted team. (Calculation logic pending).</p>
-            </div>`;
+        if (awards.bestWildcard.pick) {
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-star"></i></div><h4>Wildcard Wizard</h4><p><b>${awards.bestWildcard.pick.drafter}</b> made the best wildcard pick, grabbing <b>${awards.bestWildcard.pick.name}</b>.</p></div>`;
+        }
+        if (awards.mrAutomatic) {
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing auto-drafted team, finishing with an overall rank of #${awards.powerRankings.findIndex(r => r.name === awards.mrAutomatic.name) + 1}.</p></div>`;
+        }
         container.innerHTML = html;
     }
 
-    function renderTeamBreakdowns(teamNames, teamDetails) {
+    function renderTeamBreakdowns(teamNames, teamDetails, powerRankings) {
         const container = document.getElementById('teamBreakdownsGrid');
         container.innerHTML = '';
         teamNames.forEach(name => {
             const details = teamDetails[name];
+            const overallRank = powerRankings.findIndex(r => r.name === name) + 1;
             const card = document.createElement('div');
             card.className = 'card team-card';
             
             let rosterHtml = '';
-            for(const sport in details.roster) {
-                if (details.roster[sport].length > 0) {
-                    rosterHtml += `<div><div class="sport-header">${sport} (Rank: #${details.sportRanks[sport] || 'N/A'})</div>`;
+            const sportsAndWildcard = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'Wildcard'];
+            sportsAndWildcard.forEach(sport => {
+                if (details.roster[sport] && details.roster[sport].length > 0) {
+                    rosterHtml += `<div><div class="sport-header">${sport} ${sport !== 'Wildcard' ? `(Rank: #${details.sportRanks[sport] || 'N/A'})` : ''}</div><ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px;">`;
                     details.roster[sport].forEach(team => {
-                        rosterHtml += `<li>${team.name}</li>`;
+                        rosterHtml += `<li><div class="team-icon ${team.sport}-icon" style="background-color:${team.primaryColor};"><i class="${getSportIcon(team.sport)}" style="color:${team.secondaryColor};"></i></div>${team.name}<div class="draft-pick-circle ${team.sport}">${team.round}.${team.pick}</div></li>`;
                     });
-                    rosterHtml += `</div>`;
+                    rosterHtml += `</ul></div>`;
                 }
-            }
+            });
 
             card.innerHTML = `
-                <div>
-                    <h3>${name}</h3>
+                <div class="chart-container">
+                    <h3>${name}<span class="overall-rank">Overall Rank: #${overallRank}</span></h3>
                     <canvas id="chart-${name.replace(/\s+/g, '-')}" width="300" height="300"></canvas>
+                    <p>This chart shows your team's power ranking for each sport. A point closer to the edge means a better rank in that category.</p>
                 </div>
                 <div>
                     <h4>Final Roster</h4>
-                    <ul class="roster-list">${rosterHtml}</ul>
+                    <div class="roster-list">${rosterHtml}</div>
                 </div>
             `;
             container.appendChild(card);
             
-            // Generate Radar Chart
             const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
             createRadarChart(`chart-${name.replace(/\s+/g, '-')}`, ranks, teamNames.length);
         });
@@ -473,7 +562,6 @@
                 labels: ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'],
                 datasets: [{
                     label: 'Sport Power Ranking',
-                    // We invert the data so that a rank of #1 is at the edge and a low rank is near the center
                     data: data.map(rank => teamCount - rank + 1),
                     fill: true,
                     backgroundColor: 'rgba(210, 4, 45, 0.2)',
@@ -485,31 +573,24 @@
                 }]
             },
             options: {
-                elements: {
-                    line: {
-                        borderWidth: 3
-                    }
-                },
+                elements: { line: { borderWidth: 3 } },
                 scales: {
                     r: {
                         angleLines: { color: 'rgba(255, 255, 255, 0.2)' },
                         grid: { color: 'rgba(255, 255, 255, 0.2)' },
-                        pointLabels: { color: '#fff', font: { size: 14 } },
-                        ticks: {
-                            display: false, // Hide the numeric labels on the spokes
-                            stepSize: teamCount / 4,
-                            max: teamCount,
-                            min: 0,
+                        pointLabels: { 
+                            font: { size: 14, weight: 'bold' },
+                            color: function(context) {
+                                const label = context.label;
+                                return sportColors[label] || '#fff';
+                            }
                         },
+                        ticks: { display: false, stepSize: teamCount / 4 },
                         suggestedMin: 0,
                         suggestedMax: teamCount
                     }
                 },
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
