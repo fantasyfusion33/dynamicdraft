@@ -444,7 +444,7 @@
         document.getElementById('leagueName').textContent = draft.league_name;
 
         renderPowerRankings(analysis.powerRankings, analysis.teamDetails);
-        renderAwards(analysis.awards);
+        renderAwards(analysis.awards, analysis.powerRankings);
         renderTeamBreakdowns(draft.team_names, analysis.teamDetails, analysis.powerRankings);
         
         document.getElementById('emailForm').addEventListener('submit', (e) => {
@@ -484,7 +484,7 @@
         table.innerHTML = headHTML + bodyHTML;
     }
     
-    function renderAwards(awards) {
+    function renderAwards(awards, powerRankings) {
         const container = document.getElementById('awardsGrid');
         let html = '';
         if (awards.steal.pick) {
@@ -497,7 +497,8 @@
             html += `<div class="award-card"><div class="icon"><i class="fas fa-star"></i></div><h4>Wildcard Wizard</h4><p><b>${awards.bestWildcard.pick.drafter}</b> made the best wildcard pick, grabbing <b>${awards.bestWildcard.pick.name}</b>.</p></div>`;
         }
         if (awards.mrAutomatic) {
-            html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing auto-drafted team, finishing with an overall rank of #${awards.powerRankings.findIndex(r => r.name === awards.mrAutomatic.name) + 1}.</p></div>`;
+            const autoRank = powerRankings.findIndex(r => r.name === awards.mrAutomatic.name) + 1;
+            html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing auto-drafted team, finishing with an overall rank of #${autoRank}.</p></div>`;
         }
         container.innerHTML = html;
     }
