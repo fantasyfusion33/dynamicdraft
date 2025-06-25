@@ -285,8 +285,8 @@
         
         .chart-container {
             position: relative;
-            max-width: 450px; /* Constrain width to prevent it from becoming too large */
-            margin: 0 auto; /* Center the chart container */
+            max-width: 450px;
+            margin: 0 auto;
             width: 100%;
         }
         .chart-container p {
@@ -324,8 +324,7 @@
             <p style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 20px;">Rankings are determined by the average championship odds of all teams in your portfolio. Lower is better!</p>
             <div style="overflow-x:auto;">
                 <table class="power-rankings-table" id="powerRankingsTable">
-                    <!-- Rankings will be populated here -->
-                </table>
+                    </table>
             </div>
         </div>
 
@@ -333,8 +332,7 @@
             <h3>Draft Superlatives</h3>
             <div class="awards-container">
                 <div class="awards-grid" id="awardsGrid">
-                    <!-- Awards will be populated here -->
-                </div>
+                    </div>
             </div>
         </div>
         
@@ -352,11 +350,9 @@
             <h3>Team Breakdowns</h3>
             <div id="teamBreakdownContainer">
                 <div class="team-tabs" id="teamTabsContainer">
-                    <!-- Tabs will be populated here -->
-                </div>
+                    </div>
                 <div class="team-breakdown-grid" id="teamBreakdownsGrid">
-                    <!-- Individual team cards will be populated here -->
-                </div>
+                    </div>
             </div>
         </div>
          <a href="https://fantasyfusionsports.com" style="display: block; margin: 20px auto; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.2s ease; text-align: center;">Return to Homepage</a>
@@ -373,6 +369,9 @@
         'NHL': '#8E44AD', 'NCAAF': '#D32F2F', 'NCAAB': '#FBC02D'
     };
     
+    // Global store for chart instances to prevent duplicates
+    const chartInstances = {};
+
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
         const leagueId = urlParams.get('leagueId');
@@ -585,8 +584,12 @@
             const tab = document.createElement('button');
             tab.className = 'team-tab';
             tab.textContent = name;
-            tab.dataset.target = `breakdown-${index}`;
-            if (index === 0) tab.classList.add('active');
+            tab.dataset.targetId = `breakdown-${index}`;
+            tab.dataset.chartId = `chart-${name.replace(/\s+/g, '-')}`;
+            tab.dataset.rendered = "false";
+            if (index === 0) {
+                tab.classList.add('active');
+            }
             tabsContainer.appendChild(tab);
 
             // Create Content
@@ -595,7 +598,9 @@
             const contentDiv = document.createElement('div');
             contentDiv.id = `breakdown-${index}`;
             contentDiv.className = 'team-breakdown-content';
-            if (index === 0) contentDiv.classList.add('active');
+            if (index === 0) {
+                contentDiv.classList.add('active');
+            }
             
             let rosterHtml = '';
             const sportsAndWildcard = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'Wildcard'];
@@ -623,10 +628,17 @@
                     </div>
                 </div>`;
             breakdownsContainer.appendChild(contentDiv);
-            
-            const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
-            createRadarChart(`chart-${name.replace(/\s+/g, '-')}`, ranks, teamNames.length);
         });
+        
+        // Render the first chart initially
+        const firstTab = tabsContainer.querySelector('.team-tab');
+        if(firstTab) {
+             const teamName = firstTab.textContent;
+             const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => teamDetails[teamName].sportRanks[sport] || teamNames.length);
+             createRadarChart(firstTab.dataset.chartId, ranks, teamNames.length);
+             firstTab.dataset.rendered = "true";
+        }
+
 
         // Add event listener for tabs
         tabsContainer.addEventListener('click', (e) => {
@@ -635,7 +647,16 @@
                 e.target.classList.add('active');
 
                 breakdownsContainer.querySelectorAll('.team-breakdown-content').forEach(c => c.classList.remove('active'));
-                document.getElementById(e.target.dataset.target).classList.add('active');
+                document.getElementById(e.target.dataset.targetId).classList.add('active');
+                
+                // Lazy load chart: only create it if it hasn't been rendered yet
+                if (e.target.dataset.rendered === "false") {
+                    const teamName = e.target.textContent;
+                    const details = teamDetails[teamName];
+                    const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
+                    createRadarChart(e.target.dataset.chartId, ranks, teamNames.length);
+                    e.target.dataset.rendered = "true";
+                }
             }
         });
     }
@@ -653,22 +674,21 @@
     }
     
     function getRankColor(rank, totalTeams) {
+        if(rank === undefined || rank === null) return '#555'; // Gray for unranked
         const percentile = (totalTeams > 1) ? (totalTeams - rank) / (totalTeams - 1) : 1;
         
-        const red = [220, 53, 69]; // F/D Grade
-        const yellow = [255, 193, 7]; // C Grade
-        const green = [40, 167, 69]; // A/B Grade
+        const red = [220, 53, 69];
+        const yellow = [255, 193, 7];
+        const green = [40, 167, 69];
 
         let r, g, b;
 
         if (percentile < 0.5) {
-            // Red to Yellow
             const p = percentile * 2;
             r = Math.round(red[0] + p * (yellow[0] - red[0]));
             g = Math.round(red[1] + p * (yellow[1] - red[1]));
             b = Math.round(red[2] + p * (yellow[2] - red[2]));
         } else {
-            // Yellow to Green
             const p = (percentile - 0.5) * 2;
             r = Math.round(yellow[0] + p * (green[0] - yellow[0]));
             g = Math.round(yellow[1] + p * (green[1] - yellow[1]));
