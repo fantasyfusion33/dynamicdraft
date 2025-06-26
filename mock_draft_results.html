@@ -347,7 +347,7 @@
              <h3>Share Your Results</h3>
              <p>Enter an email address to send a copy of the draft board.</p>
              <form id="emailForm">
-                <input type="email" id="emailAddress" placeholder="friend@example.com" required>
+                <input type="email" id="emailAddress" placeholder="skilledathlete@example.com" required>
                 <button type="submit">Send Email</button>
              </form>
              <p id="emailStatus"></p>
@@ -522,18 +522,41 @@
         renderAwards(analysis.awards, analysis.powerRankings);
         renderTeamBreakdowns(draft.team_names, analysis.teamDetails, analysis.powerRankings);
         
-        document.getElementById('emailForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('emailAddress').value;
-            const statusEl = document.getElementById('emailStatus');
-            statusEl.textContent = `Simulating email send to ${email}... (Check console for payload)`;
-            console.log("Email Payload:", {
-                recipient: email,
-                subject: `Fantasy Fusion Draft Results for: ${draft.league_name}`,
-                body: "Formatted draft results would go here."
+    // Sends Results Email
+    document.getElementById('emailForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('emailAddress').value;
+        const statusEl = document.getElementById('emailStatus');
+        const emailButton = e.target.querySelector('button');
+    
+        emailButton.disabled = true;
+        statusEl.textContent = 'Sending...';
+    
+        try {
+            const { data, error } = await supabase.functions.invoke('send-draft-results', {
+                body: {
+                    recipientEmail: email,
+                    leagueName: draftData.league_name, // Assuming draftData is available in this scope
+                    rosters: draftData.player_rosters
+                }
             });
-            setTimeout(() => statusEl.textContent = "", 4000);
-        });
+    
+            if (error) throw error;
+    
+            statusEl.textContent = 'Email sent successfully!';
+            document.getElementById('emailAddress').value = ''; // Clear the input
+    
+        } catch (error) {
+            statusEl.textContent = `Error: ${error.message}`;
+            statusEl.style.color = '#dc3545'; // Make error red
+        } finally {
+            emailButton.disabled = false;
+            setTimeout(() => {
+                statusEl.textContent = "";
+                statusEl.style.color = '#28a745'; // Reset color
+            }, 5000);
+        }
+    });
     }
 
     function renderPowerRankings(rankings, teamDetails) {
