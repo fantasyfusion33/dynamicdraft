@@ -380,6 +380,7 @@
     
     // Global store for chart instances to prevent duplicates
     const chartInstances = {};
+    let draftData; 
 
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -392,11 +393,12 @@
 
         try {
             // Fetch all necessary data
-            const { data: draftData, error: draftError } = await supabase
+            let draftError;
+            ({ data: draftData, error: draftError } = await supabase
                 .from('mock_drafts')
                 .select('*')
                 .eq('id', leagueId)
-                .single();
+                .single());
 
             if (draftError) throw draftError;
             if (draftData.status !== 'completed') {
