@@ -10,7 +10,7 @@
     <style>
         :root {
             --primary: #FA4616;
-            --dark: #0c2340;
+            --dark: #0C2340;
             --light: #FFFFFF;
             --gray: #1A1A1A;
             --glass: rgba(26, 26, 26, 0.8);
@@ -138,10 +138,12 @@
             text-align: center;
         }
         #emailForm {
-            display: flex;
-            gap: 10px;
             max-width: 500px;
             margin: 15px auto 0 auto;
+        }
+        #emailForm .form-row {
+            display: flex;
+            gap: 10px;
         }
         #emailAddress {
             flex-grow: 1;
@@ -166,6 +168,24 @@
             font-size: 0.9rem;
             color: #28a745;
         }
+
+        /* Waitlist Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px);
+            z-index: 2000; display: grid; place-items: center;
+            opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: #1A1A1A; padding: 30px; border-radius: 12px;
+            width: 100%; max-width: 500px; text-align: center;
+        }
+        .modal-content h3 { margin-top: 0; font-size: 1.5rem; }
+        .modal-buttons { display: flex; gap: 15px; margin-top: 25px; }
+        .modal-buttons button { width: 100%; }
+        .modal-buttons .secondary-btn { background: #555; }
+
 
         .team-tabs {
             display: flex;
@@ -283,12 +303,11 @@
         .draft-pick-circle.NCAAF, .team-icon.NCAAF-icon, .sport-header.NCAAF { background-color: var(--ncaaf-color); }
         .draft-pick-circle.NCAAB, .team-icon.NCAAB-icon, .sport-header.NCAAB { background-color: var(--ncaab-color); }
         
-        /* -- CHART CONTAINER FIX -- */
         .chart-container {
-            position: relative; /* Required for Chart.js responsiveness */
+            position: relative;
             margin: 0 auto;
             width: 100%;
-            max-width: 251px; /* The fix: constrain the container width */
+            max-width: 251px;
         }
         .chart-container p {
             font-size: 0.9rem;
@@ -297,7 +316,6 @@
             margin-top: 15px;
             line-height: 1.5;
         }
-        /* -- END FIX -- */
 
         @media (min-width: 900px) {
             .team-card {
@@ -307,7 +325,7 @@
                 grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             }
             .chart-container {
-                max-width: 450px; /* Allow a slightly larger chart on desktop */
+                max-width: 450px;
             }
         }
     </style>
@@ -328,18 +346,14 @@
             <h3>Overall Power Rankings</h3>
             <p style="font-size: 0.9rem; color: #aaa; margin-top: -10px; margin-bottom: 20px;">Rankings are determined by the average championship odds of all teams in your portfolio. Lower is better!</p>
             <div style="overflow-x:auto;">
-                <table class="power-rankings-table" id="powerRankingsTable">
-                    <!-- Rankings will be populated here -->
-                </table>
+                <table class="power-rankings-table" id="powerRankingsTable"></table>
             </div>
         </div>
 
         <div class="card">
             <h3>Draft Superlatives</h3>
             <div class="awards-container">
-                <div class="awards-grid" id="awardsGrid">
-                    <!-- Awards will be populated here -->
-                </div>
+                <div class="awards-grid" id="awardsGrid"></div>
             </div>
         </div>
         
@@ -347,8 +361,10 @@
              <h3>Share Your Results</h3>
              <p>Enter an email address to send a copy of the draft board.</p>
              <form id="emailForm">
-                <input type="email" id="emailAddress" placeholder="skilledathlete@example.com" required>
-                <button type="submit">Send Email</button>
+                 <div class="form-row" style="width:100%">
+                    <input type="email" id="emailAddress" placeholder="friend@example.com" required>
+                    <button type="submit">Send Email</button>
+                 </div>
              </form>
              <p id="emailStatus"></p>
         </div>
@@ -356,19 +372,27 @@
         <div class="card">
             <h3>Team Breakdowns</h3>
             <div id="teamBreakdownContainer">
-                <div class="team-tabs" id="teamTabsContainer">
-                    <!-- Tabs will be populated here -->
-                </div>
-                <div class="team-breakdown-grid" id="teamBreakdownsGrid">
-                    <!-- Individual team cards will be populated here -->
-                </div>
+                <div class="team-tabs" id="teamTabsContainer"></div>
+                <div class="team-breakdown-grid" id="teamBreakdownsGrid"></div>
             </div>
         </div>
          <a href="https://fantasyfusionsports.com" style="display: block; margin: 20px auto; padding: 12px 24px; background: var(--primary); color: white; text-decoration: none; border-radius: 8px; font-weight: bold; transition: background 0.2s ease; text-align: center;">Return to Homepage</a>
     </div>
+    
+    <!-- Waitlist Opt-in Modal -->
+    <div class="modal-overlay" id="waitlistModal">
+        <div class="modal-content">
+            <h3>Join the Fusion!</h3>
+            <p>Before we send your results, would you like to be one of the first to play in a Fusion League when the full game launches?</p>
+            <div class="modal-buttons">
+                <button id="joinWaitlistBtn" class="primary-btn">Join the Waitlist</button>
+                <button id="justSendBtn" class="secondary-btn">Just Send Results</button>
+            </div>
+        </div>
+    </div>
+
 
 <script>
-    // Supabase Initialization
     const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -378,9 +402,9 @@
         'NHL': '#8E44AD', 'NCAAF': '#D32F2F', 'NCAAB': '#FBC02D'
     };
     
-    // Global store for chart instances to prevent duplicates
     const chartInstances = {};
     let draftData; 
+    let analysisData; 
 
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -392,7 +416,6 @@
         }
 
         try {
-            // Fetch all necessary data
             let draftError;
             ({ data: draftData, error: draftError } = await supabase
                 .from('mock_drafts')
@@ -411,11 +434,8 @@
             
             if(teamsError) throw teamsError;
 
-            // Perform analysis
-            const analysisResults = calculateAnalysis(draftData, allTeamsData);
-
-            // Render all components
-            renderPage(draftData, analysisResults);
+            analysisData = calculateAnalysis(draftData, allTeamsData);
+            renderPage(draftData, analysisData);
 
         } catch (error) {
             document.getElementById('loadingState').innerHTML = `<h1>Error loading results:</h1><p>${error.message}</p>`;
@@ -432,7 +452,6 @@
         const teamAnalysis = {};
         const allTeamsMap = new Map(allTeamsData.map(t => [t.team_id, t]));
 
-        // Initialize analysis object for each team
         draft.team_names.forEach(name => {
             teamAnalysis[name] = {
                 roster: draft.player_rosters[name],
@@ -442,8 +461,6 @@
         });
         
         const allPicksWithDetails = Object.values(draft.player_rosters).flat(2);
-
-        // 1. Calculate Sport-Specific Power Rankings
         const sports = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'];
         sports.forEach(sport => {
             const sportAverages = [];
@@ -451,8 +468,7 @@
                 const teamsInSport = draft.player_rosters[name][sport];
                 if (teamsInSport && teamsInSport.length > 0) {
                     const totalOdds = teamsInSport.reduce((sum, t) => sum + (parseFloat(t.championship_odds) || 100000), 0);
-                    const avgOdds = totalOdds / teamsInSport.length;
-                    sportAverages.push({ name, avgOdds });
+                    sportAverages.push({ name, avgOdds: totalOdds / teamsInSport.length });
                 } else {
                      sportAverages.push({ name, avgOdds: Infinity }); 
                 }
@@ -463,7 +479,6 @@
             });
         });
         
-        // 2. Calculate Overall Power Ranking (including wildcards)
         const overallAverages = [];
         draft.team_names.forEach(name => {
             const allManagerPicks = Object.values(draft.player_rosters[name]).flat();
@@ -477,7 +492,6 @@
         });
         overallAverages.sort((a,b) => a.avgOdds - b.avgOdds);
         
-        // 3. Find Superlatives
         let steal = { value: -Infinity, pick: null };
         let reach = { value: -Infinity, pick: null };
         let bestWildcard = { odds: Infinity, pick: null };
@@ -524,41 +538,67 @@
         renderAwards(analysis.awards, analysis.powerRankings);
         renderTeamBreakdowns(draft.team_names, analysis.teamDetails, analysis.powerRankings);
         
-    // Sends Results Email
-    document.getElementById('emailForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
+        const emailForm = document.getElementById('emailForm');
+        const waitlistModal = document.getElementById('waitlistModal');
+
+        emailForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            waitlistModal.classList.add('active');
+        });
+
+        document.getElementById('joinWaitlistBtn').addEventListener('click', () => handleEmailSend(true));
+        document.getElementById('justSendBtn').addEventListener('click', () => handleEmailSend(false));
+    }
+
+    async function handleEmailSend(waitlistOptIn) {
+        const waitlistModal = document.getElementById('waitlistModal');
+        waitlistModal.classList.remove('active');
+
         const email = document.getElementById('emailAddress').value;
         const statusEl = document.getElementById('emailStatus');
-        const emailButton = e.target.querySelector('button');
-    
+        const emailButton = document.querySelector('#emailForm button');
+
         emailButton.disabled = true;
         statusEl.textContent = 'Sending...';
-    
+        
+        const senderTeamName = draftData.team_names[draftData.user_team_position - 1];
+        const senderChart = chartInstances[senderTeamName];
+        const chartImage = senderChart ? senderChart.toBase64Image() : '';
+        const senderOverallRank = analysisData.powerRankings.findIndex(r => r.name === senderTeamName) + 1;
+        
         try {
-            const { data, error } = await supabase.functions.invoke('send-draft-results', {
+            const { error } = await supabase.functions.invoke('send-draft-results', {
                 body: {
                     recipientEmail: email,
-                    leagueName: draftData.league_name, // Assuming draftData is available in this scope
-                    rosters: draftData.player_rosters
+                    leagueName: draftData.league_name,
+                    senderTeamName: senderTeamName,
+                    rosters: draftData.player_rosters,
+                    chartImage: chartImage,
+                    sportRanks: analysisData.teamDetails,
+                    overallRank: senderOverallRank,
+                    waitlistOptIn: waitlistOptIn
                 }
             });
-    
+
             if (error) throw error;
-    
-            statusEl.textContent = 'Email sent successfully!';
-            document.getElementById('emailAddress').value = ''; // Clear the input
-    
+            
+            if(waitlistOptIn) {
+                statusEl.textContent = 'Success! Email sent and you are on the waitlist!';
+            } else {
+                statusEl.textContent = 'Email sent successfully! Join the waitlist anytime from our homepage.';
+            }
+            document.getElementById('emailAddress').value = '';
+
         } catch (error) {
             statusEl.textContent = `Error: ${error.message}`;
-            statusEl.style.color = '#dc3545'; // Make error red
+            statusEl.style.color = '#dc3545';
         } finally {
             emailButton.disabled = false;
             setTimeout(() => {
                 statusEl.textContent = "";
-                statusEl.style.color = '#28a745'; // Reset color
+                statusEl.style.color = '#28a745';
             }, 5000);
         }
-    });
     }
 
     function renderPowerRankings(rankings, teamDetails) {
@@ -600,7 +640,6 @@
             const autoRank = powerRankings.findIndex(r => r.name === awards.mrAutomatic.name) + 1;
             html += `<div class="award-card"><div class="icon"><i class="fas fa-robot"></i></div><h4>Mr. Automatic</h4><p><b>${awards.mrAutomatic.name}</b> was the best-performing CPU, finishing #${autoRank} overall.</p></div>`;
         }
-        // Add more placeholders
         html += `<div class="award-card"><div class="icon"><i class="fas fa-chart-line"></i></div><h4>Most Consistent</h4><p>Awarded to the drafter with the smallest variance in odds. (Logic pending)</p></div>`;
         html += `<div class="award-card"><div class="icon"><i class="fas fa-bomb"></i></div><h4>High Risk/Reward</h4><p>Awarded to the drafter with the wildest swings in odds. (Logic pending)</p></div>`;
 
@@ -614,27 +653,21 @@
         breakdownsContainer.innerHTML = '';
 
         teamNames.forEach((name, index) => {
-            // Create Tab
             const tab = document.createElement('button');
             tab.className = 'team-tab';
             tab.textContent = name;
             tab.dataset.targetId = `breakdown-${index}`;
             tab.dataset.chartId = `chart-${name.replace(/\s+/g, '-')}`;
             tab.dataset.rendered = "false";
-            if (index === 0) {
-                tab.classList.add('active');
-            }
+            if (index === 0) tab.classList.add('active');
             tabsContainer.appendChild(tab);
 
-            // Create Content
             const details = teamDetails[name];
             const overallRank = powerRankings.findIndex(r => r.name === name) + 1;
             const contentDiv = document.createElement('div');
             contentDiv.id = `breakdown-${index}`;
             contentDiv.className = 'team-breakdown-content';
-            if (index === 0) {
-                contentDiv.classList.add('active');
-            }
+            if (index === 0) contentDiv.classList.add('active');
             
             let rosterHtml = '';
             const sportsAndWildcard = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'Wildcard'];
@@ -664,7 +697,6 @@
             breakdownsContainer.appendChild(contentDiv);
         });
         
-        // Render the first chart initially
         const firstTab = tabsContainer.querySelector('.team-tab');
         if(firstTab) {
              const teamName = firstTab.textContent;
@@ -673,8 +705,6 @@
              firstTab.dataset.rendered = "true";
         }
 
-
-        // Add event listener for tabs
         tabsContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('team-tab')) {
                 tabsContainer.querySelectorAll('.team-tab').forEach(t => t.classList.remove('active'));
@@ -683,7 +713,6 @@
                 breakdownsContainer.querySelectorAll('.team-breakdown-content').forEach(c => c.classList.remove('active'));
                 document.getElementById(e.target.dataset.targetId).classList.add('active');
                 
-                // Lazy load chart: only create it if it hasn't been rendered yet
                 if (e.target.dataset.rendered === "false") {
                     const teamName = e.target.textContent;
                     const details = teamDetails[teamName];
@@ -752,7 +781,7 @@
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true, // This is the key fix
+                maintainAspectRatio: true, 
                 elements: { line: { borderWidth: 3 } },
                 scales: {
                     r: {
