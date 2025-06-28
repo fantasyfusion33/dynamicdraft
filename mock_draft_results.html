@@ -745,6 +745,11 @@
             }
         });
     }
+    
+    function getSportIcon(sport) { 
+        const i = {'NBA':'fas fa-basketball-ball','NCAAB':'fas fa-basketball-ball','NFL':'fas fa-football-ball','NCAAF':'fas fa-football-ball','MLB':'fas fa-baseball-ball','NHL':'fas fa-hockey-puck'}; 
+        return i[sport] || ''; 
+    }
 
     function getDraftGrade(rank, totalTeams) {
         const percentile = (totalTeams - rank + 1) / totalTeams;
