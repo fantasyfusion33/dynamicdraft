@@ -560,7 +560,6 @@
         const senderChart = chartInstances[senderTeamName];
         
         if (!senderChart) {
-            // This is a failsafe.
             statusEl.textContent = "Error: Chart not ready. Please try again.";
             statusEl.style.color = '#dc3545';
             emailButton.disabled = false;
@@ -664,7 +663,6 @@
             tab.dataset.chartId = `chart-${name.replace(/\s+/g, '-')}`;
             tab.dataset.rendered = "false";
             
-            // Highlight the user's team tab by default, otherwise the first tab
             const userTeamName = teamNames[draftData.user_team_position - 1];
             if (name === userTeamName) {
                 tab.classList.add('active');
@@ -684,7 +682,6 @@
             }
             
             let rosterHtml = '';
-            // Roster generation logic... (correct and unchanged)
             const sportsAndWildcard = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB', 'Wildcard'];
             sportsAndWildcard.forEach(sport => {
                 if (details.roster[sport] && details.roster[sport].length > 0) {
@@ -696,7 +693,6 @@
                     rosterHtml += `</ul></div>`;
                 }
             });
-
 
             contentDiv.innerHTML = `
                 <div class="card team-card">
@@ -713,21 +709,21 @@
             breakdownsContainer.appendChild(contentDiv);
         });
         
-        // FIX: Pre-render the user's chart and the active tab's chart on load
-        const userTeamTab = Array.from(tabsContainer.children).find(tab => tab.textContent === teamNames[draftData.user_team_position - 1]);
-        if(userTeamTab) {
-            const teamName = userTeamTab.textContent;
-            const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => teamDetails[teamName].sportRanks[sport] || teamNames.length);
-            createRadarChart(userTeamTab.dataset.chartId, ranks, teamNames.length);
-            userTeamTab.dataset.rendered = "true";
-        }
-
+        // Pre-render both the active tab's chart and the user's chart
         const activeTab = tabsContainer.querySelector('.team-tab.active');
-        if(activeTab && activeTab.dataset.rendered === "false") {
+        if(activeTab) {
              const teamName = activeTab.textContent;
              const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => teamDetails[teamName].sportRanks[sport] || teamNames.length);
-             createRadarChart(activeTab.dataset.chartId, ranks, teamNames.length);
+             createRadarChart(teamName, ranks, teamNames.length); // Use team name as key
              activeTab.dataset.rendered = "true";
+        }
+
+        const userTeamName = teamNames[draftData.user_team_position - 1];
+        const userTeamTab = Array.from(tabsContainer.children).find(tab => tab.textContent === userTeamName);
+        if(userTeamTab && userTeamTab.dataset.rendered === "false") {
+            const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => teamDetails[userTeamName].sportRanks[sport] || teamNames.length);
+            createRadarChart(userTeamName, ranks, teamNames.length); // Use team name as key
+            userTeamTab.dataset.rendered = "true";
         }
 
 
@@ -743,18 +739,13 @@
                     const teamName = e.target.textContent;
                     const details = teamDetails[teamName];
                     const ranks = ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'].map(sport => details.sportRanks[sport] || teamNames.length);
-                    createRadarChart(e.target.dataset.chartId, ranks, teamNames.length);
+                    createRadarChart(teamName, ranks, teamNames.length); // Use team name as key
                     e.target.dataset.rendered = "true";
                 }
             }
         });
     }
 
-    // ... other helper functions like getDraftGrade, getRankColor, etc. ...
-    function getSportIcon(sport) { 
-        const i = {'NBA':'fas fa-basketball-ball','NCAAB':'fas fa-basketball-ball','NFL':'fas fa-football-ball','NCAAF':'fas fa-football-ball','MLB':'fas fa-baseball-ball','NHL':'fas fa-hockey-puck'}; 
-        return i[sport] || ''; 
-    }
     function getDraftGrade(rank, totalTeams) {
         const percentile = (totalTeams - rank + 1) / totalTeams;
         if (percentile >= 0.9) return { letter: 'A+', color: '#28a745' };
@@ -766,6 +757,7 @@
         if (percentile >= 0.3) return { letter: 'D', color: '#dc3545' };
         return { letter: 'F', color: '#dc3545' };
     }
+    
     function getRankColor(rank, totalTeams) {
         if(rank === undefined || rank === null) return '#555'; // Gray for unranked
         const percentile = (totalTeams > 1) ? (totalTeams - rank) / (totalTeams - 1) : 1;
@@ -789,10 +781,17 @@
         }
         return `rgb(${r}, ${g}, ${b})`;
     }
-    function createRadarChart(canvasId, data, teamCount) {
+
+    function createRadarChart(teamName, data, teamCount) {
+        const canvasId = `chart-${teamName.replace(/\s+/g, '-')}`;
         const ctx = document.getElementById(canvasId);
         if(!ctx) return;
-        new Chart(ctx, {
+        
+        if (chartInstances[teamName]) { // Use team name as key
+            chartInstances[teamName].destroy();
+        }
+
+        chartInstances[teamName] = new Chart(ctx, { // Use team name as key
             type: 'radar',
             data: {
                 labels: ['NFL', 'NBA', 'MLB', 'NHL', 'NCAAF', 'NCAAB'],
