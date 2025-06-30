@@ -148,7 +148,7 @@
     .hero-content {
       max-width: 700px;
       z-index: 2;
-      margin-top: 20px; /* Added to push content down */
+      margin-top: 50px;
     }
 
     .hero h1 {
@@ -200,6 +200,14 @@
         background: rgba(255,255,255,0.1);
         box-shadow: none;
         transform: translateY(0);
+    }
+
+    /* --- More Balls Button (New) --- */
+    .more-balls-container {
+        position: fixed;
+        top: 80px; /* Below header */
+        right: 20px;
+        z-index: 999;
     }
 
     .floating-balls {
@@ -437,10 +445,6 @@
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
         }
-        .hero-content {
-            margin-top: 150px; /* Added to push content down */
-            margin-bottom: 150px;
-        }
     }
 
     @media (max-width: 992px) {
@@ -450,7 +454,7 @@
         justify-content: center;
       }
       .hero-content {
-          margin-top: 0; /* Reset margin for mobile */
+          margin-top: 0;
           margin-bottom: 50px;
           text-align: center;
       }
@@ -509,6 +513,15 @@
       .nav-menu a { font-size: 1.5rem; }
       .site-header.menu-open .menu-toggle .fa-bars { display: none; }
       .site-header.menu-open .menu-toggle .fa-times { display: block; }
+
+      .more-balls-container {
+          top: 85px;
+          right: 15px;
+      }
+      #moreBallsBtn {
+          font-size: 0.9rem;
+          padding: 10px 20px;
+      }
     }
 
     @media (max-width: 576px) {
@@ -599,6 +612,10 @@
     </button>
   </header>
 
+  <div class="more-balls-container">
+    <button class="cta-button" id="moreBallsBtn">More Balls</button>
+  </div>
+
   <section class="hero">
     <div class="floating-balls" id="floatingBalls"></div>
     <div class="hero-content">
@@ -607,7 +624,6 @@
       <div class="hero-buttons">
         <button class="cta-button" id="heroCta">Join Waitlist Today</button>
         <button class="cta-button secondary-button">Mock Draft Coming Soon!</button>
-        <button class="cta-button" id="moreBallsBtn">More Balls</button>
       </div>
     </div>  
 
