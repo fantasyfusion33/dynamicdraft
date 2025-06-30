@@ -204,8 +204,7 @@
 
     /* --- More Balls Button (New) --- */
     .more-balls-container {
-        position: fixed;
-        top: 80px; /* Below header */
+        top: 90px; /* Below header */
         right: 20px;
         z-index: 999;
     }
@@ -445,8 +444,11 @@
         .features-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+        .hero-content {
+            margin-top: 150px; /* Added to push content down */
+            margin-bottom: 150px;
+        }
     }
-
     @media (max-width: 992px) {
       .hero {
         text-align: center;
