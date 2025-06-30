@@ -135,19 +135,20 @@
     .hero {
       min-height: 100vh;
       display: flex;
-      flex-direction: column; /* Changed */
-      justify-content: center; /* Changed */
-      align-items: center; /* Changed */
-      padding: 100px 5% 40px; /* Added padding for spacing */
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 5% 40px;
       position: relative;
       overflow: hidden;
-      gap: 50px; /* Changed */
-      text-align: center; /* Changed */
+      gap: 50px;
+      text-align: center;
     }
 
     .hero-content {
-      max-width: 700px; /* Increased max-width */
+      max-width: 700px;
       z-index: 2;
+      margin-top: 50px; /* Added to push content down */
     }
 
     .hero h1 {
@@ -188,7 +189,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 15px;
-        justify-content: center; /* Center buttons */
+        justify-content: center;
     }
 
     .secondary-button {
@@ -439,6 +440,19 @@
     }
 
     @media (max-width: 992px) {
+      .hero {
+        text-align: center;
+        padding-top: 120px;
+        justify-content: center;
+      }
+      .hero-content {
+          margin-top: 0; /* Reset margin for mobile */
+          margin-bottom: 50px;
+          text-align: center;
+      }
+      .hero-buttons {
+          justify-content: center;
+      }
       .sports-timeline {
           display: none;
       }
@@ -501,7 +515,6 @@
 
     /* --- Sports Timeline (for hero) --- */
     .sports-timeline {
-      flex: 0 1 550px;
       background: var(--glass);
       border-radius: 16px;
       padding: 20px;
