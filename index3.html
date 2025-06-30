@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fantasy Fusion - A New Way to Play Fantasy Sports</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+  <style>
+    /* --- Optimized Base Styles --- */
+    :root {
+      --primary: #FA4616;
+      --dark: #0C2340;
+      --light: #FFFFFF;
+      --glass: rgba(12, 35, 64, 0.8); /* Adjusted for new dark color */
+      --nfl: #FF3333;
+      --nba: #F88158;
+      --mlb: #FFFFFF;
+      --nhl: #a1a1a1;
+      --ncaaf: #32CD32;
+      --ncaab: #FFD700;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Refactored: Consolidated body styles and set font to Roboto */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+    
+    /* Refactored: Removed !important overrides that conflict with GSAP */
+    
+    /* Ensure content stacks above background visuals */
+    .hero-content,
+    .features,
+    .how-it-works,
+    .waitlist-container,
+    .social-proof {
+      position: relative;
+      z-index: 2;
+    }
+
+    /* --- Site Header --- */
+    .site-header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 5px 0;
+      z-index: 1000;
+      background: rgba(12, 35, 64, 0.8); /* Adjusted for new dark color */
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(90deg, #FA4616, #FF8A63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -1px;
+      display: inline-block;
+    }
+
+    /* --- Hero Section --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 5%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(250, 70, 22, 0.1) 0%, rgba(12, 35, 64, 0.9) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      max-width: 600px;
+      z-index: 2;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, #FA4616, #FF8A63);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+      opacity: 0.9;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      padding: 15px 30px;
+      border-radius: 50px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 20px rgba(250, 70, 22, 0.3);
+    }
+
+    .hero-buttons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .secondary-button {
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+    .secondary-button:hover {
+        background: rgba(255,255,255,0.1);
+        box-shadow: none;
+        transform: translateY(0);
+    }
+
+    /* --- Floating Sport Balls (Optimized) --- */
+    .floating-balls {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .ball {
+      position: absolute;
+      font-size: 1.5rem;
+      opacity: 0.6;
+    }
+
+    /* Refactored: Single, efficient keyframe for all floating balls */
+    @keyframes float {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      50% { transform: translate(-25px, 25px) rotate(180deg); }
+      100% { transform: translate(0, 0) rotate(360deg); }
+    }
+
+    /* --- Sections General --- */
+    .section-title {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 60px;
+      position: relative;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 4px;
+      background: var(--primary);
+    }
+
+    /* --- Features Section --- */
+    .features {
+      padding: 100px 5%;
+      background: var(--dark);
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .feature-card {
+      background: var(--glass);
+      border-radius: 15px;
+      padding: 30px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+    }
+
+    .feature-icon {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: var(--primary);
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    /* --- How It Works --- */
+    .how-it-works {
+      padding: 100px 5%;
+      background: linear-gradient(to bottom, var(--dark), #08192e);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timeline {
+      position: relative;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .timeline-step {
+      position: relative;
+      margin-bottom: 60px;
+      width: 50%;
+      padding: 20px;
+      background: var(--glass);
+      border-radius: 15px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .timeline-step:nth-child(odd) { left: 0; }
+    .timeline-step:nth-child(even) { left: 50%; }
+
+    .step-number {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      border: 3px solid var(--dark);
+    }
+
+    .timeline-step:nth-child(odd) .step-number { right: -27px; }
+    .timeline-step:nth-child(even) .step-number { left: -27px; }
+
+    .timeline-step h3 {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+
+    /* --- Waitlist Section --- */
+    .waitlist {
+      padding: 100px 5%;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .waitlist::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, rgba(250, 70, 22, 0.05) 0%, var(--dark) 80%);
+      z-index: -1;
+    }
+
+    .waitlist-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: var(--glass);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .waitlist-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group { text-align: left; }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 1rem;
+    }
+
+    /* Refactored: Added styles for non-blocking form messages */
+    .form-message {
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        font-weight: 500;
+        display: none; /* Hidden by default */
+    }
+    .form-message.success {
+        background-color: #28a745;
+        color: white;
+        display: block;
+    }
+    .form-message.error {
+        background-color: #dc3545;
+        color: white;
+        display: block;
+    }
+
+    /* --- Social Proof & Footer --- */
+    .social-proof {
+      padding: 60px 5%;
+      text-align: center;
+    }
+
+    .counter {
+      font-size: 3rem;
+      font-weight: 800;
+      margin: 20px 0;
+      color: var(--primary);
+    }
+
+    .counter-label {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    footer {
+      padding: 30px 5%;
+      text-align: center;
+      background: #08192e;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* --- Responsive Styles --- */
+    @media (max-width: 992px) {
+      .hero {
+        flex-direction: column;
+        text-align: center;
+        padding-top: 120px;
+      }
+      .hero-content {
+          margin-bottom: 50px;
+      }
+      .sports-timeline {
+          display: none; /* Hide complex timeline on mobile for better hero focus */
+      }
+      .timeline::before { left: 20px; }
+      .timeline-step { width: 100%; left: 0 !important; padding-left: 45px; }
+      .timeline-step:nth-child(odd) .step-number,
+      .timeline-step:nth-child(even) .step-number { left: -5px; }
+    }
+
+    @media (max-width: 768px) {
+      .logo { font-size: 2rem; }
+      .site-header { padding: 10px 0; }
+      .hero-buttons { flex-direction: column; align-items: center; }
+      .features-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 576px) {
+      .hero h1 { font-size: 2.5rem; }
+      .hero p { font-size: 1rem; }
+      .section-title { font-size: 2rem; }
+    }
+
+ /* --- Sports Timeline (for hero) --- */
+  .sports-timeline {
+    background: var(--glass);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    max-width: 450px;
+    width: 100%;
+    position: relative;
+    z-index: 2;
+  }
+
+  .timeline-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+.timeline-header h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  color: #FFFFFF;
+}
+
+  .highlight {
+    color: var(--primary);
+    font-weight: 700;
+  }
+
+  .season-track {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .sport-segment {
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .sport-segment .sport-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  .sport-info h3 { font-size: 1rem; margin-bottom: 5px; }
+  .sport-dates { font-size: 0.8rem; opacity: 0.7; }
+  .sport-highlight { display: none; } /* Simplified for hero */
+
+  /* Sport Color Coding */
+  .nfl .sport-icon { color: var(--nfl); }
+  .ncaaf .sport-icon { color: var(--ncaaf); }
+  .nba .sport-icon { color: var(--nba); }
+  .nhl .sport-icon { color: var(--nhl); }
+  .mlb .sport-icon { color: var(--mlb); }
+  .ncaab .sport-icon { color: var(--ncaab); }
+
+  .sport-segment:hover { transform: scale(1.1); }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <h1 class="logo">Fantasy Fusion</h1>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="floating-balls" id="floatingBalls"></div>
+    <div class="hero-content">
+      <h1>A Brand New Way to Play Fantasy Sports</h1>
+      <p>The only fantasy sports app where you draft teams instead of players. Compete with friends all year long across 6 major sports leagues.</p>
+      <div class="hero-buttons">
+        <button class="cta-button" id="heroCta">Join Waitlist Today</button>
+        <button class="cta-button secondary-button">Mock Draft Coming Soon!</button>
+      </div>
+    </div>  
+
+    <div class="sports-timeline">
+      <div class="timeline-header">
+        <h2>Just because football ends...<br><span class="highlight">doesn't mean your season has to.</span></h2>
+      </div>
+      <div class="season-track">
+        <div class="sport-segment mlb" data-sport="MLB"><div class="sport-icon"><i class="fa-solid fa-baseball"></i></div><div class="sport-info"><h3>MLB</h3><div class="sport-dates">MAR-NOV</div></div></div>
+        <div class="sport-segment ncaaf" data-sport="NCAAF"><div class="sport-icon"><i class="fa-solid fa-football"></i></div><div class="sport-info"><h3>NCAAF</h3><div class="sport-dates">AUG-JAN</div></div></div>
+        <div class="sport-segment nfl" data-sport="NFL"><div class="sport-icon"><i class="fa-solid fa-football"></i></div><div class="sport-info"><h3>NFL</h3><div class="sport-dates">SEP-FEB</div></div></div>
+        <div class="sport-segment nba" data-sport="NBA"><div class="sport-icon"><i class="fa-solid fa-basketball"></i></div><div class="sport-info"><h3>NBA</h3><div class="sport-dates">OCT-JUN</div></div></div>
+        <div class="sport-segment nhl" data-sport="NHL"><div class="sport-icon"><i class="fa-solid fa-hockey-puck"></i></div><div class="sport-info"><h3>NHL</h3><div class="sport-dates">OCT-JUN</div></div></div>
+        <div class="sport-segment ncaab" data-sport="NCAAB"><div class="sport-icon"><i class="fa-solid fa-basketball"></i></div><div class="sport-info"><h3>NCAAB</h3><div class="sport-dates">NOV-APR</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <h2 class="section-title">What is Fantasy Fusion?</h2>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-trophy"></i></div><h3>A Multisport Champions League</h3><p>Victory takes smart drafting and strategic team management — but in the end, it's all about how many of your teams can make a deep playoff run.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-users"></i></div><h3>With Leagues from 4-12 Players</h3><p>Create private leagues with friends or join public competitions with sports fans worldwide.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-futbol"></i></div><h3>You Draft Teams Across 6 Major Leagues</h3><p>Build your roster from NFL, NBA, MLB, NHL, NCAA Football and Basketball teams.</p></div>
+      <div class="feature-card"><div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div><h3>See Live Standings & Projections</h3><p>Track your performance in real-time as your teams compete in their actual seasons.</p></div>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-it-works">
+    <h2 class="section-title">How It Works</h2>
+    <p style="text-align: center; margin-bottom: 40px; max-width: 800px; margin-left: auto; margin-right: auto;">Simple mechanics anyone can understand</p>
+    <div class="timeline">
+      <div class="timeline-step"><div class="step-number">1</div><h3>Create a Fusion League</h3><p>Set up your league with 4-12 players and customize the rules.</p></div>
+      <div class="timeline-step"><div class="step-number">2</div><h3>Choose Sports</h3><p>Select which of the 6 major leagues to include in your competition.</p></div>
+      <div class="timeline-step"><div class="step-number">3</div><h3>Set Team Limits</h3><p>Decide how many teams (1-4) from each sport will be drafted per roster.</p></div>
+      <div class="timeline-step"><div class="step-number">4</div><h3>Invite Friends</h3><p>Bring your league to life by inviting friends or joining public leagues.</p></div>
+      <div class="timeline-step"><div class="step-number">5</div><h3>Draft Your Roster</h3><p>Draft teams in snake draft format based on championship odds, rivalries, or personal strategy.</p></div>
+      <div class="timeline-step"><div class="step-number">6</div><h3>Score Points</h3><p>Earn points based on how far your drafted teams advance in their playoffs.</p></div>
+      <div class="timeline-step"><div class="step-number">7</div><h3>Win the Championship!</h3><p>Compete all season to be crowned champion at the end of the season.</p></div>
+    </div>
+  </section>
+
+  <!-- Waitlist Section -->
+  <section class="waitlist" id="waitlist">
+    <div class="waitlist-container">
+      <h2 style="margin-bottom: 30px;">Join the Fantasy Fusion Waitlist</h2>
+      <!-- Refactored: Form now has a dedicated message area and will not use alerts -->
+      <div id="waitlistFormContainer">
+          <form class="waitlist-form" id="waitlistForm">
+            <div class="form-group">
+              <label for="name">Your Name</label>
+              <input type="text" id="name" placeholder="Enter your name" required>
+            </div>
+            <div class="form-group">
+              <label for="email">Email Address</label>
+              <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+              <label for="team">Favorite Team(s)</label>
+              <input type="text" id="team" placeholder="E.g. Illinois Fighting Illini, Chicago Bears" required>
+            </div>
+            <div class="button-group">
+              <button type="submit" class="cta-button" id="joinWaitlist">Join Waitlist</button>
+            </div>
+          </form>
+      </div>
+      <div class="form-message" id="formMessage"></div>
+    </div>
+  </section>
+
+  <!-- Social Proof -->
+  <section class="social-proof">
+    <h2 class="section-title">Join the Movement</h2>
+    <div class="counter" id="waitlistCounter">0</div>
+    <div class="counter-label">sports fans have joined the waitlist!</div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2024 Fantasy Fusion, LLC. All rights reserved.</p>
+  </footer>
+
+  <script>
+    // Initialize Supabase
+    const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    /* --- Optimized Floating Balls Animation --- */
+    // Refactored: This function is now highly performant.
+    // It creates elements and applies a single, pre-defined CSS animation.
+    function createFloatingBalls() {
+      const container = document.getElementById('floatingBalls');
+      if (!container) return;
+      const icons = ['fa-football', 'fa-basketball', 'fa-baseball', 'fa-hockey-puck', 'fa-futbol', 'fa-trophy'];
+      
+      for (let i = 0; i < 25; i++) {
+        const ball = document.createElement('div');
+        ball.className = 'ball';
+        ball.innerHTML = `<i class="fa-solid ${icons[i % icons.length]}"></i>`;
+        
+        ball.style.left = `${Math.random() * 100}%`;
+        ball.style.top = `${Math.random() * 100}%`;
+        ball.style.transform = `scale(${0.5 + Math.random()})`;
+        ball.style.color = `hsla(${Math.random() * 360}, 70%, 80%, 0.7)`;
+
+        // Apply the single, efficient animation with random timings
+        ball.style.animationName = 'float';
+        ball.style.animationDuration = `${15 + Math.random() * 20}s`;
+        ball.style.animationTimingFunction = 'linear';
+        ball.style.animationIterationCount = 'infinite';
+        ball.style.animationDirection = 'alternate';
+        ball.style.animationDelay = `-${Math.random() * 20}s`; // Stagger start times
+        
+        container.appendChild(ball);
+      }
+    }
+    
+    /* --- GSAP Scroll Animations --- */
+    function setupAnimations() {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Animate general elements with the .animate-in class
+        document.querySelectorAll('.features-grid, .how-it-works, .waitlist-container, .social-proof').forEach(el => {
+            gsap.from(el, {
+                opacity: 0,
+                y: 50,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: el,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+
+        // Animate timeline steps individually
+        gsap.utils.toArray(".timeline-step").forEach((step, i) => {
+            gsap.from(step, {
+                opacity: 0,
+                x: i % 2 === 0 ? -50 : 50,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: step,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                }
+            });
+        });
+    }
+
+    /* --- Waitlist Logic --- */
+    async function updateWaitlistCounter() {
+      const waitlistCounterEl = document.getElementById('waitlistCounter');
+      if (!waitlistCounterEl) return;
+      const { count, error } = await supabase
+        .from('waitlist')
+        .select('*', { count: 'exact', head: true });
+      
+      if (error) {
+        console.error("Error fetching waitlist count:", error);
+        return;
+      }
+      
+      gsap.to(waitlistCounterEl, {
+          duration: 1.5,
+          innerText: count || 0,
+          roundProps: "innerText",
+          ease: "power1.inOut"
+      });
+    }
+
+    // Refactored: Modern, non-blocking form submission handler
+    async function handleWaitlistSubmit(event) {
+      event.preventDefault(); // Prevent default form submission behavior
+      
+      const joinButton = document.getElementById('joinWaitlist');
+      const formMessage = document.getElementById('formMessage');
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const team = document.getElementById('team').value.trim();
+
+      // Reset previous messages
+      formMessage.style.display = 'none';
+      formMessage.className = 'form-message';
+      
+      if (!name || !email || !team) {
+        formMessage.textContent = 'Please fill out all fields.';
+        formMessage.classList.add('error');
+        formMessage.style.display = 'block';
+        return;
+      }
+      
+      joinButton.disabled = true;
+      joinButton.textContent = 'Joining...';
+      
+      const { error } = await supabase
+        .from('waitlist')
+        .insert([{ name, email, favorite_team: team }]);
+      
+      if (error) {
+        formMessage.textContent = error.message.includes('duplicate key') 
+            ? 'This email is already on the waitlist!' 
+            : 'Error submitting form. Please try again.';
+        formMessage.classList.add('error');
+        formMessage.style.display = 'block';
+        console.error(error);
+        joinButton.disabled = false;
+        joinButton.textContent = 'Join Waitlist';
+      } else {
+        document.getElementById('waitlistFormContainer').innerHTML = `
+            <div class="form-message success" style="display: block;">
+                <h3>Success!</h3>
+                <p>Thanks for joining the waitlist. We'll be in touch!</p>
+            </div>
+        `;
+        updateWaitlistCounter();
+      }
+    }
+
+    // --- Initialize Page ---
+    document.addEventListener('DOMContentLoaded', () => {
+      createFloatingBalls();
+      setupAnimations();
+      updateWaitlistCounter();
+      
+      // Event listeners
+      document.getElementById('heroCta').addEventListener('click', () => {
+        document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' });
+      });
+      
+      document.getElementById('waitlistForm').addEventListener('submit', handleWaitlistSubmit);
+    });
+  </script>
+</body>
+</html>
