@@ -201,6 +201,14 @@
         transform: translateY(0);
     }
 
+    /* --- More Balls Button --- */
+    .more-balls-container {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        z-index: 999;
+    }
+
     .floating-balls {
       position: absolute;
       width: 100%;
@@ -437,7 +445,7 @@
             grid-template-columns: repeat(2, 1fr);
         }
         .hero-content {
-          margin-top: 150px; /* Added to push content down */
+          margin-top: 150px;
           margin-bottom: 150px;
         }
     }
@@ -500,7 +508,7 @@
           top: 85px;
           right: 15px;
       }
-      #moreBallsBtn {
+      .more-balls-container #moreBallsBtn {
           font-size: 0.9rem;
           padding: 10px 20px;
       }
