@@ -135,18 +135,19 @@
     .hero {
       min-height: 100vh;
       display: flex;
-      justify-content: center; /* Refactored: Center items */
+      justify-content: space-between; /* Changed */
       align-items: center;
       padding: 0 5%;
       position: relative;
       overflow: hidden;
-      gap: 5%; /* Refactored: Add gap between items */
+      gap: 5%;
     }
 
     .hero-content {
-      flex: 1; /* Refactored: Allow flex sizing */
+      flex: 0 1 600px; /* Changed */
       max-width: 600px;
       z-index: 2;
+      text-align: left;
     }
 
     .hero h1 {
@@ -445,20 +446,25 @@
       }
       .hero-content {
           margin-bottom: 50px;
+          text-align: center;
+      }
+      .hero-buttons {
+          justify-content: center;
       }
       .sports-timeline {
           display: none;
       }
-      .timeline::before { left: 20px; }
+      .timeline::before { 
+        left: 20px; 
+        transform: translateX(0);
+      }
       .timeline-step { 
         width: 100%; 
         left: 0 !important; 
-        padding-left: 30px;
-        padding-right: 0;
+        padding-left: 45px;
       }
       .timeline-step .step-number {
-        /* Refactored: Places circle on the line for mobile */
-        left: -25px;
+        left: -5px;
         top: 50%;
         transform: translateY(-50%);
       }
@@ -500,7 +506,7 @@
 
     /* --- Sports Timeline (for hero) --- */
     .sports-timeline {
-      flex: 1; /* Refactored: Allow flex sizing */
+      flex: 0 1 550px; /* Changed */
       background: var(--glass);
       border-radius: 16px;
       padding: 20px;
@@ -725,7 +731,7 @@
         gsap.utils.toArray(".timeline-step").forEach((step, i) => {
             let xPos = i % 2 === 0 ? -50 : 50;
             if (isMobile) {
-                xPos = 50; // All from the right on mobile
+                xPos = 0; // All come from the right on mobile, so no initial x offset needed
             }
 
             gsap.from(step, {
