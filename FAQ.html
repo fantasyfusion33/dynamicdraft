@@ -353,8 +353,110 @@
         font-weight: 700;
     }
     .faq-item.open .faq-answer {
-        max-height: 1000px;
+        max-height: 1500px;
     }
+
+    /* --- Calendar Styles --- */
+    .calendar-wrapper {
+        padding: 10px 0;
+        overflow-x: auto;
+    }
+    .calendar-container {
+        position: relative;
+        margin-top: 20px;
+        display: inline-block;
+        min-width: 100%;
+    }
+    .calendar {
+        display: grid;
+        grid-template-columns: 100px repeat(12, minmax(50px, 1fr));
+        gap: 5px;
+        align-items: center;
+        padding: 15px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 12px;
+        width: 100%;
+    }
+    .month-label, .sport-label {
+        font-weight: 600;
+        text-align: center;
+        padding: 8px 5px;
+        background: rgba(255,255,255,0.05);
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+    .sport-label {
+        text-align: left;
+        padding-left: 10px;
+    }
+    .season-line {
+        height: 20px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .season-line.postseason::before {
+        content: '';
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        background-image: repeating-linear-gradient(-45deg, transparent, transparent 4px, rgba(0,0,0,0.3) 4px, rgba(0,0,0,0.3) 8px);
+    }
+    .season-line .playoff-text {
+        font-size: 0.7rem;
+        font-weight: bold;
+        color: rgba(255,255,255,0.7);
+        z-index: 1;
+    }
+    .season-line:hover {
+        transform: scaleY(1.5);
+        opacity: 0.9;
+    }
+    .empty-cell {
+        height: 20px;
+        background: rgba(255,255,255,0.02);
+        border-radius: 6px;
+    }
+    .draft-window {
+        position: absolute;
+        height: calc(100% - 48px);
+        top: 63px;
+        z-index: 0;
+        opacity: 0.2;
+        pointer-events: none;
+        border-radius: 8px;
+    }
+    .draft-spring { background: #2196F3; }
+    .draft-summer { background: #4CAF50; }
+    .draft-winter { background: #FF9800; }
+    .draft-timeline {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    .draft-bubble {
+        display: flex;
+        align-items: center;
+        background: rgba(255,255,255,0.05);
+        border-radius: 24px;
+        padding: 8px 12px 8px 8px;
+        width: auto;
+    }
+    .bubble-color {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    .bubble-text { font-size: 0.85rem; line-height: 1.2; }
+    .bubble-text small { opacity: 0.8; font-size: 0.75rem; }
 
 
     footer {
@@ -454,6 +556,37 @@
   </footer>
 
   <script>
+    const calendarHTML = `
+        <div class="calendar-wrapper">
+            <div class="draft-timeline">
+                <div class="draft-bubble">
+                    <div class="bubble-color" style="background-color: #2196F3;"></div>
+                    <div class="bubble-text"><strong>Spring:</strong> Feb 16 - Mar 27<br><small>Start: NCAA Tournament → Finish: Super Bowl</small></div>
+                </div>
+                <div class="draft-bubble">
+                    <div class="bubble-color" style="background-color: #4CAF50;"></div>
+                    <div class="bubble-text"><strong>Summer:</strong> Jun 20 - Sep 30<br><small>Start: MLB Playoffs → Finish: NBA/NHL Finals</small></div>
+                </div>
+                <div class="draft-bubble">
+                    <div class="bubble-color" style="background-color: #FF9800;"></div>
+                    <div class="bubble-text"><strong>Winter:</strong> Nov 16 - Dec 19<br><small>Start: CFB Playoff → Finish: World Series</small></div>
+                </div>
+            </div>
+            <div class="calendar-container">
+                <div class="draft-window draft-spring"></div>
+                <div class="draft-window draft-summer"></div>
+                <div class="draft-window draft-winter"></div>
+                <div class="calendar">
+                    <div></div>
+                    <div class="month-label">Jan</div><div class="month-label">Feb</div><div class="month-label">Mar</div>
+                    <div class="month-label">Apr</div><div class="month-label">May</div><div class="month-label">Jun</div>
+                    <div class="month-label">Jul</div><div class="month-label">Aug</div><div class="month-label">Sep</div>
+                    <div class="month-label">Oct</div><div class="month-label">Nov</div><div class="month-label">Dec</div>
+                </div>
+            </div>
+        </div>
+    `;
+
     const faqData = {
         "Getting Started": [
             { id: "q1", q: "What is Fantasy Fusion?", a: "Fantasy Fusion is a unique fantasy sports game where you draft teams across multiple sports instead of players from just one sport - like most standard fantasy formats. You score points based on how well your drafted teams perform in their post-seasons.<br><br>Once a player makes an account, they can create their own Fusion League or join an existing one with their friends. Each season starts with a Fusion Draft where players select their teams for the season and compete with their league mates to win the championship.<br><br>Fantasy Fusion is great for fantasy sports fanatics who are in multiple fantasy leagues and want an additional league with less day-to-day management and also great for casual sports fans that want to add some additional excitement and competition to the sports they watch." },
@@ -470,8 +603,7 @@
         "Drafting & Seasons": [
             { id: "q9", q: "When can I draft?", a: "We recommend three draft windows each year—Spring, Summer, and Winter. Your league can pick any date within your chosen window and adjust it right up until the draft starts.<br><br>Note: Leagues can draft outside these windows but may run into some complications. For example, a draft can take place during the NFL playoffs - but because there are not enough NFL teams remaining for every team to draft in the league, you would be drafting NFL teams for next season without important information like championship odds to help make your picks." },
             { id: "q10", q: "How long is a Fusion season?", a: "A typical Fusion season lasts about 10–11 months. It begins the day you draft and ends after the last championship game of the final sport in your league." },
-            { id: "q11", q: "What are draft windows?", a: "There are three draft windows each year—Spring, Summer, and Winter. Your league can pick any date within your chosen window and adjust it right up until the draft starts.<br><br>Each draft window creates a unique strategy—Sports closer to the playoffs have more reliable odds, while sports early in their seasons or still pre-season require bigger bets." },
-            { id: "q12", q: "What is the difference between each draft window?", a: "Each draft window offers a different starting point and seasonal flow, but all give you a full multisport fantasy experience:<ul><li><strong>Spring Draft (Feb 16 - Mar 27):</strong> Kick off your season during the heart-pounding chaos of March Madness and stay locked in through every major championship. This is the longest Fusion season — perfect for year-round bragging rights and a gridiron finale. Sport Sequence: (START) NCAA Tournament→NBA & NHL Playoffs→MLB Playoffs→College Football Playoffs→Super Bowl (FINISH)</li><li><strong>Summer Draft (Jun 20 - Sep 30):</strong> Begins during the heart of baseball season and leads into the start of football. You won’t know whether your Fusion league champ will be crowned by a buzzer-beater in the NBA Finals or a Game 7 on the ice — and that’s what makes it thrilling. Sport Sequence: (START) MLB →College Football Playoffs→NFL Playoffs→NCAA Tournament→NBA & NHL Finals (FINISH)</li><li><strong>Winter Draft (Window: Nov 16 - Dec 19):</strong> Start your journey during the College Football Playoff and ride momentum through a full sports cycle. You'll be thrown straight into championship action — and your Fusion league champ is not crowned until the MLB champ is. Sport Sequence: (START) College Football →NFL Playoffs→NCAA Tournament→NBA & NHL Playoffs→World Series (FINISH)</li></ul><br><strong>TL;DR:</strong> All draft windows include the same six sports and last about a year—but the excitement, strategy, and timing of playoff runs will vary depending on when you start!" },
+            { id: "q11", q: "What are the seasonal windows?", a: `There are three draft windows each year—Spring, Summer, and Winter. Each draft window creates a unique strategy—sports closer to the playoffs have more reliable odds, while sports early in their seasons or still pre-season require bigger bets.<br><br>${calendarHTML}` },
             { id: "q13", q: "How long does a Fusion draft take?", a: "A Fusion draft should take around an hour for smaller leagues and up to 2 hours for larger ones. Prepare and research as much as you want beforehand! Avoiding early-round underperformers and finding late-round gems will be your key to victory." },
             { id: "q14", q: "How long does each player get to make a draft pick?", a: "The commissioner can set pick time before the draft and change it during the draft. The maximum is 2 minutes per pick." },
             { id: "q15", q: "How is draft order determined?", a: "The commissioner sets it or it can be randomly generated. We don’t care how you decide on the order. Random order generator, foot race, thumb war, whatever works for you all." },
@@ -502,6 +634,15 @@
             { id: "q32", q: "How do I interpret betting odds?", a: "To start, a - sign in front of a number means that particular bet has a greater than 50% chance of winning and a + sign means that bet has a smaller than 50% chance of winning.<br>For <strong>Plus (+) odds</strong>: The bigger the number next to the plus (like +300 compared to +150), the BIGGER the underdog they are, meaning they have a predicted lower chance of winning.<br>For <strong>Minus (-) odds</strong>: The bigger the number next to the minus (like -300 compared to -150), the STRONGER the favorite they are, meaning they have a predicted higher chance of winning." }
         ]
     };
+    
+    const sportsData = [
+        { name: "NFL", color: "#00ffc1", postseasonColor: "#0d8769", season: [ { month: 8, type: "regular" }, { month: 9, type: "regular" }, { month: 10, type: "regular" }, { month: 11, type: "regular" }, { month: 0, type: "postseason" }, { month: 1, type: "postseason" } ] },
+        { name: "NBA", color: "#F25C54", postseasonColor: "#b70c03", season: [ { month: 9, type: "regular" }, { month: 10, type: "regular" }, { month: 11, type: "regular" }, { month: 0, type: "regular" }, { month: 1, type: "regular" }, { month: 2, type: "regular" }, { month: 3, type: "postseason" }, { month: 4, type: "postseason" }, { month: 5, type: "postseason" } ] },
+        { name: "MLB", color: "#FFD166", postseasonColor: "#d69600", season: [ { month: 3, type: "regular" }, { month: 4, type: "regular" }, { month: 5, type: "regular" }, { month: 6, type: "regular" }, { month: 7, type: "regular" }, { month: 8, type: "regular" }, { month: 9, type: "postseason" } ] },
+        { name: "NHL", color: "#00c0ff", postseasonColor: "#074475", season: [ { month: 9, type: "regular" }, { month: 10, type: "regular" }, { month: 11, type: "regular" }, { month: 0, type: "regular" }, { month: 1, type: "regular" }, { month: 2, type: "regular" }, { month: 3, type: "postseason" }, { month: 4, type: "postseason" }, { month: 5, type: "postseason" } ] },
+        { name: "NCAAF", color: "#EF476F", postseasonColor: "#cc0233", season: [ { month: 0, type: "postseason" }, { month: 7, type: "regular" }, { month: 8, type: "regular" }, { month: 9, type: "regular" }, { month: 10, type: "regular" }, { month: 11, type: "postseason" } ] },
+        { name: "NCAAB", color: "#d2b2ff", postseasonColor: "#571fa7", season: [ { month: 0, type: "regular" }, { month: 1, type: "regular" }, { month: 2, type: "postseason" }, { month: 3, type: "postseason" }, { month: 10, type: "regular" }, { month: 11, type: "regular" } ] }
+    ];
 
     function setupMenu() {
         const menuToggle = document.getElementById('menuToggle');
@@ -568,6 +709,59 @@
         }
     }
 
+    function generateCalendar() {
+        const calendarEl = document.querySelector('#q11 .calendar');
+        if (!calendarEl) return;
+        
+        sportsData.forEach((sport) => {
+            const label = document.createElement('div');
+            label.className = 'sport-label';
+            label.textContent = sport.name;
+            calendarEl.appendChild(label);
+            
+            for (let month = 0; month < 12; month++) {
+                const monthData = sport.season.find(m => m.month === month);
+                const cell = document.createElement('div');
+                
+                if (monthData) {
+                    cell.className = `season-line ${sport.name.toLowerCase()} ${monthData.type}`;
+                    cell.style.backgroundColor = monthData.type === 'postseason' ? sport.postseasonColor : sport.color;
+                    if (monthData.type === 'postseason') {
+                        const text = document.createElement('span');
+                        text.className = 'playoff-text';
+                        text.textContent = 'Playoffs';
+                        cell.appendChild(text);
+                    }
+                } else {
+                    cell.className = 'empty-cell';
+                }
+                calendarEl.appendChild(cell);
+            }
+        });
+    }
+
+    function positionDraftWindows() {
+        const calendarGrid = document.querySelector('#q11 .calendar');
+        if (!calendarGrid) return;
+        
+        const calendarWidth = calendarGrid.offsetWidth;
+        const labelWidth = calendarGrid.querySelector('.sport-label').offsetWidth;
+        const monthAreaWidth = calendarWidth - labelWidth;
+        const colWidth = monthAreaWidth / 12;
+
+        const spring = document.querySelector('.draft-spring');
+        spring.style.left = `${labelWidth + (1.53 * colWidth)}px`;
+        spring.style.width = `${1.39 * colWidth}px`;
+
+        const summer = document.querySelector('.draft-summer');
+        summer.style.left = `${labelWidth + (5.67 * colWidth)}px`;
+        summer.style.width = `${3.33 * colWidth}px`;
+        
+        const winter = document.querySelector('.draft-winter');
+        winter.style.left = `${labelWidth + (10.53 * colWidth)}px`;
+        winter.style.width = `${1.1 * colWidth}px`;
+    }
+
     function setupFAQInteraction() {
         document.querySelectorAll('.faq-question').forEach(button => {
             button.addEventListener('click', () => {
@@ -589,7 +783,8 @@
                 const targetElement = document.querySelector(targetId);
                 if (targetElement) {
                     targetElement.scrollIntoView({
-                        behavior: 'smooth'
+                        behavior: 'smooth',
+                        block: 'center'
                     });
                     if (!targetElement.classList.contains('open')) {
                         targetElement.classList.add('open');
@@ -664,8 +859,11 @@
     document.addEventListener('DOMContentLoaded', () => {
       setupMenu();
       buildFAQ();
+      generateCalendar();
+      positionDraftWindows();
       setupFAQInteraction();
       setupSearch();
+      window.addEventListener('resize', positionDraftWindows);
     });
   </script>
 </body>
