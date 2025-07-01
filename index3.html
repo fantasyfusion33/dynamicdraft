@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fantasy Fusion - A New Way to Play Fantasy Sports</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
   <style>
@@ -84,21 +83,36 @@
       width: 100%;
       padding: 10px 5%;
       z-index: 1000;
-      background: rgba(12, 35, 64, 0.8);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: transparent;
+      backdrop-filter: blur(0px);
+      border-bottom: 1px solid rgba(255,255,255,0);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      transition: background 0.4s ease, backdrop-filter 0.4s ease, border-bottom-color 0.4s ease;
+    }
+    .site-header.scrolled {
+      background: rgba(12, 35, 64, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom-color: rgba(255,255,255,0.1);
     }
 
     .logo {
       font-size: 2.5rem;
-      font-weight: 800;
-      background: linear-gradient(90deg, #FA4616, #FF8A63);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -1px;
+      letter-spacing: 1px;
+    }
+    .logo .fantasy {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 400;
+        color: var(--primary);
+        text-transform: uppercase;
+        margin-right: -8px; 
+    }
+    .logo .fusion {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 400;
+        color: #FF8A63;
+        text-transform: uppercase;
     }
 
     /* --- Hamburger Menu --- */
@@ -573,24 +587,37 @@
     .sport-segment .sport-icon {
       font-size: 2.5rem;
       margin-bottom: 10px;
+      position: relative;
     }
+    .sport-segment .sport-icon i {
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 1px 1px 1px rgba(0,0,0,0.2),
+                     2px 2px 2px rgba(0,0,0,0.2),
+                     3px 3px 2px rgba(0,0,0,0.2);
+    }
+
     .sport-info h3 { font-size: 1.1rem; margin-bottom: 5px; color: var(--light); }
     .sport-dates { font-size: 0.8rem; opacity: 0.7; }
     .sport-highlight { display: none; }
 
-    .nfl .sport-icon { color: var(--nfl); }
-    .ncaaf .sport-icon { color: var(--ncaaf); }
-    .nba .sport-icon { color: var(--nba); }
-    .nhl .sport-icon { color: var(--nhl); }
-    .mlb .sport-icon { color: var(--mlb); }
-    .ncaab .sport-icon { color: var(--ncaab); }
+    .nfl .sport-icon i { background-image: linear-gradient(45deg, var(--nfl-color), #4a90e2); }
+    .nba .sport-icon i { background-image: linear-gradient(45deg, var(--nba-color), #f7b733); }
+    .mlb .sport-icon i { background-image: linear-gradient(45deg, var(--mlb-color), #4caf50); }
+    .nhl .sport-icon i { background-image: linear-gradient(45deg, var(--nhl-color), #c39bd3); }
+    .ncaaf .sport-icon i { background-image: linear-gradient(45deg, var(--ncaaf-color), #ef5350); }
+    .ncaab .sport-icon i { background-image: linear-gradient(45deg, var(--ncaab-color), #ffee58); }
 
     .sport-segment:hover { transform: scale(1.1); }
   </style>
 </head>
 <body>
   <header class="site-header" id="siteHeader">
-    <h1 class="logo">Fantasy Fusion</h1>
+    <h1 class="logo">
+        <span class="fantasy">Fantasy</span>
+        <span class="fusion">Fusion</span>
+    </h1>
     <nav class="nav-menu" id="navMenu">
         <a href="#about">About</a>
         <a href="#faq">FAQ</a>
@@ -846,12 +873,26 @@
         }
     }
 
+function setupHeaderScroll() {
+        const header = document.getElementById('siteHeader');
+        if (!header) return;
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    }
+
     // --- Initialize Page ---
     document.addEventListener('DOMContentLoaded', () => {
-      createFloatingBalls(25); // Initial set of balls
+      createFloatingBalls(25);
       setupAnimations();
       updateWaitlistCounter();
       setupMenu();
+      setupHeaderScroll();
       
       // Event listeners
       document.getElementById('heroCta').addEventListener('click', () => {
