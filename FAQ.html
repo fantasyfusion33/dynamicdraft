@@ -370,7 +370,7 @@
     }
     .calendar {
         display: grid;
-        grid-template-columns: 100px repeat(12, minmax(50px, 1fr));
+        grid-template-columns: 100px repeat(12, 1fr);
         gap: 5px;
         align-items: center;
         padding: 15px;
@@ -493,7 +493,10 @@
     @media (max-width: 768px) {
       .logo { font-size: 2rem; }
       .site-header { padding: 15px 5%; }
-      .faq-hero h1 { font-size: 2.5rem; }
+      .faq-hero { padding: 120px 20px 40px; }
+      .faq-hero h1 { font-size: 2.8rem; }
+      .faq-hero p { font-size: 1.1rem; }
+      .faq-main-container { padding: 0 20px; }
       
       .menu-toggle { display: block; }
       .nav-menu {
@@ -516,14 +519,17 @@
       .site-header.menu-open .menu-toggle .fa-bars { display: none; }
       .site-header.menu-open .menu-toggle .fa-times { display: block; }
 
+      .faq-question {
+          font-size: 1.1rem;
+      }
       .faq-question span {
           max-width: 85%;
       }
       .faq-answer .faq-answer-content {
-          font-size: 0.9rem; /* Smaller answer text on mobile */
+          font-size: 1rem;
       }
       .calendar {
-          grid-template-columns: 80px repeat(12, 1fr); /* Dynamic columns for mobile */
+          grid-template-columns: 60px repeat(12, 1fr);
       }
       .month-label, .sport-label {
           font-size: 0.7rem;
@@ -531,8 +537,13 @@
       .season-line.postseason .playoff-text {
           display: block;
           font-size: 10px;
-          content: 'P';
           color: white;
+      }
+      .season-line.postseason .playoff-text::after {
+          content: 'P';
+      }
+      .season-line .playoff-text {
+          font-size: 0; /* Hide original text */
       }
     }
   </style>
