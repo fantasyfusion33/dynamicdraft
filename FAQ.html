@@ -490,16 +490,27 @@
     }
 
     @media (max-width: 768px) {
+    html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    }
+    main {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
       .logo { font-size: 2rem; }
       .site-header { padding: 15px 5%; }
       .faq-hero { padding: 120px 20px 40px; }
       .faq-hero h1 { font-size: 3.5rem; }
       .faq-hero p { font-size: 1.5rem; }
-      .faq-main-container { padding: 0 20px; }
+      .faq-main-container { padding: 0 20px; flex: 1 0 auto; }
       
       .menu-toggle { display: block; }
       .nav-menu {
           position: fixed;
+          min-height: 100vh;
           top: 0;
           right: 0;
           width: 100%;
