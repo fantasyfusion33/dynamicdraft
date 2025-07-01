@@ -172,6 +172,36 @@
         border-color: var(--primary);
     }
 
+    /* --- New Search Results Styles --- */
+    .search-results-container {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--glass-lighter);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 15px;
+        margin-top: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 100;
+        display: none;
+    }
+    .search-results-container a {
+        display: block;
+        padding: 15px 20px;
+        color: var(--light);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        transition: background-color 0.2s ease;
+    }
+    .search-results-container a:last-child {
+        border-bottom: none;
+    }
+    .search-results-container a:hover {
+        background-color: var(--primary);
+    }
+
     /* --- New Two-Column Layout --- */
     .faq-main-container {
         display: flex;
@@ -310,7 +340,7 @@
         overflow: hidden;
         transition: max-height 0.4s ease-out, padding 0.4s ease-out;
     }
-    .faq-answer p {
+    .faq-answer .faq-answer-content {
         padding: 0 20px 20px 20px;
         opacity: 0.8;
     }
@@ -323,7 +353,7 @@
         font-weight: 700;
     }
     .faq-item.open .faq-answer {
-        max-height: 1000px; /* Increased for longer content */
+        max-height: 1000px;
     }
 
 
@@ -403,6 +433,7 @@
         <div class="search-container">
             <i class="fas fa-search"></i>
             <input type="text" class="search-bar" id="faqSearch" placeholder="Search for a question...">
+            <div class="search-results-container" id="searchResults"></div>
         </div>
     </section>
 
@@ -570,19 +601,63 @@
     
     function setupSearch() {
         const searchBar = document.getElementById('faqSearch');
-        if (!searchBar) return;
+        const searchResultsContainer = document.getElementById('searchResults');
+        if (!searchBar || !searchResultsContainer) return;
 
         searchBar.addEventListener('keyup', (e) => {
-            const searchTerm = e.target.value.toLowerCase();
-            document.querySelectorAll('.faq-item').forEach(item => {
-                const question = item.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
-                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
+            const searchTerm = e.target.value.toLowerCase().trim();
+            const keywords = searchTerm.split(' ').filter(k => k);
+
+            searchResultsContainer.innerHTML = '';
+
+            if (keywords.length === 0) {
+                searchResultsContainer.style.display = 'none';
+                return;
+            }
+
+            const matches = [];
+            for (const category in faqData) {
+                faqData[category].forEach(item => {
+                    const questionText = item.q.toLowerCase();
+                    const answerText = item.a.toLowerCase();
+
+                    const isMatch = keywords.some(keyword => questionText.includes(keyword) || answerText.includes(keyword));
+                    
+                    if (isMatch) {
+                        matches.push(item);
+                    }
+                });
+            }
+
+            if (matches.length > 0) {
+                matches.forEach(item => {
+                    const link = document.createElement('a');
+                    link.href = `#${item.id}`;
+                    link.textContent = item.q;
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetElement = document.getElementById(item.id);
+                        if (targetElement) {
+                            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            if (!targetElement.classList.contains('open')) {
+                                targetElement.classList.add('open');
+                            }
+                        }
+                        searchResultsContainer.style.display = 'none';
+                        searchBar.value = '';
+                    });
+                    searchResultsContainer.appendChild(link);
+                });
+                searchResultsContainer.style.display = 'block';
+            } else {
+                searchResultsContainer.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('.search-container')) {
+                searchResultsContainer.style.display = 'none';
+            }
         });
     }
 
