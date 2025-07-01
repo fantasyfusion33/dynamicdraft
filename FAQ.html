@@ -78,9 +78,6 @@
       font-size: 2.5rem;
       letter-spacing: 1px;
     }
-    .logo a {
-        text-decoration: none;
-    }
     .logo .fantasy {
         font-family: 'Oswald', sans-serif;
         font-weight: 400;
@@ -331,6 +328,7 @@
     .faq-question .icon {
         transition: transform 0.3s ease;
         font-size: 1rem;
+        margin-left: 15px;
     }
     .faq-item.open .faq-question .icon {
         transform: rotate(180deg);
@@ -412,6 +410,7 @@
         font-weight: bold;
         color: rgba(255,255,255,0.7);
         z-index: 1;
+        display: none; /* Hidden by default, shown on larger screens */
     }
     .season-line:hover {
         transform: scaleY(1.5);
@@ -469,6 +468,12 @@
     }
 
     /* --- Responsive Styles --- */
+    @media (min-width: 769px) {
+        .season-line .playoff-text {
+            display: block; /* Show "Playoffs" text on desktop */
+        }
+    }
+
     @media (max-width: 992px) {
       .faq-main-container {
           flex-direction: column;
@@ -507,15 +512,41 @@
       .nav-menu a { font-size: 1.5rem; }
       .site-header.menu-open .menu-toggle .fa-bars { display: none; }
       .site-header.menu-open .menu-toggle .fa-times { display: block; }
+
+      .faq-question span {
+          max-width: 85%; /* Prevent question text from overlapping icon */
+      }
+      .calendar {
+          grid-template-columns: 80px repeat(12, 35px);
+      }
+      .month-label, .sport-label {
+          font-size: 0.7rem;
+      }
+      .season-line .playoff-text {
+          display: block;
+          font-size: 0.6rem;
+          content: 'P'; /* Use "P" on smaller screens */
+          color: white;
+      }
+      .season-line.postseason .playoff-text::after {
+          content: 'P';
+      }
+      .season-line .playoff-text {
+          font-size: 0.6rem;
+          writing-mode: vertical-rl;
+      }
+      .season-line.postseason .playoff-text {
+        writing-mode: initial;
+        font-size: 10px;
+        content: 'P';
+      }
     }
   </style>
 </head>
 <body>
   <header class="site-header" id="siteHeader">
     <h1 class="logo">
-        <a href="#">
-            <span class="fantasy">Fantasy</span><span class="fusion">Fusion</span>
-        </a>
+        <span class="fantasy">Fantasy</span><span class="fusion">Fusion</span>
     </h1>
     <nav class="nav-menu" id="navMenu">
         <a href="#">About</a>
