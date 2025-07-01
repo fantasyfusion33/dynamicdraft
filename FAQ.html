@@ -292,7 +292,7 @@
         padding: 0 0 60px 0;
         position: relative;
         z-index: 2;
-        min-width: 0; 
+        min-width: 0; /* Fix for flexbox overflow */
     }
     .category-title {
         font-size: 1.8rem;
@@ -362,7 +362,7 @@
     .calendar-wrapper {
         padding: 10px 0;
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch; /* Improves scrolling feel on iOS */
+        -webkit-overflow-scrolling: touch;
     }
     .calendar-container {
         position: relative;
@@ -530,14 +530,8 @@
       .faq-answer .faq-answer-content {
           font-size: 1rem;
       }
-      .calendar {
-          grid-template-columns: 80px repeat(12, 35px);
-      }
-      .month-label, .sport-label {
-          font-size: 0.7rem;
-      }
-      .season-line .playoff-text {
-          display: none;
+      .calendar-wrapper {
+          display: none; /* Hide calendar on mobile */
       }
     }
   </style>
