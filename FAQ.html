@@ -314,8 +314,16 @@
         padding: 0 20px 20px 20px;
         opacity: 0.8;
     }
+    .faq-answer ul {
+        padding: 0 20px 20px 40px;
+        opacity: 0.8;
+    }
+    .faq-answer strong {
+        color: var(--light);
+        font-weight: 700;
+    }
     .faq-item.open .faq-answer {
-        max-height: 500px;
+        max-height: 1000px; /* Increased for longer content */
     }
 
 
@@ -417,31 +425,50 @@
   <script>
     const faqData = {
         "Getting Started": [
-            { id: "q1", q: "What is Fantasy Fusion?", a: "Fantasy Fusion is a new type of fantasy sports game where you draft entire professional and college teams across multiple sports, instead of individual players. Your teams score points based on their real-life postseason success." },
-            { id: "q2", q: "How do I create a league?", a: "You can create a league from your main dashboard after signing up. You'll be able to set the league size, scoring rules, and invite your friends to join." }
-        ],
-        "Drafting and Seasons": [
-            { id: "q3", q: "How does the draft work?", a: "The draft is a live snake draft. The draft order reverses each round to ensure fairness. You will draft teams one by one until your roster is full." },
-            { id: "q4", q: "When are the draft seasons?", a: "There are three main draft windows per year: Spring (Feb-Mar), Summer (Jun-Sep), and Winter (Nov-Dec), allowing you to play year-round." }
+            { id: "q1", q: "What is Fantasy Fusion?", a: "Fantasy Fusion is a unique fantasy sports game where you draft teams across multiple sports instead of players from just one sport - like most standard fantasy formats. You score points based on how well your drafted teams perform in their post-seasons.<br><br>Once a player makes an account, they can create their own Fusion League or join an existing one with their friends. Each season starts with a Fusion Draft where players select their teams for the season and compete with their league mates to win the championship.<br><br>Fantasy Fusion is great for fantasy sports fanatics who are in multiple fantasy leagues and want an additional league with less day-to-day management and also great for casual sports fans that want to add some additional excitement and competition to the sports they watch." },
+            { id: "q2", q: "Do I need to follow every sport to be good at this?", a: "Not at all. You’ll see stats like championship odds and average draft position right in the draft, so even if you’re not an expert, you’ll be equipped to make smart picks. In fact, Fantasy Fusion is designed to get you excited about new sports. Pick a team, follow their season, and maybe even become a fan along the way." },
+            { id: "q3", q: "Is this only for hardcore fans?", a: "Nope. Casual fans love it too. Fantasy Fusion gives you a reason to root for teams in sports you’ve never followed—and based on our data, deep sports knowledge doesn’t always translate to better results. Strategy and timing matter just as much." },
+            { id: "q4", q: "Can I be in multiple Fusion leagues at once?", a: "Yes! The limit does not exist, but I am sure one of you degenerates will still manage to find it." },
+            { id: "q5", q: "Is it free to play?", a: "Yes! Fantasy Fusion will always be free. In the future, we’ll offer optional paid leagues where we help manage your league buy-in for a small service fee." },
+            { id: "q6", q: "Can I join a public league?", a: "Yes! If you don’t have a full group to play in a league with, check out our Public Leagues section. You can filter by league size, wildcard settings, and draft date." }
         ],
         "How to Play": [
-            { id: "q5", q: "What do I do after the draft?", a: "Once your draft is complete, there is no weekly management! Your roster is locked for the season. You just sit back, watch the real-life games, and track your progress on the leaderboard." }
+            { id: "q7", q: "How does drafting teams instead of players work?", a: "During your league’s draft, you’ll see a list of every team from college football, college basketball, NFL, NBA, MLB, and NHL. Each team includes useful stats like championship odds, average draft position, and past performance. You build your Fusion roster by drafting teams—not players. The goal? Stack your squad with teams that make deep playoff runs. The draft ends once all rosters are full." },
+            { id: "q8", q: "What do I do after the draft?", a: "That is when the season starts. You can see metrics on how well you drafted compared to your leaguemates, but nothing really begins until the post-seasons of your teams start and your potential turns into actual results.<br>-See active league standing from your league homepage.<br>-Keep up with the latest news on your teams.<br>-Make roster management decisions like waivers too.<br>-And don’t forget to trash talk your leaguemates (respectfully of course!)" }
+        ],
+        "Drafting & Seasons": [
+            { id: "q9", q: "When can I draft?", a: "We recommend three draft windows each year—Spring, Summer, and Winter. Your league can pick any date within your chosen window and adjust it right up until the draft starts.<br><br>Note: Leagues can draft outside these windows but may run into some complications. For example, a draft can take place during the NFL playoffs - but because there are not enough NFL teams remaining for every team to draft in the league, you would be drafting NFL teams for next season without important information like championship odds to help make your picks." },
+            { id: "q10", q: "How long is a Fusion season?", a: "A typical Fusion season lasts about 10–11 months. It begins the day you draft and ends after the last championship game of the final sport in your league." },
+            { id: "q11", q: "What are draft windows?", a: "There are three draft windows each year—Spring, Summer, and Winter. Your league can pick any date within your chosen window and adjust it right up until the draft starts.<br><br>Each draft window creates a unique strategy—Sports closer to the playoffs have more reliable odds, while sports early in their seasons or still pre-season require bigger bets." },
+            { id: "q12", q: "What is the difference between each draft window?", a: "Each draft window offers a different starting point and seasonal flow, but all give you a full multisport fantasy experience:<ul><li><strong>Spring Draft (Feb 16 - Mar 27):</strong> Kick off your season during the heart-pounding chaos of March Madness and stay locked in through every major championship. This is the longest Fusion season — perfect for year-round bragging rights and a gridiron finale. Sport Sequence: (START) NCAA Tournament→NBA & NHL Playoffs→MLB Playoffs→College Football Playoffs→Super Bowl (FINISH)</li><li><strong>Summer Draft (Jun 20 - Sep 30):</strong> Begins during the heart of baseball season and leads into the start of football. You won’t know whether your Fusion league champ will be crowned by a buzzer-beater in the NBA Finals or a Game 7 on the ice — and that’s what makes it thrilling. Sport Sequence: (START) MLB →College Football Playoffs→NFL Playoffs→NCAA Tournament→NBA & NHL Finals (FINISH)</li><li><strong>Winter Draft (Window: Nov 16 - Dec 19):</strong> Start your journey during the College Football Playoff and ride momentum through a full sports cycle. You'll be thrown straight into championship action — and your Fusion league champ is not crowned until the MLB champ is. Sport Sequence: (START) College Football →NFL Playoffs→NCAA Tournament→NBA & NHL Playoffs→World Series (FINISH)</li></ul><br><strong>TL;DR:</strong> All draft windows include the same six sports and last about a year—but the excitement, strategy, and timing of playoff runs will vary depending on when you start!" },
+            { id: "q13", q: "How long does a Fusion draft take?", a: "A Fusion draft should take around an hour for smaller leagues and up to 2 hours for larger ones. Prepare and research as much as you want beforehand! Avoiding early-round underperformers and finding late-round gems will be your key to victory." },
+            { id: "q14", q: "How long does each player get to make a draft pick?", a: "The commissioner can set pick time before the draft and change it during the draft. The maximum is 2 minutes per pick." },
+            { id: "q15", q: "How is draft order determined?", a: "The commissioner sets it or it can be randomly generated. We don’t care how you decide on the order. Random order generator, foot race, thumb war, whatever works for you all." },
+            { id: "q16", q: "What format options are there for the draft?", a: "Right now, the draft is in a snake draft format. A snake draft, also known as a serpentine draft, is a fantasy draft method where the draft order reverses each round. This means that the team who picks first in the first round will pick last in the second round, and then first again in the third round, and so on. It keeps things balanced and makes sure the person with the first pick doesn’t run away with the league every year." },
+            { id: "q17", q: "How are draftable teams ordered in the Fusion draft?", a: "The default ordering for teams is based on each team’s championship odds. So if the Celtics have +300 odds and the Chiefs have +450 odds, the Celtics will be listed before the Chiefs. However, you can also sort by:<ul><li><strong>Average Draft Position (ADP)</strong> - average draft position for the team from all the fusion drafts for the current draft window.</li><li><strong>Previous Points Scored</strong> - How many Fusion points that specific team scored last season.</li><li><strong>Championship % odds</strong> - This shows the implied % chance of a team winning its league’s championship.</li></ul>" },
+            { id: "q18", q: "Can I filter between different leagues and sports conferences during the draft?", a: "Yes, there are many filter options during the draft and in mock drafts. You can filter by the following:<ul><li><strong>Sport League</strong> - Can filter for the draftable teams remaining by sport league. E.g. If I only want to see NFL teams, I can filter just for them.</li><li><strong>Conferences</strong> - If you have picked a specific sports league, you can then pick a specific conference in that sports league to see even more specific teams. This is the most granular Fusion Draft filtering gets. E.g. I have filtered for only NFL teams, and now only want to see teams in the NFC.</li></ul>" }
         ],
         "Scoring": [
-            { id: "q6", q: "How are points calculated?", a: "Points are awarded based on how far your drafted teams advance in their respective playoffs. For example, a team making the championship game will earn more points than a team eliminated in the first round." }
+            { id: "q19", q: "How does scoring work?", a: "The teams you draft will score points based on how far they make it in the playoffs. Your league can also choose to add bonus points when the league is created or in league settings later. A full scoring graphic will be in the app." },
+            { id: "q20", q: "What are Bonus Points and How do they work?", a: "Bonus points could awarded for anything from the team with the league MVP to most assists or passing touchdowns in a season. We try to keep them creative and not necessarily correlated to the top team in the standings.<br><br>The league commissioner can choose how many bonus points to include in your league in league settings and can pick specific options or choose to randomize them." },
+            { id: "q21", q: "Will scoring get more advanced in the future?", a: "Yes! We plan to offer advanced scoring modes including weekly matchups and head-to-head leagues—while always prioritizing teams that go the distance." },
+            { id: "q22", q: "What happens in the event of a tie?", a: "If multiple Fusion teams finish with the same score, we crown co-champions! Tied leagues should split any winnings evenly." }
         ],
-        "Sports and Roster Rules": [
-            { id: "q7", q: "Which sports are included?", a: "We include six major U.S. sports leagues: NFL, NBA, MLB, NHL, NCAA Football, and NCAA Men's Basketball." },
-            { id: "q8", q: "How many teams can I draft?", a: "This is set by your league commissioner. You can draft between 1 and 4 teams from each sport included in your league." }
+        "Sports & Roster Rules": [
+            { id: "q23", q: "What sports are included?", a: "Every league includes:<ul><li>NFL</li><li>NBA</li><li>MLB</li><li>NHL</li><li>NCAA Football (NCAAF)</li><li>NCAA Basketball (NCAAB)</li></ul>More sports will be added in the future—and eventually you’ll be able to customize which ones your league uses." },
+            { id: "q24", q: "How many teams can be in a Fusion league?", a: "Leagues can have between 4 and 12 teams." },
+            { id: "q25", q: "How many teams are on a roster?", a: "Each Fusion team gets:<ul><li>2 teams per sports league</li><li>Optional: 1 or 2 Wildcard team(s)</li></ul>" },
+            { id: "q26", q: "What’s a Wildcard team?", a: "A Wildcard slot lets you draft an extra team from any sport—even if you already have two from that league. It's perfect for adding flexibility and excitement to your draft strategy. So if you have 2 NFL teams already drafted, but really want to add the Bengals, you can still do it with your wildcard slot." }
         ],
         "Roster Management": [
-            { id: "q9", q: "Can I make trades?", a: "Trades are not currently supported in the initial version of the game. All rosters are locked post-draft." }
+            { id: "q27", q: "Can I trade teams with other users?", a: "Not yet, but this feature is coming soon." },
+            { id: "q28", q: "Can I swap out teams mid-season?", a: "Yes—through waivers. Every team gets 1 waiver per season to drop a team and pick up an undrafted one. But once a sport’s playoffs begin, those teams become locked.<br>Waivers only work:<ul><li>If it’s still regular season or preseason for that sport.</li><li>Once playoffs begin, those teams are locked and cannot be swapped.</li></ul>" },
+            { id: "q29", q: "Do I need to set a weekly lineup?", a: "No, once the draft is over, your lineup is set for the year, unless you switch one of your teams through waivers. Spend the season rooting on your teams to the championship!" }
         ],
-        "Updates and Stats": [
-            { id: "q10", q: "How often are standings updated?", a: "Standings and team statuses are updated daily to reflect the latest real-world results." }
-        ],
-        "Account Management": [
-            { id: "q11", q: "How do I change my password?", a: "You can change your password from the 'Account Settings' page, accessible from your user dashboard." }
+        "Updates & Stats": [
+            { id: "q30", q: "How often are stats and odds updated?", a: "We update them frequently—usually daily. During holidays or big sports weekends, we might be a little delayed, but we strive to keep things accurate and fresh." },
+            { id: "q31", q: "Where do our Championship odds come from?", a: "We collect odds from all the major sportsbooks that release championship odds for each sports league. We average them to come up with the Championship odds used in the app." },
+            { id: "q32", q: "How do I interpret betting odds?", a: "To start, a - sign in front of a number means that particular bet has a greater than 50% chance of winning and a + sign means that bet has a smaller than 50% chance of winning.<br>For <strong>Plus (+) odds</strong>: The bigger the number next to the plus (like +300 compared to +150), the BIGGER the underdog they are, meaning they have a predicted lower chance of winning.<br>For <strong>Minus (-) odds</strong>: The bigger the number next to the minus (like -300 compared to -150), the STRONGER the favorite they are, meaning they have a predicted higher chance of winning." }
         ]
     };
 
@@ -466,18 +493,17 @@
 
         const indexList = document.createElement('ul');
         indexList.className = 'index-list';
+        faqIndex.appendChild(indexList);
 
         for (const category in faqData) {
             const categoryId = category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
             
-            // Create main content section
             const categoryTitle = document.createElement('h2');
             categoryTitle.className = 'category-title';
             categoryTitle.textContent = category;
             categoryTitle.id = categoryId;
             faqContent.appendChild(categoryTitle);
 
-            // Create index section
             const indexCategory = document.createElement('li');
             indexCategory.className = 'index-category';
             const catButton = document.createElement('button');
@@ -486,22 +512,20 @@
             indexQuestions.className = 'index-questions';
 
             faqData[category].forEach(item => {
-                // Add question to main content
                 const faqItem = document.createElement('div');
                 faqItem.className = 'faq-item';
                 faqItem.id = item.id;
                 faqItem.innerHTML = `
                     <button class="faq-question">
-                        ${item.q}
+                        <span>${item.q}</span>
                         <span class="icon"><i class="fas fa-chevron-down"></i></span>
                     </button>
                     <div class="faq-answer">
-                        <p>${item.a}</p>
+                        <div class="faq-answer-content">${item.a}</div>
                     </div>
                 `;
                 faqContent.appendChild(faqItem);
 
-                // Add question to index
                 const indexLi = document.createElement('li');
                 indexLi.innerHTML = `<a href="#${item.id}">${item.q}</a>`;
                 indexQuestions.appendChild(indexLi);
@@ -511,11 +535,9 @@
             indexCategory.appendChild(indexQuestions);
             indexList.appendChild(indexCategory);
         }
-        faqIndex.appendChild(indexList);
     }
 
     function setupFAQInteraction() {
-        // Main content accordion
         document.querySelectorAll('.faq-question').forEach(button => {
             button.addEventListener('click', () => {
                 const faqItem = button.parentElement;
@@ -523,14 +545,12 @@
             });
         });
 
-        // Index accordion
         document.querySelectorAll('.index-category > button').forEach(button => {
             button.addEventListener('click', () => {
                 button.parentElement.classList.toggle('open');
             });
         });
 
-        // Smooth scrolling for index links
         document.querySelectorAll('.faq-index a').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -540,7 +560,6 @@
                     targetElement.scrollIntoView({
                         behavior: 'smooth'
                     });
-                    // Open the accordion item if it's not already open
                     if (!targetElement.classList.contains('open')) {
                         targetElement.classList.add('open');
                     }
@@ -557,7 +576,7 @@
             const searchTerm = e.target.value.toLowerCase();
             document.querySelectorAll('.faq-item').forEach(item => {
                 const question = item.querySelector('.faq-question').textContent.toLowerCase();
-                const answer = item.querySelector('.faq-answer p').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
                 if (question.includes(searchTerm) || answer.includes(searchTerm)) {
                     item.style.display = 'block';
                 } else {
