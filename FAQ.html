@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ - Fantasy Fusion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <style>
+    :root {
+      --primary: #FA4616;
+      --dark: #0C2340;
+      --light: #FFFFFF;
+      --glass: rgba(12, 35, 64, 0.8);
+      --glass-lighter: rgba(20, 50, 80, 0.8);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      line-height: 1.6;
+      overflow-x: hidden;
+      position: relative;
+    }
+    
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+            315deg,
+            rgba(250, 70, 22, 0.2),
+            rgba(12, 35, 64, 0.1),
+            rgba(12, 35, 64, 1)
+        );
+        background-size: 400% 400%;
+        animation: gradientAnimation 25s ease infinite;
+        z-index: -1;
+    }
+
+    @keyframes gradientAnimation {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    /* --- Site Header (Copied from Homepage) --- */
+    .site-header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 10px 5%;
+      z-index: 1000;
+      background: rgba(12, 35, 64, 0.8);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 2.5rem;
+      letter-spacing: 1px;
+    }
+    .logo a {
+        text-decoration: none;
+    }
+    .logo .fantasy {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 400;
+        color: var(--primary);
+        text-transform: uppercase;
+        margin-right: -8px; 
+    }
+    .logo .fusion {
+        font-family: 'Oswald', sans-serif;
+        font-weight: 400;
+        color: #FF8A63;
+        text-transform: uppercase;
+    }
+
+    /* --- Hamburger Menu --- */
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        z-index: 1001;
+    }
+    .menu-toggle .fa-bars, .menu-toggle .fa-times {
+        font-size: 1.8rem;
+        color: var(--light);
+    }
+    .menu-toggle .fa-times { display: none; }
+
+    .nav-menu {
+        display: flex;
+        gap: 30px;
+        list-style: none;
+    }
+    .nav-menu a {
+        color: var(--light);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    .nav-menu a:hover, .nav-menu a.active {
+        color: var(--primary);
+    }
+
+    /* --- FAQ Page Specific Styles --- */
+    .faq-hero {
+        padding: 150px 5% 60px;
+        text-align: center;
+        position: relative;
+        z-index: 2;
+    }
+    .faq-hero h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+    .faq-hero p {
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto 40px;
+        opacity: 0.8;
+    }
+
+    .search-container {
+        max-width: 700px;
+        margin: 0 auto;
+        position: relative;
+    }
+    .search-container .fa-search {
+        position: absolute;
+        top: 50%;
+        left: 20px;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.5);
+    }
+    .search-bar {
+        width: 100%;
+        padding: 20px 20px 20px 50px;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        border: 1px solid rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.1);
+        color: white;
+    }
+    .search-bar::placeholder {
+        color: rgba(255,255,255,0.5);
+    }
+    .search-bar:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    /* --- New Two-Column Layout --- */
+    .faq-main-container {
+        display: flex;
+        gap: 40px;
+        padding: 0 5%;
+        max-width: 1400px;
+        margin: 0 auto;
+        align-items: flex-start;
+    }
+
+    /* --- New Frozen Index Styles --- */
+    .faq-index {
+        flex: 0 0 300px;
+        position: sticky;
+        top: 100px;
+        height: calc(100vh - 120px);
+        overflow-y: auto;
+    }
+    .faq-index-title {
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--light);
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+        border-bottom: 2px solid var(--primary);
+    }
+    .index-list {
+        list-style: none;
+    }
+    .index-category > button {
+        background: none;
+        border: none;
+        color: var(--light);
+        font-family: 'Roboto', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        width: 100%;
+        text-align: left;
+        padding: 15px 10px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .index-category > button:hover {
+        color: var(--primary);
+    }
+    .index-category .icon {
+        transition: transform 0.3s ease;
+    }
+    .index-category.open .icon {
+        transform: rotate(45deg);
+    }
+    .index-questions {
+        list-style: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out;
+    }
+    .index-category.open .index-questions {
+        max-height: 500px;
+    }
+    .index-questions li a {
+        display: block;
+        padding: 10px 10px 10px 25px;
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+    }
+    .index-questions li a:hover {
+        color: var(--light);
+        background-color: rgba(255,255,255,0.05);
+    }
+    .index-questions li a.active {
+        color: var(--primary);
+        font-weight: bold;
+        border-left: 3px solid var(--primary);
+        padding-left: 22px;
+    }
+
+
+    /* --- Main FAQ Content Styles --- */
+    .faq-content {
+        flex: 1;
+        padding: 0 0 60px 0;
+        position: relative;
+        z-index: 2;
+    }
+    .category-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        margin-top: 50px;
+    }
+    .category-title:first-of-type {
+        margin-top: 0;
+    }
+    
+    /* --- New Accordion Styles --- */
+    .faq-item {
+        margin-bottom: 15px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .faq-question {
+        background: none;
+        border: none;
+        width: 100%;
+        text-align: left;
+        padding: 20px;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: var(--light);
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.2s ease;
+    }
+    .faq-question:hover {
+        background-color: var(--glass-lighter);
+    }
+    .faq-question .icon {
+        transition: transform 0.3s ease;
+        font-size: 1rem;
+    }
+    .faq-item.open .faq-question .icon {
+        transform: rotate(180deg);
+    }
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+    }
+    .faq-answer p {
+        padding: 0 20px 20px 20px;
+        opacity: 0.8;
+    }
+    .faq-item.open .faq-answer {
+        max-height: 500px;
+    }
+
+
+    footer {
+      padding: 30px 5%;
+      text-align: center;
+      background: #08192e;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      position: relative;
+      z-index: 2;
+    }
+
+    /* --- Responsive Styles --- */
+    @media (max-width: 992px) {
+      .faq-main-container {
+          flex-direction: column;
+      }
+      .faq-index {
+          position: static;
+          width: 100%;
+          height: auto;
+          margin-bottom: 40px;
+          flex: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .logo { font-size: 2rem; }
+      .site-header { padding: 15px 5%; }
+      .faq-hero h1 { font-size: 2.5rem; }
+      
+      .menu-toggle { display: block; }
+      .nav-menu {
+          position: fixed;
+          top: 0;
+          right: 0;
+          width: 100%;
+          height: 100vh;
+          background: var(--dark);
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          transform: translateX(100%);
+          transition: transform 0.3s ease-in-out;
+      }
+      .nav-menu.active {
+          transform: translateX(0);
+      }
+      .nav-menu a { font-size: 1.5rem; }
+      .site-header.menu-open .menu-toggle .fa-bars { display: none; }
+      .site-header.menu-open .menu-toggle .fa-times { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header" id="siteHeader">
+    <h1 class="logo">
+        <a href="#">
+            <span class="fantasy">Fantasy</span><span class="fusion">Fusion</span>
+        </a>
+    </h1>
+    <nav class="nav-menu" id="navMenu">
+        <a href="#">About</a>
+        <a href="#" class="active">FAQ</a>
+        <a href="#">Research</a>
+    </nav>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation menu">
+        <i class="fas fa-bars"></i>
+        <i class="fas fa-times"></i>
+    </button>
+  </header>
+
+  <main>
+    <section class="faq-hero">
+        <h1>Frequently Asked Questions</h1>
+        <p>Can't find what you're looking for? Use the search bar below or contact us.</p>
+        <div class="search-container">
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-bar" id="faqSearch" placeholder="Search for a question...">
+        </div>
+    </section>
+
+    <div class="faq-main-container">
+        <aside class="faq-index" id="faqIndex">
+            <h3 class="faq-index-title">Categories</h3>
+            <!-- Index will be populated by JavaScript -->
+        </aside>
+
+        <section class="faq-content" id="faqContent">
+            <!-- Categories and questions will be populated by JavaScript -->
+        </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Fantasy Fusion, LLC. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const faqData = {
+        "Getting Started": [
+            { id: "q1", q: "What is Fantasy Fusion?", a: "Fantasy Fusion is a new type of fantasy sports game where you draft entire professional and college teams across multiple sports, instead of individual players. Your teams score points based on their real-life postseason success." },
+            { id: "q2", q: "How do I create a league?", a: "You can create a league from your main dashboard after signing up. You'll be able to set the league size, scoring rules, and invite your friends to join." }
+        ],
+        "Drafting and Seasons": [
+            { id: "q3", q: "How does the draft work?", a: "The draft is a live snake draft. The draft order reverses each round to ensure fairness. You will draft teams one by one until your roster is full." },
+            { id: "q4", q: "When are the draft seasons?", a: "There are three main draft windows per year: Spring (Feb-Mar), Summer (Jun-Sep), and Winter (Nov-Dec), allowing you to play year-round." }
+        ],
+        "How to Play": [
+            { id: "q5", q: "What do I do after the draft?", a: "Once your draft is complete, there is no weekly management! Your roster is locked for the season. You just sit back, watch the real-life games, and track your progress on the leaderboard." }
+        ],
+        "Scoring": [
+            { id: "q6", q: "How are points calculated?", a: "Points are awarded based on how far your drafted teams advance in their respective playoffs. For example, a team making the championship game will earn more points than a team eliminated in the first round." }
+        ],
+        "Sports and Roster Rules": [
+            { id: "q7", q: "Which sports are included?", a: "We include six major U.S. sports leagues: NFL, NBA, MLB, NHL, NCAA Football, and NCAA Men's Basketball." },
+            { id: "q8", q: "How many teams can I draft?", a: "This is set by your league commissioner. You can draft between 1 and 4 teams from each sport included in your league." }
+        ],
+        "Roster Management": [
+            { id: "q9", q: "Can I make trades?", a: "Trades are not currently supported in the initial version of the game. All rosters are locked post-draft." }
+        ],
+        "Updates and Stats": [
+            { id: "q10", q: "How often are standings updated?", a: "Standings and team statuses are updated daily to reflect the latest real-world results." }
+        ],
+        "Account Management": [
+            { id: "q11", q: "How do I change my password?", a: "You can change your password from the 'Account Settings' page, accessible from your user dashboard." }
+        ]
+    };
+
+    function setupMenu() {
+        const menuToggle = document.getElementById('menuToggle');
+        const navMenu = document.getElementById('navMenu');
+        const siteHeader = document.getElementById('siteHeader');
+
+        if (menuToggle && navMenu && siteHeader) {
+            menuToggle.addEventListener('click', () => {
+                const isActive = navMenu.classList.toggle('active');
+                siteHeader.classList.toggle('menu-open');
+                menuToggle.setAttribute('aria-expanded', isActive);
+            });
+        }
+    }
+
+    function buildFAQ() {
+        const faqContent = document.getElementById('faqContent');
+        const faqIndex = document.getElementById('faqIndex');
+        if (!faqContent || !faqIndex) return;
+
+        const indexList = document.createElement('ul');
+        indexList.className = 'index-list';
+
+        for (const category in faqData) {
+            const categoryId = category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
+            
+            // Create main content section
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.className = 'category-title';
+            categoryTitle.textContent = category;
+            categoryTitle.id = categoryId;
+            faqContent.appendChild(categoryTitle);
+
+            // Create index section
+            const indexCategory = document.createElement('li');
+            indexCategory.className = 'index-category';
+            const catButton = document.createElement('button');
+            catButton.innerHTML = `${category} <span class="icon">+</span>`;
+            const indexQuestions = document.createElement('ul');
+            indexQuestions.className = 'index-questions';
+
+            faqData[category].forEach(item => {
+                // Add question to main content
+                const faqItem = document.createElement('div');
+                faqItem.className = 'faq-item';
+                faqItem.id = item.id;
+                faqItem.innerHTML = `
+                    <button class="faq-question">
+                        ${item.q}
+                        <span class="icon"><i class="fas fa-chevron-down"></i></span>
+                    </button>
+                    <div class="faq-answer">
+                        <p>${item.a}</p>
+                    </div>
+                `;
+                faqContent.appendChild(faqItem);
+
+                // Add question to index
+                const indexLi = document.createElement('li');
+                indexLi.innerHTML = `<a href="#${item.id}">${item.q}</a>`;
+                indexQuestions.appendChild(indexLi);
+            });
+
+            indexCategory.appendChild(catButton);
+            indexCategory.appendChild(indexQuestions);
+            indexList.appendChild(indexCategory);
+        }
+        faqIndex.appendChild(indexList);
+    }
+
+    function setupFAQInteraction() {
+        // Main content accordion
+        document.querySelectorAll('.faq-question').forEach(button => {
+            button.addEventListener('click', () => {
+                const faqItem = button.parentElement;
+                faqItem.classList.toggle('open');
+            });
+        });
+
+        // Index accordion
+        document.querySelectorAll('.index-category > button').forEach(button => {
+            button.addEventListener('click', () => {
+                button.parentElement.classList.toggle('open');
+            });
+        });
+
+        // Smooth scrolling for index links
+        document.querySelectorAll('.faq-index a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                    // Open the accordion item if it's not already open
+                    if (!targetElement.classList.contains('open')) {
+                        targetElement.classList.add('open');
+                    }
+                }
+            });
+        });
+    }
+    
+    function setupSearch() {
+        const searchBar = document.getElementById('faqSearch');
+        if (!searchBar) return;
+
+        searchBar.addEventListener('keyup', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            document.querySelectorAll('.faq-item').forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer p').textContent.toLowerCase();
+                if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupMenu();
+      buildFAQ();
+      setupFAQInteraction();
+      setupSearch();
+    });
+  </script>
+</body>
+</html>
