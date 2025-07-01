@@ -361,6 +361,7 @@
     .calendar-wrapper {
         padding: 10px 0;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Improves scrolling feel on iOS */
     }
     .calendar-container {
         position: relative;
@@ -483,6 +484,7 @@
       }
       .faq-index {
           position: static;
+          width: 100%;
           height: auto;
           margin-bottom: 40px;
           flex: none;
@@ -490,27 +492,12 @@
     }
 
     @media (max-width: 768px) {
-    html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    }
-    main {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
       .logo { font-size: 2rem; }
       .site-header { padding: 15px 5%; }
-      .faq-hero {
-        width: 100vw;
-        max-width: 100vw;
-        padding: 120px 20px 40px 20px;
-        box-sizing: border-box;
-      }
-      .faq-hero h1 { font-size: 3.5rem; }
-      .faq-hero p { font-size: 1.5rem; }
-      .faq-main-container { padding: 0 20px; flex: 1 0 auto; }
+      .faq-hero { padding: 120px 20px 40px; }
+      .faq-hero h1 { font-size: 2.8rem; }
+      .faq-hero p { font-size: 1.1rem; }
+      .faq-main-container { padding: 0 20px; }
       
       .menu-toggle { display: block; }
       .nav-menu {
@@ -533,31 +520,23 @@
       .site-header.menu-open .menu-toggle .fa-bars { display: none; }
       .site-header.menu-open .menu-toggle .fa-times { display: block; }
 
-      .faq-question .index-category {
-          font-size: 1.5rem;
+      .faq-question {
+          font-size: 1.1rem;
       }
       .faq-question span {
           max-width: 85%;
       }
-      .faq-answer .faq-answer-content .index-questions {
-          font-size: 1.2rem;
+      .faq-answer .faq-answer-content {
+          font-size: 1rem;
       }
       .calendar {
-          grid-template-columns: 60px repeat(12, 1fr);
+          grid-template-columns: 80px repeat(12, 35px);
       }
       .month-label, .sport-label {
           font-size: 0.7rem;
       }
-      .season-line.postseason .playoff-text {
-          display: block;
-          font-size: 10px;
-          color: white;
-      }
-      .season-line.postseason .playoff-text::after {
-          content: 'P';
-      }
       .season-line .playoff-text {
-          font-size: 0; /* Hide original text */
+          display: none;
       }
     }
   </style>
@@ -566,7 +545,7 @@
   <header class="site-header" id="siteHeader">
     <h1 class="logo">
         <a href="#">
-            <span class="fantasy">Fantasy</span><span class="fusion"> Fusion</span>
+            <span class="fantasy">Fantasy</span><span class="fusion">Fusion</span>
         </a>
     </h1>
     <nav class="nav-menu" id="navMenu">
