@@ -537,7 +537,7 @@
     
     async function fetchDraftableTeamsFromDB() {
         try {
-            const { data, error } = await supabase.from('SportTeamDatabase_6_23_25').select('*');
+            const { data, error } = await supabase.from('SportTeamDatabase_7_1_25').select('*');
             if (error) throw error;
             const pickedTeamIds = new Set(
                 Object.values(draftState.player_rosters)
