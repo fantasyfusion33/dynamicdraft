@@ -429,7 +429,7 @@
             }
             
             const { data: allTeamsData, error: teamsError } = await supabase
-                .from('SportTeamDatabase_6_23_25')
+                .from('SportTeamDatabase_7_1_25')
                 .select('team_id, sport, name, adp, championship_odds, primaryColor, secondaryColor');
             
             if(teamsError) throw teamsError;
