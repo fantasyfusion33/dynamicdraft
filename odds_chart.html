@@ -6,7 +6,6 @@
     <title>Fantasy Fusion - Research Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    /* Base styles from your app are unchanged */
     :root {
         --primary: #FA4616;
         --dark: #0C2340;
@@ -36,16 +35,8 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding-bottom: 15px;
     }
-    .page-header h1 {
-        color: var(--primary);
-        margin: 0;
-        font-size: 2.5rem;
-    }
-    .page-header p {
-        margin: 5px 0 0;
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 1.1rem;
-    }
+    .page-header h1 { color: var(--primary); margin: 0; font-size: 2.5rem; }
+    .page-header p { margin: 5px 0 0; color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; }
     .filter-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -53,12 +44,9 @@
         padding: 20px;
         background: var(--glass);
         border-radius: 12px;
-        align-items: end; /* Aligns items to the bottom */
+        align-items: end;
     }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-    }
+    .filter-group { display: flex; flex-direction: column; }
     .filter-group label {
         font-size: 0.8rem;
         text-transform: uppercase;
@@ -81,65 +69,37 @@
         font-weight: bold;
         transition: background-color 0.2s;
     }
-    .filter-group button:hover {
-        background-color: #d83a0f;
-    }
-    .range-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+    .filter-group button:hover { background-color: #d83a0f; }
+    .range-controls { display: flex; align-items: center; gap: 10px; }
     .range-controls input[type="range"] {
         flex-grow: 1;
-        -webkit-appearance: none;
-        appearance: none;
-        /* CHANGE 5: Thinner slider bar */
-        height: 4px;
-        background: #333;
-        border-radius: 2px;
-        outline: none;
-        cursor: pointer;
+        -webkit-appearance: none; appearance: none;
+        height: 4px; background: #333;
+        border-radius: 2px; outline: none; cursor: pointer;
     }
     .range-controls input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 18px;
-        height: 18px;
-        background: var(--primary);
-        border-radius: 50%;
+        -webkit-appearance: none; appearance: none;
+        width: 18px; height: 18px;
+        background: var(--primary); border-radius: 50%;
     }
     .range-controls input[type="number"] {
-        width: 85px; /* Fixed width for the number input */
-        text-align: right;
+        width: 85px; text-align: right;
         -moz-appearance: textfield;
     }
     .range-controls input[type="number"]::-webkit-outer-spin-button,
     .range-controls input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+      -webkit-appearance: none; margin: 0;
     }
-
     .chart-container {
-        position: relative; /* Needed for the clear button */
-        background: var(--glass);
-        padding: 20px;
-        border-radius: 12px;
+        position: relative; background: var(--glass);
+        padding: 20px; border-radius: 12px;
         min-height: 500px;
     }
-    /* CHANGE 3: Style for the "Clear Selection" button */
     #clearSelectionBtn {
-        position: absolute;
-        top: 30px;
-        right: 30px;
-        z-index: 10;
-        background-color: var(--primary);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: bold;
-        display: none; /* Hidden by default */
+        position: absolute; top: 30px; right: 30px; z-index: 10;
+        background-color: var(--primary); color: white; border: none;
+        padding: 8px 16px; border-radius: 6px; cursor: pointer;
+        font-weight: bold; display: none;
     }
 </style>
 </head>
@@ -168,15 +128,15 @@
                 <div class="filter-group">
                     <label for="minOddsFilter">Min American Odds</label>
                     <div class="range-controls">
-                        <input type="range" id="minOddsFilter" min="-1000" max="500000" value="-1000" step="10">
-                        <input type="number" id="minOddsValue" min="-1000" max="500000" value="-1000">
+                        <input type="range" id="minOddsFilter" min="-500" max="50000" value="-500" step="10">
+                        <input type="number" id="minOddsValue" min="-500" max="50000" value="-500">
                     </div>
                 </div>
                 <div class="filter-group">
                     <label for="maxOddsFilter">Max American Odds</label>
                     <div class="range-controls">
-                        <input type="range" id="maxOddsFilter" min="-1000" max="500000" value="100000" step="10">
-                        <input type="number" id="maxOddsValue" min="-1000" max="500000" value="100000">
+                        <input type="range" id="maxOddsFilter" min="-500" max="50000" value="10000" step="10">
+                        <input type="number" id="maxOddsValue" min="-500" max="50000" value="10000">
                     </div>
                 </div>
                 <div class="filter-group">
@@ -221,16 +181,11 @@
             allTeamsData = data;
             populateSportFilter();
             updateChart();
-
         } catch (err) {
             console.error('Error fetching data:', err);
-            alert('Failed to fetch data from the database. Please check the console.');
         }
     }
 
-    // ========================================================================
-    // ODDS CONVERSION UTILITIES
-    // ========================================================================
     function probabilityToAmerican(prob) {
         if (prob <= 0 || prob >= 1) return null;
         if (prob >= 0.5) return Math.round(-1 * (prob / (1 - prob)) * 100);
@@ -238,15 +193,12 @@
     }
 
     function americanToProbability(odds) {
-        odds = parseInt(odds, 10);
-        if (isNaN(odds)) return null;
-        if (odds > 0) return 100 / (odds + 100) / 100;
-        return -odds / (-odds + 100) / 100;
+        const numOdds = parseInt(odds, 10);
+        if (isNaN(numOdds)) return null;
+        if (numOdds > 0) return 100 / (numOdds + 100) / 100;
+        return -numOdds / (-numOdds + 100) / 100;
     }
 
-    // ========================================================================
-    // CHART INITIALIZATION & LOGIC
-    // ========================================================================
     function initializeChart() {
         const ctx = document.getElementById('oddsChart').getContext('2d');
         oddsChart = new Chart(ctx, {
@@ -255,16 +207,8 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                // CHANGE 3: Add onClick handler for isolating a team
-                onClick: (event, elements, chart) => {
-                    if (elements.length > 0) {
-                        const datasetIndex = elements[0].datasetIndex;
-                        chart.data.datasets.forEach((ds, i) => {
-                            ds.hidden = i !== datasetIndex;
-                        });
-                        chart.update();
-                        document.getElementById('clearSelectionBtn').style.display = 'block';
-                    }
+                onClick: (event, elements) => {
+                    if (elements.length > 0) isolateDataset(elements[0].datasetIndex);
                 },
                 scales: {
                     x: {
@@ -283,7 +227,6 @@
                         },
                         grid: { color: 'rgba(255, 255, 255, 0.1)' }
                     },
-                    // CHANGE 2: Dynamic American odds axis is now handled in the 'afterUpdate' callback
                     yAmerican: {
                         position: 'right',
                         title: { display: true, text: 'American Odds', color: 'rgba(255,255,255,0.7)' },
@@ -295,14 +238,7 @@
                     legend: {
                         position: 'top',
                         labels: { color: 'white', boxWidth: 20, padding: 20 },
-                        // CHANGE 3: Isolate team on legend click
-                        onClick: (e, legendItem, legend) => {
-                            legend.chart.data.datasets.forEach((ds, i) => {
-                                ds.hidden = i !== legendItem.datasetIndex;
-                            });
-                            legend.chart.update();
-                            document.getElementById('clearSelectionBtn').style.display = 'block';
-                        }
+                        onClick: (e, legendItem) => isolateDataset(legendItem.datasetIndex)
                     },
                     tooltip: {
                         mode: 'index',
@@ -318,7 +254,7 @@
                     }
                 },
                 interaction: { mode: 'index', intersect: false },
-                // CHANGE 2: This callback dynamically syncs the two Y-axes
+                // CORRECTED: This callback dynamically syncs the two Y-axes
                 afterUpdate: function(chart) {
                     const yAxis = chart.scales.y;
                     const americanAxis = chart.scales.yAmerican;
@@ -332,9 +268,6 @@
         });
     }
 
-    // ========================================================================
-    // FILTERING LOGIC
-    // ========================================================================
     function addEventListeners() {
         document.getElementById('teamSearch').addEventListener('input', updateChart);
         document.getElementById('sportFilter').addEventListener('change', () => {
@@ -348,45 +281,29 @@
         const maxSlider = document.getElementById('maxOddsFilter');
         const maxInput = document.getElementById('maxOddsValue');
 
-        minSlider.addEventListener('input', (e) => { minInput.value = e.target.value; updateChart(); });
-        minInput.addEventListener('input', (e) => { minSlider.value = e.target.value; updateChart(); });
-        maxSlider.addEventListener('input', (e) => { maxInput.value = e.target.value; updateChart(); });
-        maxInput.addEventListener('input', (e) => { maxSlider.value = e.target.value; updateChart(); });
+        minSlider.addEventListener('input', () => { minInput.value = minSlider.value; updateChart(); });
+        minInput.addEventListener('change', () => { minSlider.value = minInput.value; updateChart(); });
+        maxSlider.addEventListener('input', () => { maxInput.value = maxSlider.value; updateChart(); });
+        maxInput.addEventListener('change', () => { maxSlider.value = maxInput.value; updateChart(); });
 
-        // CHANGE 3 & 4: Event listeners for clear buttons
-        document.getElementById('clearSelectionBtn').addEventListener('click', () => {
-            oddsChart.data.datasets.forEach(ds => ds.hidden = false);
-            oddsChart.update();
-            document.getElementById('clearSelectionBtn').style.display = 'none';
-        });
-
-        document.getElementById('clearFiltersBtn').addEventListener('click', () => {
-            document.getElementById('teamSearch').value = '';
-            document.getElementById('sportFilter').value = 'all';
-            document.getElementById('conferenceFilter').value = 'all';
-            document.getElementById('conferenceFilter').disabled = true;
-            minSlider.value = minSlider.min;
-            minInput.value = minSlider.min;
-            maxSlider.value = maxSlider.max;
-            maxInput.value = maxSlider.max;
-            updateChart();
-        });
+        document.getElementById('clearSelectionBtn').addEventListener('click', clearIsolation);
+        document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
     }
 
     function updateChart() {
         const searchTerm = document.getElementById('teamSearch').value.toLowerCase();
         const selectedSport = document.getElementById('sportFilter').value;
         const selectedConference = document.getElementById('conferenceFilter').value;
-        // CHANGE 1: Convert filter values from American odds to probability for filtering
-        const minProb = americanToProbability(document.getElementById('minOddsValue').value);
-        const maxProb = americanToProbability(document.getElementById('maxOddsValue').value);
+        // CORRECTED: Convert American odds from filters to probability for comparison
+        const minProb = americanToProbability(document.getElementById('minOddsValue').value) || 0;
+        const maxProb = americanToProbability(document.getElementById('maxOddsValue').value) || 1;
 
         const filteredTeams = allTeamsData.filter(team => {
             const currentProb = team.current_championship_pct || 0;
             const nameMatch = team.name.toLowerCase().includes(searchTerm);
             const sportMatch = selectedSport === 'all' || team.sport === selectedSport;
             const conferenceMatch = selectedConference === 'all' || team.conference === selectedConference;
-            const oddsMatch = currentProb >= (minProb || 0) && currentProb <= (maxProb || 1);
+            const oddsMatch = currentProb >= minProb && currentProb <= maxProb;
             return nameMatch && sportMatch && conferenceMatch && oddsMatch;
         });
 
@@ -410,7 +327,41 @@
         });
 
         oddsChart.data.datasets = datasets;
+        // Keep isolated view if active, otherwise make all visible
+        const isIsolated = oddsChart.data.datasets.some(ds => ds.hidden);
+        if (!isIsolated) {
+            clearIsolation();
+        }
         oddsChart.update();
+    }
+
+    function isolateDataset(datasetIndex) {
+        oddsChart.data.datasets.forEach((ds, i) => {
+            ds.hidden = i !== datasetIndex;
+        });
+        oddsChart.update();
+        document.getElementById('clearSelectionBtn').style.display = 'block';
+    }
+
+    function clearIsolation() {
+        oddsChart.data.datasets.forEach(ds => ds.hidden = false);
+        oddsChart.update();
+        document.getElementById('clearSelectionBtn').style.display = 'none';
+    }
+
+    function clearAllFilters() {
+        const minSlider = document.getElementById('minOddsFilter');
+        const maxSlider = document.getElementById('maxOddsFilter');
+        document.getElementById('teamSearch').value = '';
+        document.getElementById('sportFilter').value = 'all';
+        document.getElementById('conferenceFilter').value = 'all';
+        document.getElementById('conferenceFilter').disabled = true;
+        minSlider.value = minSlider.min;
+        document.getElementById('minOddsValue').value = minSlider.min;
+        maxSlider.value = maxSlider.max;
+        document.getElementById('maxOddsValue').value = maxSlider.max;
+        updateChart();
+        clearIsolation();
     }
 
     function populateSportFilter() {
