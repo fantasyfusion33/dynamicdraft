@@ -6,6 +6,7 @@
     <title>Fantasy Fusion - Research Hub</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+    /* Base styles from your app are unchanged */
     :root {
         --primary: #FA4616;
         --dark: #0C2340;
@@ -35,8 +36,16 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         padding-bottom: 15px;
     }
-    .page-header h1 { color: var(--primary); margin: 0; font-size: 2.5rem; }
-    .page-header p { margin: 5px 0 0; color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; }
+    .page-header h1 {
+        color: var(--primary);
+        margin: 0;
+        font-size: 2.5rem;
+    }
+    .page-header p {
+        margin: 5px 0 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+    }
     .filter-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -44,16 +53,18 @@
         padding: 20px;
         background: var(--glass);
         border-radius: 12px;
-        align-items: end;
     }
-    .filter-group { display: flex; flex-direction: column; }
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
     .filter-group label {
         font-size: 0.8rem;
         text-transform: uppercase;
         color: rgba(255, 255, 255, 0.5);
         margin-bottom: 8px;
     }
-    .filter-group input, .filter-group select, .filter-group button {
+    .filter-group input, .filter-group select {
         padding: 10px 15px;
         background: var(--gray);
         border: 1px solid #333;
@@ -63,43 +74,50 @@
         width: 100%;
         box-sizing: border-box;
     }
-    .filter-group button {
-        background-color: var(--primary);
-        cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.2s;
+    /* NEW: Styles for combining range slider and number input */
+    .range-input-wrapper {
+        display: flex;
+        flex-direction: column;
     }
-    .filter-group button:hover { background-color: #d83a0f; }
-    .range-controls { display: flex; align-items: center; gap: 10px; }
+    .range-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
     .range-controls input[type="range"] {
         flex-grow: 1;
-        -webkit-appearance: none; appearance: none;
-        height: 4px; background: #333;
-        border-radius: 2px; outline: none; cursor: pointer;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 8px;
+        background: #333;
+        border-radius: 4px;
+        outline: none;
+        cursor: pointer;
     }
     .range-controls input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none; appearance: none;
-        width: 18px; height: 18px;
-        background: var(--primary); border-radius: 50%;
+        -webkit-appearance: none;
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        background: var(--primary);
+        border-radius: 50%;
     }
     .range-controls input[type="number"] {
-        width: 85px; text-align: right;
-        -moz-appearance: textfield;
+        width: 80px; /* Fixed width for the number input */
+        text-align: right;
+        -moz-appearance: textfield; /* Firefox */
     }
     .range-controls input[type="number"]::-webkit-outer-spin-button,
     .range-controls input[type="number"]::-webkit-inner-spin-button {
-      -webkit-appearance: none; margin: 0;
+      -webkit-appearance: none;
+      margin: 0;
     }
+
     .chart-container {
-        position: relative; background: var(--glass);
-        padding: 20px; border-radius: 12px;
+        background: var(--glass);
+        padding: 20px;
+        border-radius: 12px;
         min-height: 500px;
-    }
-    #clearSelectionBtn {
-        position: absolute; top: 30px; right: 30px; z-index: 10;
-        background-color: var(--primary); color: white; border: none;
-        padding: 8px 16px; border-radius: 6px; cursor: pointer;
-        font-weight: bold; display: none;
     }
 </style>
 </head>
@@ -117,36 +135,40 @@
                     <label for="teamSearch">Team Name</label>
                     <input type="text" id="teamSearch" placeholder="Search by name...">
                 </div>
+
                 <div class="filter-group">
                     <label for="sportFilter">Sport</label>
-                    <select id="sportFilter"><option value="all">All Sports</option></select>
+                    <select id="sportFilter">
+                        <option value="all">All Sports</option>
+                    </select>
                 </div>
+
                 <div class="filter-group">
                     <label for="conferenceFilter">Conference</label>
-                    <select id="conferenceFilter" disabled><option value="all">All Conferences</option></select>
+                    <select id="conferenceFilter" disabled>
+                        <option value="all">All Conferences</option>
+                    </select>
                 </div>
+
                 <div class="filter-group">
-                    <label for="minOddsFilter">Min American Odds</label>
+                    <label for="minOddsFilter">Min % Odds</label>
                     <div class="range-controls">
-                        <input type="range" id="minOddsFilter" min="-500" max="50000" value="-500" step="10">
-                        <input type="number" id="minOddsValue" min="-500" max="50000" value="-500">
+                        <input type="range" id="minOddsFilter" min="0" max="100" value="0" step=".01">
+                        <input type="number" id="minOddsValue" min="0" max="100" value="0">
                     </div>
                 </div>
+
                 <div class="filter-group">
-                    <label for="maxOddsFilter">Max American Odds</label>
+                    <label for="maxOddsFilter">Max % Odds</label>
                     <div class="range-controls">
-                        <input type="range" id="maxOddsFilter" min="-500" max="50000" value="10000" step="10">
-                        <input type="number" id="maxOddsValue" min="-500" max="50000" value="10000">
+                        <input type="range" id="maxOddsFilter" min="0" max="100" value="100" step=".01">
+                        <input type="number" id="maxOddsValue" min="0" max="100" value="100">
                     </div>
-                </div>
-                <div class="filter-group">
-                    <label>&nbsp;</label> <button id="clearFiltersBtn">Clear All Filters</button>
                 </div>
             </div>
         </section>
 
         <main class="chart-container">
-            <button id="clearSelectionBtn">Clear Selection</button>
             <canvas id="oddsChart"></canvas>
         </main>
     </div>
@@ -156,6 +178,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
+    // ========================================================================
+    // SETUP & INITIALIZATION
+    // ========================================================================
     const supabaseUrl = 'https://rbumhlgjljzcwaosefif.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJidW1obGdqbGp6Y3dhb3NlZmlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDAyNTQxMTYsImV4cCI6MjA1NTgzMDExNn0.wC53zINy4iyxOzMfmqN9xw6Z2-bIjFMblXY95bS3kOQ';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -163,6 +188,9 @@
     let allTeamsData = [];
     let oddsChart;
 
+    // ========================================================================
+    // SCRIPT ENTRY POINT
+    // ========================================================================
     document.addEventListener('DOMContentLoaded', async () => {
         initializeChart();
         await fetchDataAndPopulate();
@@ -180,23 +208,25 @@
             if (error) throw error;
             allTeamsData = data;
             populateSportFilter();
+            updateOddsRange();
             updateChart();
+
         } catch (err) {
             console.error('Error fetching data:', err);
+            alert('Failed to fetch data from the database. Please check the console.');
         }
     }
 
-    function probabilityToAmerican(prob) {
-        if (prob <= 0 || prob >= 1) return null;
-        if (prob >= 0.5) return Math.round(-1 * (prob / (1 - prob)) * 100);
-        return `+${Math.round(((1 - prob) / prob) * 100)}`;
-    }
-
-    function americanToProbability(odds) {
-        const numOdds = parseInt(odds, 10);
-        if (isNaN(numOdds)) return null;
-        if (numOdds > 0) return 100 / (numOdds + 100) / 100;
-        return -numOdds / (-numOdds + 100) / 100;
+    /**
+     * Helper function to convert probability to American odds
+     */
+    function probabilityToAmericanOdds(probability) {
+        if (probability <= 0 || probability >= 1) return 'N/A';
+        if (probability >= 0.5) {
+            return Math.round(-1 * (probability / (1 - probability)) * 100);
+        } else {
+            return `+${Math.round(((1 - probability) / probability) * 100)}`;
+        }
     }
 
     function initializeChart() {
@@ -207,9 +237,6 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                onClick: (event, elements) => {
-                    if (elements.length > 0) isolateDataset(elements[0].datasetIndex);
-                },
                 scales: {
                     x: {
                         type: 'time',
@@ -218,55 +245,60 @@
                         ticks: { color: 'white' },
                         grid: { color: 'rgba(255, 255, 255, 0.1)' }
                     },
+                    // CHANGE 3: Primary Y-Axis for Percentage Odds
                     y: {
                         position: 'left',
                         title: { display: true, text: 'Championship Odds (%)', color: 'white' },
                         ticks: {
                             color: 'white',
-                            callback: (value) => value.toFixed(1) + '%'
+                            callback: (value) => value + '%'
                         },
                         grid: { color: 'rgba(255, 255, 255, 0.1)' }
                     },
+                    // CHANGE 3: Secondary Y-Axis for American Odds
                     yAmerican: {
                         position: 'right',
                         title: { display: true, text: 'American Odds', color: 'rgba(255,255,255,0.7)' },
-                        ticks: { color: 'rgba(255,255,255,0.7)' },
-                        grid: { drawOnChartArea: false }
+                        ticks: {
+                            color: 'rgba(255,255,255,0.7)',
+                            callback: (value) => probabilityToAmericanOdds(value / 100)
+                        },
+                        grid: { drawOnChartArea: false } // Only show ticks/labels
                     }
                 },
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: { color: 'white', boxWidth: 20, padding: 20 },
-                        onClick: (e, legendItem) => isolateDataset(legendItem.datasetIndex)
+                        labels: { color: 'white', boxWidth: 20, padding: 20 }
                     },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
                         callbacks: {
                             label: function(context) {
-                                const pct = context.parsed.y;
-                                if (pct === null) return '';
-                                const american = probabilityToAmerican(pct / 100);
-                                return `${context.dataset.label}: ${pct.toFixed(2)}% (${american})`;
+                                let label = context.dataset.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed.y !== null) {
+                                    const pct = context.parsed.y;
+                                    const american = probabilityToAmericanOdds(pct / 100);
+                                    label += `${pct.toFixed(2)}% (${american})`;
+                                }
+                                return label;
                             }
                         }
                     }
                 },
-                interaction: { mode: 'index', intersect: false },
-                // CORRECTED: This callback dynamically syncs the two Y-axes
-                afterUpdate: function(chart) {
-                    const yAxis = chart.scales.y;
-                    const americanAxis = chart.scales.yAmerican;
-                    const yTicks = yAxis.getTicks();
-                    americanAxis.ticks = yTicks.map(tick => ({
-                        value: tick.value,
-                        label: probabilityToAmerican(tick.value / 100) || ''
-                    }));
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
                 }
             }
         });
     }
+
+    // ========================================================================
+    // FILTERING LOGIC
+    // ========================================================================
 
     function addEventListeners() {
         document.getElementById('teamSearch').addEventListener('input', updateChart);
@@ -276,34 +308,46 @@
         });
         document.getElementById('conferenceFilter').addEventListener('change', updateChart);
 
+        // CHANGE 4: Link sliders and number inputs together
         const minSlider = document.getElementById('minOddsFilter');
         const minInput = document.getElementById('minOddsValue');
         const maxSlider = document.getElementById('maxOddsFilter');
         const maxInput = document.getElementById('maxOddsValue');
 
-        minSlider.addEventListener('input', () => { minInput.value = minSlider.value; updateChart(); });
-        minInput.addEventListener('change', () => { minSlider.value = minInput.value; updateChart(); });
-        maxSlider.addEventListener('input', () => { maxInput.value = maxSlider.value; updateChart(); });
-        maxInput.addEventListener('change', () => { maxSlider.value = maxInput.value; updateChart(); });
-
-        document.getElementById('clearSelectionBtn').addEventListener('click', clearIsolation);
-        document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
+        minSlider.addEventListener('input', (e) => {
+            minInput.value = e.target.value;
+            updateChart();
+        });
+        minInput.addEventListener('input', (e) => {
+            minSlider.value = e.target.value;
+            updateChart();
+        });
+        maxSlider.addEventListener('input', (e) => {
+            maxInput.value = e.target.value;
+            updateChart();
+        });
+        maxInput.addEventListener('input', (e) => {
+            maxSlider.value = e.target.value;
+            updateChart();
+        });
     }
 
     function updateChart() {
         const searchTerm = document.getElementById('teamSearch').value.toLowerCase();
         const selectedSport = document.getElementById('sportFilter').value;
         const selectedConference = document.getElementById('conferenceFilter').value;
-        // CORRECTED: Convert American odds from filters to probability for comparison
-        const minProb = americanToProbability(document.getElementById('minOddsValue').value) || 0;
-        const maxProb = americanToProbability(document.getElementById('maxOddsValue').value) || 1;
+        const minOdds = parseFloat(document.getElementById('minOddsValue').value);
+        const maxOdds = parseFloat(document.getElementById('maxOddsValue').value);
 
         const filteredTeams = allTeamsData.filter(team => {
-            const currentProb = team.current_championship_pct || 0;
+            // CHANGE 2: Scale current percentage by 100 for filtering
+            const currentPct = (team.current_championship_pct || 0) * 100;
+
             const nameMatch = team.name.toLowerCase().includes(searchTerm);
             const sportMatch = selectedSport === 'all' || team.sport === selectedSport;
             const conferenceMatch = selectedConference === 'all' || team.conference === selectedConference;
-            const oddsMatch = currentProb >= minProb && currentProb <= maxProb;
+            const oddsMatch = currentPct >= minOdds && currentPct <= maxOdds;
+
             return nameMatch && sportMatch && conferenceMatch && oddsMatch;
         });
 
@@ -312,11 +356,14 @@
                 .filter(entry => entry.pct !== null)
                 .map(entry => ({
                     x: new Date(entry.date),
+                    // CHANGE 2: Scale historical percentage by 100 for display
                     y: entry.pct * 100
                 }));
+
             return {
                 label: team.name,
                 data: historyData,
+                // CHANGE 1: Use team's primary color for the line
                 borderColor: team.primaryColor || '#FFFFFF',
                 backgroundColor: team.primaryColor || '#FFFFFF',
                 tension: 0.1,
@@ -327,42 +374,12 @@
         });
 
         oddsChart.data.datasets = datasets;
-        // Keep isolated view if active, otherwise make all visible
-        const isIsolated = oddsChart.data.datasets.some(ds => ds.hidden);
-        if (!isIsolated) {
-            clearIsolation();
-        }
         oddsChart.update();
     }
 
-    function isolateDataset(datasetIndex) {
-        oddsChart.data.datasets.forEach((ds, i) => {
-            ds.hidden = i !== datasetIndex;
-        });
-        oddsChart.update();
-        document.getElementById('clearSelectionBtn').style.display = 'block';
-    }
-
-    function clearIsolation() {
-        oddsChart.data.datasets.forEach(ds => ds.hidden = false);
-        oddsChart.update();
-        document.getElementById('clearSelectionBtn').style.display = 'none';
-    }
-
-    function clearAllFilters() {
-        const minSlider = document.getElementById('minOddsFilter');
-        const maxSlider = document.getElementById('maxOddsFilter');
-        document.getElementById('teamSearch').value = '';
-        document.getElementById('sportFilter').value = 'all';
-        document.getElementById('conferenceFilter').value = 'all';
-        document.getElementById('conferenceFilter').disabled = true;
-        minSlider.value = minSlider.min;
-        document.getElementById('minOddsValue').value = minSlider.min;
-        maxSlider.value = maxSlider.max;
-        document.getElementById('maxOddsValue').value = maxSlider.max;
-        updateChart();
-        clearIsolation();
-    }
+    // ========================================================================
+    // HELPER FUNCTIONS
+    // ========================================================================
 
     function populateSportFilter() {
         const sportFilter = document.getElementById("sportFilter");
@@ -384,6 +401,29 @@
         } else {
             confFilter.disabled = true;
         }
+    }
+
+    function updateOddsRange() {
+        // CHANGE 2: Scale all percentages by 100 to set slider range
+        const percentages = allTeamsData
+            .map(t => (t.current_championship_pct || 0) * 100)
+            .filter(pct => pct !== null);
+
+        if (percentages.length === 0) return;
+
+        const maxPct = Math.ceil(Math.max(...percentages, 100)); // Ensure max is at least 100
+
+        const minSlider = document.getElementById('minOddsFilter');
+        const maxSlider = document.getElementById('maxOddsFilter');
+        const minInput = document.getElementById('minOddsValue');
+        const maxInput = document.getElementById('maxOddsValue');
+
+        minSlider.max = maxPct;
+        maxSlider.max = maxPct;
+        maxSlider.value = maxPct;
+        minInput.max = maxPct;
+        maxInput.max = maxPct;
+        maxInput.value = maxPct;
     }
 
 </script>
